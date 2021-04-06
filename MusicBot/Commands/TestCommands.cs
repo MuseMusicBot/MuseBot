@@ -172,7 +172,13 @@ namespace MusicBot.Commands
 
             if (vol == null)
             {
-                await Context.Channel.SendMessageAsync($"Current volume is at: `{player.Volume}%`.");
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.Orange,
+                    Description = $"Current volume is at `{player.Volume}%`."
+                }.Build();
+                //await Context.Channel.SendMessageAsync($"Current volume is at: `{player.Volume}%`.");
+                await Context.Channel.SendMessageAsync(embed:embed);
                 return;
             }
 
