@@ -208,7 +208,26 @@ namespace MusicBot.Commands
         {
             if (!node.HasPlayer(Context.Guild))
             {
-                return;
+                if (vol ==null)
+                {
+                    var embed = new EmbedBuilder
+                    {
+                        Color = Discord.Color.Orange,
+                        Description = $"Volume is at `{Program.Volume}%`."
+                    }.Build();
+                    await Context.Channel.SendMessageAsync(embed:embed);
+                    return;
+                }
+                else
+                {
+                    var embed = new EmbedBuilder
+                    {
+                        Color = Discord.Color.Orange,
+                        Description = "You must be in a voice channel to change volume."
+                    }.Build();
+                    await Context.Channel.SendMessageAsync(embed:embed);
+                    return;
+                }
             }
 
             var player = node.GetPlayer(Context.Guild);
