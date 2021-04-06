@@ -131,7 +131,7 @@ namespace MusicBot.Helpers
                 var emebed = BuildMusicEmbed(player);
                 await Program.message.ModifyAsync(x =>
                 {
-                    x.Content = newQueue;
+                    x.Content = $"__**Queue List:**__\n{newQueue}";
                     x.Embed = emebed;
                 });
             }
@@ -151,7 +151,8 @@ namespace MusicBot.Helpers
                 await Program.message.ModifyAsync(x =>
                 {
                     x.Embed = embed;
-                    x.Content = newQueue == "" ? "No songs in queue" : newQueue;
+                    x.Content = $"__**Queue List:**__\n{(newQueue == "" ? "No songs in queue" : newQueue)}";
+
                 });
             }
         }
