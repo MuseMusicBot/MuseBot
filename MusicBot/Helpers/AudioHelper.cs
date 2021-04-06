@@ -75,6 +75,18 @@ namespace MusicBot.Helpers
             var icon = _discord.CurrentUser.GetAvatarUrl();
             var thumb = YouTubeHelper.GetYtThumbnail(player.Track.Url);
 
+            /* TODO: Fix and make sure it doesn't throw */
+            //var thumb = player.Track.FetchArtworkAsync().Result;
+            //using var client = new HttpClient();
+            //var img = System.Drawing.Image.FromStream(client.GetStreamAsync(new Uri(thumb)).Result);
+
+            //if (img.Width == 120 && img.Height == 90)
+            //{
+            //    thumb = YouTubeHelper.GetYtThumbnail(player.Track.Url);
+            //}
+
+            //img.Dispose();
+
             var embed = new EmbedBuilder
             {
                 Color = Discord.Color.DarkBlue,
