@@ -26,6 +26,20 @@ namespace MusicBot.Commands
         public async Task Setup()
         {
             //Instead of automatically making text channel, make it so it requires a setup command.
+            if (Context.Guild.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
+            {
+                return;
+            }
+
+            var channel = await Context.Guild.CreateTextChannelAsync("muse-song-requests", x =>
+            {
+                var c = Context.Guild.CategoryChannels;
+                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
+                x.Topic = "Music Bot";
+            });
+
+            var embed = audioHelper.BuildDefaultEmbed();
+            Program.message = await channel.SendMessageAsync("__**Queue List:**__\nNo songs in queue, join a voice channel to get started.", embed: embed);
         }
 
         [Command("play", RunMode = RunMode.Async)]
