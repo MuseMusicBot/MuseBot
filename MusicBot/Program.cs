@@ -18,7 +18,6 @@ namespace MusicBot
 
         public static int count = 0;
         public static int endcount = 0;
-        private static bool ready = false;
         public static IUserMessage message;
 
         static void Main(string[] args) =>
@@ -78,7 +77,6 @@ namespace MusicBot
 
             discord.Ready += async () =>
             {
-                ready = true;
                 var node = services.GetRequiredService<LavaNode>();
                 if (!node.IsConnected)
                 {
@@ -98,18 +96,25 @@ namespace MusicBot
                     }
                     catch { }
                 }
+
+                discord.GetGuild(192866874185220098).GetTextChannel(message.Channel.Id).DeleteAsync();
             };
 
             // trap process exit
             AppDomain.CurrentDomain.ProcessExit += (s, e) =>
             {
+                var node = services.GetRequiredService<LavaNode>();
+                foreach (var player in node.Players)
+                {
+                    try
+                    {
+                        node.LeaveAsync(player.VoiceChannel);
+                    }
+                    catch { }
+                }
 
+                discord.GetGuild(192866874185220098).GetTextChannel(message.Channel.Id).DeleteAsync();
             };
-
-            while (!ready)
-            {
-                await Task.Delay(100);
-            }
 
             await Task.Delay(-1);
 
