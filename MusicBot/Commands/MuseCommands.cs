@@ -22,8 +22,14 @@ namespace MusicBot.Commands
             audioHelper = ah;
         }
 
+        [Command("setup", RunMode = RunMode.Async)]
+        public async Task Setup()
+        {
+            //Instead of automatically making text channel, make it so it requires a setup command.
+        }
+
         [Command("play", RunMode = RunMode.Async)]
-        public async Task TestPlay([Remainder]string query)
+        public async Task Play([Remainder]string query)
         {
             if (!node.HasPlayer(Context.Guild))
             {
@@ -223,7 +229,7 @@ namespace MusicBot.Commands
                     var embed = new EmbedBuilder
                     {
                         Color = Discord.Color.Orange,
-                        Description = "You must be in a voice channel to change volume."
+                        Description = "The bot must be in a voice channel to change volume."
                     }.Build();
                     await Context.Channel.SendMessageAsync(embed:embed);
                     return;
@@ -248,7 +254,18 @@ namespace MusicBot.Commands
                 var embed = new EmbedBuilder
                 {
                     Color = Discord.Color.Orange,
-                    Description = "Volume can only be set between 0 - 150"
+                    Description = "Volume can only be set between 0 - 150 inclusively"
+                }.Build();
+                await Context.Channel.SendMessageAsync(embed:embed);
+                return;
+            }
+
+            if (vol < 1)
+            {
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.Orange,
+                    Description = "Volume can only be set between 0 - 150 inclusively"
                 }.Build();
                 await Context.Channel.SendMessageAsync(embed:embed);
                 return;
