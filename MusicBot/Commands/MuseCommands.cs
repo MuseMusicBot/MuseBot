@@ -9,12 +9,12 @@ using Victoria.Enums;
 
 namespace MusicBot.Commands
 {
-    public class TestCommands : ModuleBase<SocketCommandContext>
+    public class MuseCommands : ModuleBase<SocketCommandContext>
     {
         private readonly LavaNode node;
         private readonly Helpers.AudioHelper audioHelper;
 
-        public TestCommands(Helpers.AudioHelper ah, LavaNode lavaNode)
+        public MuseCommands(Helpers.AudioHelper ah, LavaNode lavaNode)
         {
             node = lavaNode;
             audioHelper = ah;

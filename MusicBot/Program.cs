@@ -126,7 +126,7 @@ namespace MusicBot
                 .AddSingleton<AudioHelper>()
                 .AddSingleton<MessageHelper>()
                 .AddSingleton<CommandHandlerService>()
-                .AddSingleton<Commands.TestCommands>()
+                .AddSingleton<Commands.MuseCommands>()
                 .AddLogging()
                 .AddSingleton<LoggingService>()
                 .BuildServiceProvider();
