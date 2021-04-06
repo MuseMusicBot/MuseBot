@@ -105,6 +105,15 @@ namespace MusicBot.Helpers
             return embed;
         }
 
+        public string TimeSpanToTimeCode(TimeSpan ts)
+        {
+            var hours = ts.Hours;
+            var min = ts.Minutes;
+            var sec = ts.Seconds;
+
+            return $"{(hours > 0 ? $"{hours:d2}:" : "")}{min:d2}:{sec:d2}";
+        }
+
         public Task<string> UpdateEmbedQueue(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();

@@ -98,35 +98,76 @@ namespace MusicBot.Commands
 
         }
 
-        // [Command("seek")]
-        // [Alias("s")]
-        // public async Task Seek(long? seek = null)
-        // {
-        //     var player = llm.GetPlayer(Context.Guild.Id);
-        //     if (player == null)
-        //     {
-        //         return;
-        //     }
+        [Command("seek")]
+        [Alias("s")]
+        public async Task Seek(TimeSpan? seek = null)
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
 
-        //     if (seek == null)
-        //     {
-        //         long playerPosition = player.CurrentPosition;
-        //         TimeSpan ts = TimeSpan.FromSeconds(playerPosition);
-        //         await Context.Channel.SendMessageAsync(string.Format("Current Position: {0}h {1}m {2}s", ts.TotalHours, ts.TotalMinutes, ts.TotalSeconds));
-        //         return;
-        //     }
+            var player = node.GetPlayer(Context.Guild);
 
-        //     if (seek.Value < 0 || seek.Value > player.CurrentTrack.Length.TotalSeconds)
-        //     {
-        //         await Context.Channel.SendMessageAsync($"Cannot seek to that position. Valid max position is `{player.CurrentTrack.Length.TotalSeconds}`.");
-        //         return;
-        //     }
+            if(!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            {
+                return;
+            }
 
-        //     if (player.CurrentTrack.IsSeekable)
-        //     {
-        //         await player.SeekAsync((int)seek.Value);
-        //     }
-        // }
+            var pos = player.Track.Position;
+            var len = player.Track.Duration;
+
+            if (seek == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            {
+                var embed = new EmbedBuilder
+                {
+                    Color = Color.Orange,
+                    Description = $"Current Position: {audioHelper.TimeSpanToTimeCode(pos)}/{audioHelper.TimeSpanToTimeCode(len)}"
+                }.Build();
+
+                await Context.Channel.SendMessageAsync(embed: embed);
+                return;
+            }
+
+            if (len.TotalMilliseconds - seek.Value.TotalMilliseconds < 0)
+            {
+                var embed = new EmbedBuilder
+                {
+                    Color = Color.Orange,
+                    Description = $"You can only seek up to {audioHelper.TimeSpanToTimeCode(len)}"
+                }.Build();
+
+                await Context.Channel.SendMessageAsync(embed: embed);
+                return;
+            }
+
+            await player.SeekAsync(seek.Value);
+
+            //var player = llm.GetPlayer(Context.Guild.Id);
+            //if (player == null)
+            //{
+            //    return;
+            //}
+
+            //if (seek == null)
+            //{
+            //    long playerPosition = player.CurrentPosition;
+            //    TimeSpan ts = TimeSpan.FromSeconds(playerPosition);
+            //    await Context.Channel.SendMessageAsync(string.Format("Current Position: {0}h {1}m {2}s", ts.TotalHours, ts.TotalMinutes, ts.TotalSeconds));
+            //    return;
+            //}
+
+            //if (seek.Value < 0 || seek.Value > player.CurrentTrack.Length.TotalSeconds)
+            //{
+            //    await Context.Channel.SendMessageAsync($"Cannot seek to that position. Valid max position is `{player.CurrentTrack.Length.TotalSeconds}`.");
+            //    return;
+            //}
+
+            //if (player.CurrentTrack.IsSeekable)
+            //{
+            //    await player.SeekAsync((int)seek.Value);
+            //}
+        }
 
         [Command("move", RunMode = RunMode.Async)]
         [Alias("mv")]
