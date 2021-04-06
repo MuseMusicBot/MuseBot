@@ -32,51 +32,9 @@ namespace MusicBot.Services
 
             this.discord.MessageReceived += MessageReceived;
             this.discord.GuildAvailable += GuildAvailable;
-            this.discord.ChannelDestroyed += ChannelDestroyed;
         }
 
-        private async Task ChannelDestroyed(SocketChannel arg)
-        {
-            if (!(arg is SocketGuildChannel channel))
-            {
-                return;
-            }
-
-            if (channel.Name != "test-music")
-            {
-                return;
-            }
-
-            var ch = await discord.GetGuild(arg.Id).CreateTextChannelAsync("test-music", x =>
-            {
-                var c = discord.GetGuild(arg.Id).CategoryChannels;
-                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
-                x.Topic = "Music Bot";
-            });
-
-            var r = channel.Guild;
-            List<IRole> roles = r.Roles.Where(x => x.Name == "Senpai" || x.Name == "Bots").Cast<IRole>().ToList();
-            foreach (var role in roles)
-            {
-                OverwritePermissions overwritePermissions = new OverwritePermissions();
-                overwritePermissions.Modify(readMessageHistory: PermValue.Allow, sendMessages: PermValue.Allow, viewChannel: PermValue.Allow, manageChannel: PermValue.Allow, addReactions: PermValue.Allow);
-                await ch.AddPermissionOverwriteAsync(role, overwritePermissions);
-            }
-
-            List<IRole> denyRoles = r.Roles.Where(x => x.Name == "Kohai" || x.Name == "Newbie").Cast<IRole>().ToList();
-            denyRoles.Add(r.EveryoneRole);
-
-            foreach (var role in denyRoles)
-            {
-                OverwritePermissions overwritePermissions = new OverwritePermissions();
-                overwritePermissions.Modify(readMessageHistory: PermValue.Deny, viewChannel: PermValue.Deny);
-
-                await ch.AddPermissionOverwriteAsync(role, overwritePermissions);
-            }
-
-            Program.message = await ch.SendMessageAsync("test message");
-        }
-
+        // TODO: Create m?setup command instead of On Guild Available
         private async Task GuildAvailable(SocketGuild arg)
         {
             if (arg.TextChannels.Where(x => x.Name == "test-music").Any())
