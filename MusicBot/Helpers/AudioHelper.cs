@@ -40,7 +40,7 @@ namespace MusicBot.Helpers
                 await Program.message.ModifyAsync((x) =>
                 {
                     x.Embed = embed;
-                    x.Content = queue == "" ? "No songs in queue" : queue;
+                    x.Content = $"__**Queue List:**__\n{(queue == "" ? "No songs in queue" : queue)}";
                 });
 
             };
