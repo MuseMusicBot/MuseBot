@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -281,6 +283,42 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             await node.LeaveAsync(player.VoiceChannel);
+        }
+
+        [Command("ping", RunMode = RunMode.Async)]
+        public async Task Ping()
+        {
+            IUserMessage message;
+            Stopwatch stopwatch;
+            var latency = Context.Client.Latency;
+
+            var tcs = new TaskCompletionSource<long>();
+            var timeout = Task.Delay(TimeSpan.FromSeconds(30));
+
+            Task TestMessageAsync(SocketMessage arg)
+            {
+                tcs.SetResult(stopwatch.ElapsedMilliseconds);
+                return Task.CompletedTask;
+            }
+
+            stopwatch = Stopwatch.StartNew();
+            message = await ReplyAsync($"{latency}ms");
+            var init = stopwatch.ElapsedMilliseconds;
+
+            Context.Client.MessageReceived += TestMessageAsync;
+            var task = await Task.WhenAny(tcs.Task, timeout);
+            Context.Client.MessageReceived -= TestMessageAsync;
+            stopwatch.Stop();
+
+            if (task == timeout)
+            {
+                await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: timed out");
+            }
+            else
+            {
+                var rtt = await tcs.Task;
+                await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: {rtt}ms");
+            }
         }
     }
 }
