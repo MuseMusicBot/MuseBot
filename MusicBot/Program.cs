@@ -26,7 +26,7 @@ namespace MusicBot
 
         private async Task MainAsync(string[] args)
         {
-            string token = System.Environment.GetEnvironmentVariable("BOT_TOKEN");
+            string token = "MTk2MDY3MjYyMDY5NzM1NDM0.V23X3g.5d7fjXNoohw1w2N3smANm8WYmQE";
 
             discord = new DiscordSocketClient(new DiscordSocketConfig
             {
