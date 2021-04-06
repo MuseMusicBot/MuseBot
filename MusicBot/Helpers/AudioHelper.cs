@@ -40,7 +40,7 @@ namespace MusicBot.Helpers
                 await Program.message.ModifyAsync((x) =>
                 {
                     x.Embed = embed;
-                    x.Content = $"__**Queue List:**__\n{(queue == "" ? "No songs in queue" : queue)}";
+                    x.Content = $"__**Queue List:**__\n{(queue == "" ? "No songs in queue, join a voice channel to get started." : queue)}";
                 });
 
             };
@@ -151,7 +151,7 @@ namespace MusicBot.Helpers
                 await Program.message.ModifyAsync(x =>
                 {
                     x.Embed = embed;
-                    x.Content = $"__**Queue List:**__\n{(newQueue == "" ? "No songs in queue" : newQueue)}";
+                    x.Content = $"__**Queue List:**__\n{(newQueue == "" ? "No songs in queue, join a voice channel to get started." : newQueue)}";
 
                 });
             }
