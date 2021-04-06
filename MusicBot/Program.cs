@@ -96,8 +96,6 @@ namespace MusicBot
                     }
                     catch { }
                 }
-
-                discord.GetGuild(192866874185220098).GetTextChannel(message.Channel.Id).DeleteAsync();
             };
 
             // trap process exit
@@ -112,8 +110,6 @@ namespace MusicBot
                     }
                     catch { }
                 }
-
-                discord.GetGuild(192866874185220098).GetTextChannel(message.Channel.Id).DeleteAsync();
             };
 
             await Task.Delay(-1);
