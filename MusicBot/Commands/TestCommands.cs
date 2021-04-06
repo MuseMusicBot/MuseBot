@@ -43,14 +43,12 @@ namespace MusicBot.Commands
             var search = await node.SearchAsync(query);
             if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
             {
-                await Context.Message.DeleteAsync();
                 return;
             }
 
             var player = node.GetPlayer(Context.Guild);
 
             await audioHelper.QueueTracksToPlayer(player, search);
-            await Context.Message.DeleteAsync();
         }
 
         [Command("pause")]
@@ -174,14 +172,12 @@ namespace MusicBot.Commands
 
             if (vol == null)
             {
-                await Context.Message.DeleteAsync();
                 await Context.Channel.SendMessageAsync($"Current volume is at: `{player.Volume}%`.");
                 return;
             }
 
             if (vol > 150)
             {
-                await Context.Message.DeleteAsync();
                 await Context.Channel.SendMessageAsync("Volume can only be set between 0 - 150");
                 return;
             }
@@ -217,7 +213,12 @@ namespace MusicBot.Commands
             var player = node.GetPlayer(Context.Guild);
 
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
-                await player.SkipAsync();
+            {
+                if (player.Queue.Count > 1)
+                {
+                    await player.SkipAsync();
+                }
+            }
         }
 
         [Command("queue")]
@@ -235,7 +236,6 @@ namespace MusicBot.Commands
 
             if (q.Count == 0)
             {
-                await Context.Message.DeleteAsync();
                 return;
             }
 
@@ -246,8 +246,6 @@ namespace MusicBot.Commands
             }
 
             await Context.Channel.SendMessageAsync(sb.ToString());
-
-            await Context.Message.DeleteAsync();
         }
 
         [Command("stop", RunMode = RunMode.Async)]
@@ -260,8 +258,6 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             await player.StopAsync();
-
-            await Context.Message.DeleteAsync();
         }
 
         [Command("disconnect", RunMode = RunMode.Async)]
@@ -272,8 +268,6 @@ namespace MusicBot.Commands
             {
                 return;
             }
-
-            await Context.Message.DeleteAsync();
 
             var player = node.GetPlayer(Context.Guild);
             await node.LeaveAsync(player.VoiceChannel);

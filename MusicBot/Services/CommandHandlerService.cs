@@ -157,6 +157,7 @@ namespace MusicBot.Services
 
                 await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
                 await message.DeleteAsync();
+                return;
             }
 
             var result = await commands.ExecuteAsync(context, argPos, provider);
