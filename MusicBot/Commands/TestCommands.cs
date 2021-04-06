@@ -1,0 +1,282 @@
+﻿using Discord;
+using Discord.Commands;
+using System;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Victoria;
+using Victoria.Enums;
+
+namespace MusicBot.Commands
+{
+    public class TestCommands : ModuleBase<SocketCommandContext>
+    {
+        private readonly LavaNode node;
+        private readonly Helpers.AudioHelper audioHelper;
+
+        public TestCommands(Helpers.AudioHelper ah, LavaNode lavaNode)
+        {
+            node = lavaNode;
+            audioHelper = ah;
+        }
+
+        [Command("play", RunMode = RunMode.Async)]
+        public async Task TestPlay([Remainder]string query)
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                try
+                {
+                    if ((Context.User as IGuildUser)?.VoiceChannel == null)
+                    {
+                        return;
+                    }
+
+                    await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+
+            var search = await node.SearchAsync(query);
+            if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+            {
+                await Context.Message.DeleteAsync();
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+
+            await audioHelper.QueueTracksToPlayer(player, search);
+            await Context.Message.DeleteAsync();
+        }
+
+        [Command("pause")]
+        [Alias("p")]
+        public async Task Pause()
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+
+            if (player.PlayerState == PlayerState.Paused)
+            {
+                return;
+            }
+
+            if (player.PlayerState == PlayerState.Playing)
+            {
+                await player.PauseAsync();
+            }
+        }
+
+        [Command("resume")]
+        [Alias("r")]
+        public async Task Resume()
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+
+            if (player.PlayerState == PlayerState.Playing)
+            {
+                return;
+            }
+
+            if (player.PlayerState == PlayerState.Paused)
+            {
+                await player.ResumeAsync();
+            }
+
+        }
+
+        // [Command("seek")]
+        // [Alias("s")]
+        // public async Task Seek(long? seek = null)
+        // {
+        //     var player = llm.GetPlayer(Context.Guild.Id);
+        //     if (player == null)
+        //     {
+        //         return;
+        //     }
+
+        //     if (seek == null)
+        //     {
+        //         long playerPosition = player.CurrentPosition;
+        //         TimeSpan ts = TimeSpan.FromSeconds(playerPosition);
+        //         await Context.Channel.SendMessageAsync(string.Format("Current Position: {0}h {1}m {2}s", ts.TotalHours, ts.TotalMinutes, ts.TotalSeconds));
+        //         return;
+        //     }
+
+        //     if (seek.Value < 0 || seek.Value > player.CurrentTrack.Length.TotalSeconds)
+        //     {
+        //         await Context.Channel.SendMessageAsync($"Cannot seek to that position. Valid max position is `{player.CurrentTrack.Length.TotalSeconds}`.");
+        //         return;
+        //     }
+
+        //     if (player.CurrentTrack.IsSeekable)
+        //     {
+        //         await player.SeekAsync((int)seek.Value);
+        //     }
+        // }
+
+        [Command("move", RunMode = RunMode.Async)]
+        [Alias("mv")]
+        public async Task MoveQueue(int indexToMove)
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+            var queue = player.Queue.ToList();
+
+
+            if (indexToMove < 1 || indexToMove > queue.Count)
+                return;
+
+            --indexToMove;
+
+            LavaTrack trackToMove = queue.ElementAt(indexToMove);
+            queue.RemoveAt(indexToMove);
+            player.Queue.Clear();
+
+            player.Queue.Enqueue(trackToMove);
+
+            foreach (var p in queue)
+            {
+                player.Queue.Enqueue(p);
+            }
+
+            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            await Program.message.ModifyAsync(x => x.Content = newQueue);
+        }
+
+        [Command("volume", RunMode = RunMode.Async)]
+        [Alias("vol")]
+        public async Task SetVolume(ushort? vol = null)
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+
+            if (vol == null)
+            {
+                await Context.Message.DeleteAsync();
+                await Context.Channel.SendMessageAsync($"Current volume is at: `{player.Volume}%`.");
+                return;
+            }
+
+            if (vol > 150)
+            {
+                await Context.Message.DeleteAsync();
+                await Context.Channel.SendMessageAsync("Volume can only be set between 0 - 150");
+                return;
+            }
+
+            Program.Volume = vol.Value;
+            await player.UpdateVolumeAsync(vol.Value);
+
+            await Program.message.ModifyAsync(x => x.Embed = audioHelper.BuildMusicEmbed(player));
+        }
+
+        // [Command("nowplaying")]
+        // [Alias("np")]
+        // public async Task NowPlaying()
+        // {
+        //     string s = await ah.NowPlaying();
+
+        //     if (s == "")
+        //     {
+        //         return;
+        //     }
+
+        //     await Context.Channel.SendMessageAsync($"**Now Playing**: {s}");
+        // }
+
+        [Command("skip")]
+        public async Task Skip()
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+
+            if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+                await player.SkipAsync();
+        }
+
+        [Command("queue")]
+        [Alias("q")]
+        public async Task DisplayQueue()
+        {
+            StringBuilder sb = new StringBuilder();
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+            var q = player.Queue.ToList();
+
+            if (q.Count == 0)
+            {
+                await Context.Message.DeleteAsync();
+                return;
+            }
+
+            int idx = 1;
+            foreach (var i in q)
+            {
+                sb.AppendLine($"{idx++}. {i.Title}");
+            }
+
+            await Context.Channel.SendMessageAsync(sb.ToString());
+
+            await Context.Message.DeleteAsync();
+        }
+
+        [Command("stop", RunMode = RunMode.Async)]
+        public async Task Stop()
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+            await player.StopAsync();
+
+            await Context.Message.DeleteAsync();
+        }
+
+        [Command("disconnect", RunMode = RunMode.Async)]
+        [Alias("d", "dc", "leave")]
+        public async Task Disconnect()
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            await Context.Message.DeleteAsync();
+
+            var player = node.GetPlayer(Context.Guild);
+            await node.LeaveAsync(player.VoiceChannel);
+        }
+    }
+}
