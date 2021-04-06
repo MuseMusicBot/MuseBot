@@ -37,12 +37,12 @@ namespace MusicBot.Services
         // TODO: Create m?setup command instead of On Guild Available
         private async Task GuildAvailable(SocketGuild arg)
         {
-            if (arg.TextChannels.Where(x => x.Name == "test-music").Any())
+            if (arg.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
             {
                 return;
             }
 
-            var channel = await discord.GetGuild(arg.Id).CreateTextChannelAsync("test-music", x =>
+            var channel = await discord.GetGuild(arg.Id).CreateTextChannelAsync("muse-song-requests", x =>
             {
                 var c = discord.GetGuild(arg.Id).CategoryChannels;
                 x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
@@ -82,7 +82,7 @@ namespace MusicBot.Services
 
             var context = new SocketCommandContext(discord, message);
 
-            if (context.Guild.GetTextChannel(message.Channel.Id).Name != "test-music")
+            if (context.Guild.GetTextChannel(message.Channel.Id).Name != "muse-song-requests")
             {
                 return;
             }
