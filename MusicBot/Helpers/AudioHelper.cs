@@ -49,6 +49,12 @@ namespace MusicBot.Helpers
             {
                 if (!args.Reason.ShouldPlayNext())
                 {
+                    var embed = BuildDefaultEmbed();
+                    await Program.message.ModifyAsync(x =>
+                    {
+                        x.Content = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
+                        x.Embed = embed;
+                    });   
                     return;
                 }
 
@@ -71,7 +77,7 @@ namespace MusicBot.Helpers
 
             var embed = new EmbedBuilder
             {
-                Color = Discord.Color.Blue,
+                Color = Discord.Color.DarkBlue,
                 Author = new EmbedAuthorBuilder
                 {
                     IconUrl = icon,
@@ -80,6 +86,20 @@ namespace MusicBot.Helpers
                 },
                 ImageUrl = thumb,
                 Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} songs in queue | Volume: {Program.Volume}%" }
+            }.Build();
+
+            return embed;
+        }
+
+        public Embed BuildDefaultEmbed()
+        {
+            var embed = new EmbedBuilder
+            {
+                Color = Discord.Color.DarkTeal,
+                Title = "No songs currently playing",
+                Description = "INSERT LINKS HERE IF YOU WANT",
+                ImageUrl = "https://i.imgur.com/ce9UMue.jpg",
+                Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
             }.Build();
 
             return embed;

@@ -66,7 +66,8 @@ namespace MusicBot.Services
                 await channel.AddPermissionOverwriteAsync(role, overwritePermissions);
             }
 
-            Program.message = await channel.SendMessageAsync("test message");
+            var embed = ah.BuildDefaultEmbed();
+            Program.message = await channel.SendMessageAsync("__**Queue List:**__\nNo songs in queue, join a voice channel to get started.", embed: embed);
         }
 
         private async Task MessageReceived(SocketMessage socketMessage)
