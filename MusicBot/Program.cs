@@ -14,7 +14,7 @@ namespace MusicBot
     {
         private DiscordSocketClient discord;
         //private Task LavalinkTask;
-        public static ushort Volume = 25;
+        public static ushort Volume = 5;
 
         public static int count = 0;
         public static int endcount = 0;
