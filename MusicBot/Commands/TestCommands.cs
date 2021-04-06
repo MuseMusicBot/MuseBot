@@ -177,14 +177,18 @@ namespace MusicBot.Commands
                     Color = Discord.Color.Orange,
                     Description = $"Current volume is at `{player.Volume}%`."
                 }.Build();
-                //await Context.Channel.SendMessageAsync($"Current volume is at: `{player.Volume}%`.");
                 await Context.Channel.SendMessageAsync(embed:embed);
                 return;
             }
 
             if (vol > 150)
             {
-                await Context.Channel.SendMessageAsync("Volume can only be set between 0 - 150");
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.Orange,
+                    Description = "Volume can only be set between 0 - 150"
+                }.Build();
+                await Context.Channel.SendMessageAsync(embed:embed);
                 return;
             }
 
