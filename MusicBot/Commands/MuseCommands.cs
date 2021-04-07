@@ -411,5 +411,12 @@ namespace MusicBot.Commands
                 await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: {rtt}ms");
             }
         }
+
+        [Command("help", RunMode = RunMode.Async)]
+        [Summary("Lists all the commands")]
+        public async Task HelpAsync([Remainder] string commandOrModule = null)
+        {
+            await Context.Channel.SendMessageAsync("Help has arrived");
+        }
     }
 }
