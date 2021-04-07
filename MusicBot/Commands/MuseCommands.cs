@@ -161,7 +161,17 @@ namespace MusicBot.Commands
                 return;
             }
 
+            else
+            {
             await player.SeekAsync(seek.Value);
+
+            var embed = new EmbedBuilder
+                    {
+                        Color = Discord.Color.Orange,
+                        Description = $"Seeked to `{seek.Value}`."
+                    }.Build();
+            await Context.Channel.SendMessageAsync(embed:embed);
+            }
 
             //var player = llm.GetPlayer(Context.Guild.Id);
             //if (player == null)
@@ -410,13 +420,6 @@ namespace MusicBot.Commands
                 var rtt = await tcs.Task;
                 await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: {rtt}ms");
             }
-        }
-
-        [Command("help", RunMode = RunMode.Async)]
-        [Summary("Lists all the commands")]
-        public async Task HelpAsync([Remainder] string commandOrModule = null)
-        {
-            await Context.Channel.SendMessageAsync("Help has arrived");
         }
     }
 }
