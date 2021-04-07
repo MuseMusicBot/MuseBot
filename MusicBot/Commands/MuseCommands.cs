@@ -359,6 +359,10 @@ namespace MusicBot.Commands
         [Alias("q")]
         public async Task DisplayQueue()
         {
+            //===================
+            //Check to see if bot message is less than 2000 characters. If more, than append "And **X** more..."
+            //===================
+
             StringBuilder sb = new StringBuilder();
             if (!node.HasPlayer(Context.Guild))
             {
@@ -376,6 +380,7 @@ namespace MusicBot.Commands
             int idx = 1;
             foreach (var i in q)
             {
+                //Append Track Duration
                 sb.AppendLine($"{idx++}. {i.Title}");
             }
 
@@ -407,40 +412,40 @@ namespace MusicBot.Commands
             await node.LeaveAsync(player.VoiceChannel);
         }
 
-        [Command("ping", RunMode = RunMode.Async)]
-        public async Task Ping()
-        {
-            IUserMessage message;
-            Stopwatch stopwatch;
-            var latency = Context.Client.Latency;
+        // [Command("ping", RunMode = RunMode.Async)]
+        // public async Task Ping()
+        // {
+        //     IUserMessage message;
+        //     Stopwatch stopwatch;
+        //     var latency = Context.Client.Latency;
 
-            var tcs = new TaskCompletionSource<long>();
-            var timeout = Task.Delay(TimeSpan.FromSeconds(30));
+        //     var tcs = new TaskCompletionSource<long>();
+        //     var timeout = Task.Delay(TimeSpan.FromSeconds(30));
 
-            Task TestMessageAsync(SocketMessage arg)
-            {
-                tcs.SetResult(stopwatch.ElapsedMilliseconds);
-                return Task.CompletedTask;
-            }
+        //     Task TestMessageAsync(SocketMessage arg)
+        //     {
+        //         tcs.SetResult(stopwatch.ElapsedMilliseconds);
+        //         return Task.CompletedTask;
+        //     }
 
-            stopwatch = Stopwatch.StartNew();
-            message = await ReplyAsync($"{latency}ms");
-            var init = stopwatch.ElapsedMilliseconds;
+        //     stopwatch = Stopwatch.StartNew();
+        //     message = await ReplyAsync($"{latency}ms");
+        //     var init = stopwatch.ElapsedMilliseconds;
 
-            Context.Client.MessageReceived += TestMessageAsync;
-            var task = await Task.WhenAny(tcs.Task, timeout);
-            Context.Client.MessageReceived -= TestMessageAsync;
-            stopwatch.Stop();
+        //     Context.Client.MessageReceived += TestMessageAsync;
+        //     var task = await Task.WhenAny(tcs.Task, timeout);
+        //     Context.Client.MessageReceived -= TestMessageAsync;
+        //     stopwatch.Stop();
 
-            if (task == timeout)
-            {
-                await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: timed out");
-            }
-            else
-            {
-                var rtt = await tcs.Task;
-                await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: {rtt}ms");
-            }
-        }
+        //     if (task == timeout)
+        //     {
+        //         await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: timed out");
+        //     }
+        //     else
+        //     {
+        //         var rtt = await tcs.Task;
+        //         await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: {rtt}ms");
+        //     }
+        // }
     }
 }
