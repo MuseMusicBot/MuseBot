@@ -304,6 +304,18 @@ namespace MusicBot.Commands
                 return;
             }
 
+            if (player.PlayerState == PlayerState.Stopped)
+            {
+                Program.Volume = vol.Value;
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.Orange,
+                    Description = $"Volume is now set to `{Program.Volume}%`."
+                }.Build();
+                await Context.Channel.SendMessageAsync(embed:embed);
+                return;
+            }
+
             Program.Volume = vol.Value;
             await player.UpdateVolumeAsync(vol.Value);
 
