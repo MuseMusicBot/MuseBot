@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +40,15 @@ namespace MusicBot.Commands
             });
 
             var embed = audioHelper.BuildDefaultEmbed();
-            Program.message = await channel.SendMessageAsync("__**Queue List:**__\nNo songs in queue, join a voice channel to get started.", embed: embed);
+            var msg = await channel.SendMessageAsync("__**Queue List:**__\nNo songs in queue, join a voice channel to get started.", embed: embed);
+
+            var guildId = Context.Guild.Id;
+            var channelId = channel.Id;
+            var msgId = msg.Id;
+
+            File.WriteAllText(Program.testConfig, $"{guildId}\n{channelId}\n{msgId}\n");
+
+            Program.message = msg;
         }
 
         [Command("play", RunMode = RunMode.Async)]

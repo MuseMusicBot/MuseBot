@@ -7,6 +7,7 @@ using MusicBot.Helpers;
 using System;
 using System.Threading.Tasks;
 using Victoria;
+using System.IO;
 
 namespace MusicBot
 {
@@ -19,6 +20,7 @@ namespace MusicBot
         public static int count = 0;
         public static int endcount = 0;
         public static IUserMessage message;
+        public const string testConfig = "testConfig.txt";
 
         static void Main(string[] args) =>
             new Program().MainAsync(args).GetAwaiter().GetResult();
@@ -81,6 +83,16 @@ namespace MusicBot
                 if (!node.IsConnected)
                 {
                     await node.ConnectAsync();
+                }
+
+                if (File.Exists(testConfig))
+                {
+                    var msgIds = (await File.ReadAllLinesAsync(testConfig));
+                    var guildId = ulong.Parse(msgIds[0]);
+                    var chnlId = ulong.Parse(msgIds[1]);
+                    var msgId = ulong.Parse(msgIds[2]);
+
+                    message = await discord.GetGuild(guildId).GetTextChannel(chnlId).GetMessageAsync(msgId) as IUserMessage;
                 }
             };
 
