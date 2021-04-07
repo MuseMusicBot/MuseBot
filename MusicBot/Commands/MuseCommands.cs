@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,11 +17,44 @@ namespace MusicBot.Commands
     {
         private readonly LavaNode node;
         private readonly Helpers.AudioHelper audioHelper;
+        private static readonly IEnumerable<int> Range = Enumerable.Range(1900, 2000);
 
         public MuseCommands(Helpers.AudioHelper ah, LavaNode lavaNode)
         {
             node = lavaNode;
             audioHelper = ah;
+        }
+
+        [Command("lyrics", RunMode = RunMode.Async)]
+        [Summary("Lists all the commands")]
+        public async Task GeniusLyrics()
+        {
+            var player = node.GetPlayer(Context.Guild);
+            var lyrics = await player.Track.FetchLyricsFromGeniusAsync();
+            var split = lyrics.Split('\n');
+            var strings = new StringBuilder();
+
+            Console.WriteLine(lyrics);
+
+            if (string.IsNullOrWhiteSpace(lyrics)) {
+                await Context.Channel.SendMessageAsync($"No lyrics found for {player.Track.Title}");
+                return;
+            }
+            
+            foreach (var line in split)
+            {
+                if (Range.Contains(strings.Length))
+                {
+                    await Context.Channel.SendMessageAsync($"```{strings}```");
+                    strings.Clear();
+                }
+                else
+                {
+                    strings.AppendLine(line);
+                }
+            }
+
+            await Context.Channel.SendMessageAsync($"```{strings}```");
         }
 
         [Command("setup", RunMode = RunMode.Async)]
