@@ -31,43 +31,6 @@ namespace MusicBot.Services
             node = lavanode;
 
             this.discord.MessageReceived += MessageReceived;
-            this.discord.GuildAvailable += GuildAvailable;
-        }
-
-        // TODO: Create m?setup command instead of On Guild Available
-        private async Task GuildAvailable(SocketGuild arg)
-        {
-            if (arg.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
-            {
-                return;
-            }
-
-            var channel = await discord.GetGuild(arg.Id).CreateTextChannelAsync("muse-song-requests", x =>
-            {
-                var c = discord.GetGuild(arg.Id).CategoryChannels;
-                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
-                x.Topic = "Music Bot";
-            });
-
-            List<IRole> roles = arg.Roles.Where(x => x.Name == "Senpai" || x.Name == "Bots").Cast<IRole>().ToList();
-            foreach (var role in roles)
-            {
-                OverwritePermissions overwritePermissions = new OverwritePermissions(readMessageHistory: PermValue.Allow, sendMessages: PermValue.Allow, viewChannel: PermValue.Allow, manageChannel: PermValue.Allow, addReactions: PermValue.Allow);
-                await channel.AddPermissionOverwriteAsync(role, overwritePermissions);
-            }
-
-            List<IRole> denyRoles = arg.Roles.Where(x => x.Name == "Kohai" || x.Name == "Newbie").Cast<IRole>().ToList();
-            denyRoles.Add(arg.EveryoneRole);
-
-            foreach (var role in denyRoles)
-            {
-                OverwritePermissions overwritePermissions = new OverwritePermissions(readMessageHistory: PermValue.Deny, viewChannel: PermValue.Deny);
-
-                await channel.AddPermissionOverwriteAsync(role, overwritePermissions);
-            }
-
-            var embed = ah.BuildDefaultEmbed();
-            Program.message = await channel.SendMessageAsync("__**Queue List:**__\nNo songs in queue, join a voice channel to get started.", embed: embed);
         }
 
         private async Task MessageReceived(SocketMessage socketMessage)
@@ -83,7 +46,7 @@ namespace MusicBot.Services
 
             var context = new SocketCommandContext(discord, message);
 
-            if (context.Guild.GetTextChannel(message.Channel.Id).Name != "muse-song-requests")
+            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Name != "muse-song-requests")
             {
                 return;
             }

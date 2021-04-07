@@ -60,8 +60,14 @@ namespace MusicBot.Helpers
 
                 var player = args.Player;
 
-                if (!player.Queue.TryDequeue(out var track))
+                if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
                 {
+                    var embed = BuildDefaultEmbed();
+                    await Program.message.ModifyAsync(x =>
+                    {
+                        x.Content = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
+                        x.Embed = embed;
+                    });
                     return;
                 }
 
