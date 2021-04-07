@@ -115,7 +115,7 @@ namespace MusicBot.Helpers
             {
                 Color = Discord.Color.DarkTeal,
                 Title = "No songs currently playing",
-                Description = "INSERT LINKS HERE IF YOU WANT",
+                Description = "No, this is not Hydra. Please stop asking.",
                 ImageUrl = "https://i.imgur.com/ce9UMue.jpg",
                 Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
             }.Build();
