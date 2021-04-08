@@ -355,37 +355,37 @@ namespace MusicBot.Commands
             }
         }
 
-        [Command("queue")]
-        [Alias("q")]
-        public async Task DisplayQueue()
-        {
-            //===================
-            //Check to see if bot message is less than 2000 characters. If more, than append "And **X** more..."
-            //===================
+        //[Command("queue")]
+        //[Alias("q")]
+        //public async Task DisplayQueue()
+        //{
+        //    //===================
+        //    //Check to see if bot message is less than 2000 characters. If more, than append "And **X** more..."
+        //    //===================
 
-            StringBuilder sb = new StringBuilder();
-            if (!node.HasPlayer(Context.Guild))
-            {
-                return;
-            }
+        //    StringBuilder sb = new StringBuilder();
+        //    if (!node.HasPlayer(Context.Guild))
+        //    {
+        //        return;
+        //    }
 
-            var player = node.GetPlayer(Context.Guild);
-            var q = player.Queue.ToList();
+        //    var player = node.GetPlayer(Context.Guild);
+        //    var q = player.Queue.ToList();
 
-            if (q.Count == 0)
-            {
-                return;
-            }
+        //    if (q.Count == 0)
+        //    {
+        //        return;
+        //    }
 
-            int idx = 1;
-            foreach (var i in q)
-            {
-                //Append Track Duration
-                sb.AppendLine($"{idx++}. {i.Title}");
-            }
+        //    int idx = 1;
+        //    foreach (var i in q)
+        //    {
+        //        //Append Track Duration
+        //        sb.AppendLine($"{idx++}. {i.Title}");
+        //    }
 
-            await Context.Channel.SendMessageAsync(sb.ToString());
-        }
+        //    await Context.Channel.SendMessageAsync(sb.ToString());
+        //}
 
         [Command("stop", RunMode = RunMode.Async)]
         public async Task Stop()

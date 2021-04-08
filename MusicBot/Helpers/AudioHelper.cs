@@ -134,6 +134,7 @@ namespace MusicBot.Helpers
 
         public Task<string> UpdateEmbedQueue(LavaPlayer player)
         {
+            IEnumerable<int> Range = Enumerable.Range(0, 1500);
             StringBuilder sb = new StringBuilder();
             var q = player.Queue.ToList();
             int idx = 1;
@@ -145,11 +146,21 @@ namespace MusicBot.Helpers
 
             foreach (var p in q)
             {
-                sb.AppendLine($"{idx++}. {p.Title}");
+                var s = $"{idx++}. {p.Title} [{TimeSpanToTimeCode(p.Duration)}]";
+
+                if (Range.Contains(s.Length + sb.Length + 2))
+                {
+                    sb.AppendLine(s);
+                }
+                else
+                {
+                    sb.AppendLine($"And **{q.Count - q.IndexOf(p)}** more...");
+                    break;
+                }
             }
 
             return Task.FromResult(sb.ToString());
-            
+
         }
 
         public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search)
