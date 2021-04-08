@@ -61,9 +61,6 @@ namespace MusicBot.Services
                 var newMsg = await context.Channel.SendMessageAsync(embed:embed);
 
                 await message.DeleteAsync();
-                //await newMsg.DeleteAsync();
-                //await mh.RemoveMessageAfterTimeout(message, 10000);
-                //await mh.RemoveMessageAfterTimeout(newMsg, 10000);
                 return;
             }
 
@@ -94,6 +91,7 @@ namespace MusicBot.Services
                     return;
             if (result.Error.HasValue &&
                 result.Error.Value != CommandError.UnknownCommand)
+                // TODO Look at custom parse errors
                 await context.Channel.SendMessageAsync(result.ToString());
             await message.DeleteAsync();
         }

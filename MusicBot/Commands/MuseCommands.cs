@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
+using MusicBot.Helpers;
 
 namespace MusicBot.Commands
 {
@@ -52,7 +53,7 @@ namespace MusicBot.Commands
         }
 
         [Command("play", RunMode = RunMode.Async)]
-        public async Task Play([Remainder]string query)
+        public async Task Play([Remainder] string query)
         {
             if (!node.HasPlayer(Context.Guild))
             {
@@ -127,7 +128,7 @@ namespace MusicBot.Commands
 
         }
 
-        [Command("seek")]
+        [Command("seek", RunMode = RunMode.Async)]
         [Alias("s")]
         public async Task Seek(TimeSpan? seek = null)
         {
@@ -138,7 +139,7 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
-            if(!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            if (!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
             {
                 return;
             }
@@ -151,10 +152,10 @@ namespace MusicBot.Commands
                 var embed = new EmbedBuilder
                 {
                     Color = Color.Orange,
-                    Description = $"Current Position: {audioHelper.TimeSpanToTimeCode(pos)}/{audioHelper.TimeSpanToTimeCode(len)}"
+                    Description = $"Current Position: {pos.ToTimecode()}/{len.ToTimecode()}"
                 }.Build();
 
-                await Context.Channel.SendMessageAsync(embed: embed);
+                await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
                 return;
             }
 
@@ -163,49 +164,24 @@ namespace MusicBot.Commands
                 var embed = new EmbedBuilder
                 {
                     Color = Color.Orange,
-                    Description = $"You can only seek up to {audioHelper.TimeSpanToTimeCode(len)}"
+                    Description = $"You can only seek up to {len.ToTimecode()}"
                 }.Build();
 
-                await Context.Channel.SendMessageAsync(embed: embed);
+                await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
                 return;
             }
 
             else
             {
-            await player.SeekAsync(seek.Value);
+                await player.SeekAsync(seek.Value);
 
-            var embed = new EmbedBuilder
-                    {
-                        Color = Discord.Color.Orange,
-                        Description = $"Seeked to `{seek.Value}`."
-                    }.Build();
-            await Context.Channel.SendMessageAsync(embed:embed);
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.Orange,
+                    Description = $"Seeked to `{seek.Value}`."
+                }.Build();
+                await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
             }
-
-            //var player = llm.GetPlayer(Context.Guild.Id);
-            //if (player == null)
-            //{
-            //    return;
-            //}
-
-            //if (seek == null)
-            //{
-            //    long playerPosition = player.CurrentPosition;
-            //    TimeSpan ts = TimeSpan.FromSeconds(playerPosition);
-            //    await Context.Channel.SendMessageAsync(string.Format("Current Position: {0}h {1}m {2}s", ts.TotalHours, ts.TotalMinutes, ts.TotalSeconds));
-            //    return;
-            //}
-
-            //if (seek.Value < 0 || seek.Value > player.CurrentTrack.Length.TotalSeconds)
-            //{
-            //    await Context.Channel.SendMessageAsync($"Cannot seek to that position. Valid max position is `{player.CurrentTrack.Length.TotalSeconds}`.");
-            //    return;
-            //}
-
-            //if (player.CurrentTrack.IsSeekable)
-            //{
-            //    await player.SeekAsync((int)seek.Value);
-            //}
         }
 
         [Command("move", RunMode = RunMode.Async)]
@@ -247,24 +223,24 @@ namespace MusicBot.Commands
         {
             if (!node.HasPlayer(Context.Guild))
             {
-                if (vol ==null)
+                if (vol == null)
                 {
                     var embed = new EmbedBuilder
                     {
-                        Color = Discord.Color.Orange,
+                        Color = Color.Orange,
                         Description = $"Volume is at `{Program.Volume}%`."
                     }.Build();
-                    await Context.Channel.SendMessageAsync(embed:embed);
+                    await Context.Channel.SendMessageAsync(embed: embed);
                     return;
                 }
                 else
                 {
                     var embed = new EmbedBuilder
                     {
-                        Color = Discord.Color.Orange,
+                        Color = Color.Orange,
                         Description = "The bot must be in a voice channel to change volume."
                     }.Build();
-                    await Context.Channel.SendMessageAsync(embed:embed);
+                    await Context.Channel.SendMessageAsync(embed: embed);
                     return;
                 }
             }
@@ -275,10 +251,10 @@ namespace MusicBot.Commands
             {
                 var embed = new EmbedBuilder
                 {
-                    Color = Discord.Color.Orange,
+                    Color = Color.Orange,
                     Description = $"Current volume is at `{player.Volume}%`."
                 }.Build();
-                await Context.Channel.SendMessageAsync(embed:embed);
+                await Context.Channel.SendMessageAsync(embed: embed);
                 return;
             }
 
@@ -286,10 +262,10 @@ namespace MusicBot.Commands
             {
                 var embed = new EmbedBuilder
                 {
-                    Color = Discord.Color.Orange,
+                    Color = Color.Orange,
                     Description = "Volume can only be set between 0 - 150 inclusively"
                 }.Build();
-                await Context.Channel.SendMessageAsync(embed:embed);
+                await Context.Channel.SendMessageAsync(embed: embed);
                 return;
             }
 
@@ -297,10 +273,10 @@ namespace MusicBot.Commands
             {
                 var embed = new EmbedBuilder
                 {
-                    Color = Discord.Color.Orange,
+                    Color = Color.Orange,
                     Description = "Volume can only be set between 0 - 150 inclusively"
                 }.Build();
-                await Context.Channel.SendMessageAsync(embed:embed);
+                await Context.Channel.SendMessageAsync(embed: embed);
                 return;
             }
 
@@ -309,10 +285,10 @@ namespace MusicBot.Commands
                 Program.Volume = vol.Value;
                 var embed = new EmbedBuilder
                 {
-                    Color = Discord.Color.Orange,
+                    Color = Color.Orange,
                     Description = $"Volume is now set to `{Program.Volume}%`."
                 }.Build();
-                await Context.Channel.SendMessageAsync(embed:embed);
+                await Context.Channel.SendMessageAsync(embed: embed);
                 return;
             }
 
@@ -336,7 +312,7 @@ namespace MusicBot.Commands
         //     await Context.Channel.SendMessageAsync($"**Now Playing**: {s}");
         // }
 
-        [Command("skip")]
+        [Command("skip", RunMode = RunMode.Async)]
         public async Task Skip()
         {
             if (!node.HasPlayer(Context.Guild))
@@ -409,6 +385,9 @@ namespace MusicBot.Commands
             }
 
             var player = node.GetPlayer(Context.Guild);
+            player.Queue.Clear();
+            var s = await audioHelper.UpdateEmbedQueue(player);
+            await Program.message.ModifyAsync(x => { x.Content = s; x.Embed = audioHelper.BuildDefaultEmbed(); });
             await node.LeaveAsync(player.VoiceChannel);
         }
 

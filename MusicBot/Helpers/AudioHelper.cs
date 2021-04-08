@@ -37,7 +37,7 @@ namespace MusicBot.Helpers
                 var embed = BuildMusicEmbed(player);
 
                 
-                await Program.message.ModifyAsync((x) =>
+                await Program.message.ModifyAsync(x =>
                 {
                     x.Embed = embed;
                     x.Content = $"__**Queue List:**__\n{(queue == "" ? "No songs in queue, join a voice channel to get started." : queue)}";
@@ -45,6 +45,7 @@ namespace MusicBot.Helpers
 
             };
 
+            // TODO: Fix default embed showing up after skipping
             Node.OnTrackEnded += async (args) =>
             {
                 if (!args.Reason.ShouldPlayNext())
@@ -123,15 +124,6 @@ namespace MusicBot.Helpers
             return embed;
         }
 
-        public string TimeSpanToTimeCode(TimeSpan ts)
-        {
-            var hours = ts.Hours;
-            var min = ts.Minutes;
-            var sec = ts.Seconds;
-
-            return $"{(hours > 0 ? $"{hours:d2}:" : "")}{min:d2}:{sec:d2}";
-        }
-
         public Task<string> UpdateEmbedQueue(LavaPlayer player)
         {
             IEnumerable<int> Range = Enumerable.Range(0, 1500);
@@ -146,7 +138,7 @@ namespace MusicBot.Helpers
 
             foreach (var p in q)
             {
-                var s = $"{idx++}. {p.Title} [{TimeSpanToTimeCode(p.Duration)}]";
+                var s = $"{idx++}. {p.Title} [{p.Duration.ToTimecode()}]";
 
                 if (Range.Contains(s.Length + sb.Length + 2))
                 {
