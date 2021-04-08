@@ -53,10 +53,15 @@ namespace MusicBot.Services
 
             if ((message.Author as IGuildUser)?.VoiceChannel == null)
             {
-                var newMsg = await context.Channel.SendMessageAsync("You must be in a voice channel to add songs");
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.Orange,
+                    Description = "You have to be in a voice channel."
+                }.Build();
+                var newMsg = await context.Channel.SendMessageAsync(embed:embed);
 
                 await message.DeleteAsync();
-                await newMsg.DeleteAsync();
+                //await newMsg.DeleteAsync();
                 //await mh.RemoveMessageAfterTimeout(message, 10000);
                 //await mh.RemoveMessageAfterTimeout(newMsg, 10000);
                 return;
