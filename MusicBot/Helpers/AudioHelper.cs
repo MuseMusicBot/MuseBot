@@ -157,54 +157,59 @@ namespace MusicBot.Helpers
 
         public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search)
         {
-            List<LavaTrack> lavaTracks;
-            string newQueue;
-            if (search.LoadStatus == LoadStatus.PlaylistLoaded)
+            _ = Task.Run(async () =>
             {
-                lavaTracks = search.Tracks.ToList();
-            }
-            else
-            {
-                lavaTracks = new List<LavaTrack>
+                List<LavaTrack> lavaTracks;
+                string newQueue;
+                if (search.LoadStatus == LoadStatus.PlaylistLoaded)
+                {
+                    lavaTracks = search.Tracks.ToList();
+                }
+                else
+                {
+                    lavaTracks = new List<LavaTrack>
                 {
                     search.Tracks.First()
                 };
-            }
-
-            if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
-            {
-                foreach (var track in lavaTracks)
-                {
-                    player.Queue.Enqueue(track);
-                }
-                newQueue = await UpdateEmbedQueue(player);
-                var emebed = BuildMusicEmbed(player);
-                await Program.message.ModifyAsync(x =>
-                {
-                    x.Content = $"__**Queue List:**__\n{newQueue}";
-                    x.Embed = emebed;
-                });
-            }
-            else
-            {
-                foreach (var track in lavaTracks)
-                {
-                    player.Queue.Enqueue(track);
                 }
 
-                _ = player.Queue.TryDequeue(out var newTrack);
-
-                await player.PlayAsync(newTrack);
-                newQueue = await UpdateEmbedQueue(player);
-                var embed = BuildMusicEmbed(player);
-
-                await Program.message.ModifyAsync(x =>
+                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
                 {
-                    x.Embed = embed;
-                    x.Content = $"__**Queue List:**__\n{(newQueue == "" ? "No songs in queue, join a voice channel to get started." : newQueue)}";
+                    foreach (var track in lavaTracks)
+                    {
+                        player.Queue.Enqueue(track);
+                    }
+                    newQueue = await UpdateEmbedQueue(player);
+                    var emebed = BuildMusicEmbed(player);
+                    await Program.message.ModifyAsync(x =>
+                    {
+                        x.Content = $"__**Queue List:**__\n{newQueue}";
+                        x.Embed = emebed;
+                    });
+                }
+                else
+                {
+                    foreach (var track in lavaTracks)
+                    {
+                        player.Queue.Enqueue(track);
+                    }
 
-                });
-            }
+                    _ = player.Queue.TryDequeue(out var newTrack);
+
+                    await player.PlayAsync(newTrack);
+                    newQueue = await UpdateEmbedQueue(player);
+                    var embed = BuildMusicEmbed(player);
+
+                    await Program.message.ModifyAsync(x =>
+                    {
+                        x.Embed = embed;
+                        x.Content = $"__**Queue List:**__\n{(newQueue == "" ? "No songs in queue, join a voice channel to get started." : newQueue)}";
+
+                    });
+                }
+            });
+
+            await Task.CompletedTask;
         }
     }
 }
