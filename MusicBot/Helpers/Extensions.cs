@@ -22,5 +22,15 @@ namespace MusicBot.Helpers
             await Task.Delay(timeout);
             await message.DeleteAsync(new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
         }
+
+        public static TimeSpan ToTimeSpan(this string timecode)
+        {
+            if (!TimeSpan.TryParse(timecode, out var res))
+            {
+                return default;
+            }
+
+            return res;
+        }
     }
 }

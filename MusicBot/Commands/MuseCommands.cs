@@ -130,7 +130,7 @@ namespace MusicBot.Commands
 
         [Command("seek", RunMode = RunMode.Async)]
         [Alias("s")]
-        public async Task Seek(TimeSpan? seek = null)
+        public async Task Seek(string seekTime = null)
         {
             if (!node.HasPlayer(Context.Guild))
             {
@@ -147,7 +147,7 @@ namespace MusicBot.Commands
             var pos = player.Track.Position;
             var len = player.Track.Duration;
 
-            if (seek == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            if (seekTime == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
             {
                 var embed = new EmbedBuilder
                 {
@@ -159,7 +159,17 @@ namespace MusicBot.Commands
                 return;
             }
 
-            if (len.TotalMilliseconds - seek.Value.TotalMilliseconds < 0)
+            int seperators = seekTime.Split(":").Length;
+
+            var seek = seperators switch
+            {
+                3 => seekTime.ToTimeSpan(),
+                2 => ("00:" + seekTime).ToTimeSpan(),
+                1 => ("00:00:" + seekTime).ToTimeSpan(),
+                _ => default,
+            };
+
+            if (len.TotalMilliseconds - seek.TotalMilliseconds < 0)
             {
                 var embed = new EmbedBuilder
                 {
@@ -173,12 +183,12 @@ namespace MusicBot.Commands
 
             else
             {
-                await player.SeekAsync(seek.Value);
+                await player.SeekAsync(seek);
 
                 var embed = new EmbedBuilder
                 {
                     Color = Discord.Color.Orange,
-                    Description = $"Seeked to `{seek.Value}`."
+                    Description = $"Seeked to `{seek.ToTimecode()}`."
                 }.Build();
                 await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
             }
