@@ -94,20 +94,38 @@ namespace MusicBot.Helpers
 
             //img.Dispose();
 
-            var embed = new EmbedBuilder
+            if (player.Queue.Count < 2)
             {
-                Color = Discord.Color.DarkBlue,
-                Author = new EmbedAuthorBuilder
+                var embed = new EmbedBuilder
                 {
-                    IconUrl = icon,
-                    Name = string.Format("[{0:d2}{1:d2}:{2:d2}] - {3}", length.Hours > 0 ? $"{length.Hours}:" : "", length.Minutes, length.Seconds, player.Track.Title),
-                    Url = $"{player.Track.Url}"
-                },
-                ImageUrl = thumb,
-                Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} songs in queue | Volume: {Program.Volume}%" }
-            }.Build();
-
-            return embed;
+                    Color = Discord.Color.DarkBlue,
+                    Author = new EmbedAuthorBuilder
+                    {
+                        IconUrl = icon,
+                        Name = string.Format("[{0:d2}{1:d2}:{2:d2}] - {3}", length.Hours > 0 ? $"{length.Hours}:" : "", length.Minutes, length.Seconds, player.Track.Title),
+                        Url = $"{player.Track.Url}"
+                    },
+                    ImageUrl = thumb,
+                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} song in queue | Volume: {Program.Volume}%" }
+                }.Build();
+                return embed;
+            }
+            else
+            {
+                var embed = new EmbedBuilder
+                {
+                    Color = Discord.Color.DarkBlue,
+                    Author = new EmbedAuthorBuilder
+                    {
+                        IconUrl = icon,
+                        Name = string.Format("[{0:d2}{1:d2}:{2:d2}] - {3}", length.Hours > 0 ? $"{length.Hours}:" : "", length.Minutes, length.Seconds, player.Track.Title),
+                        Url = $"{player.Track.Url}"
+                    },
+                    ImageUrl = thumb,
+                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} songs in queue | Volume: {Program.Volume}%" }
+                }.Build();
+                return embed;
+            }
         }
 
         public Embed BuildDefaultEmbed()
