@@ -104,12 +104,11 @@ namespace MusicBot.Helpers
                         Url = $"{player.Track.Url}"
                     },
                     ImageUrl = thumb,
-                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} song{player.Queue.Count > 2 ? "s" : ""} in queue | Volume: {Program.Volume}%" }
+                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} song{(player.Queue.Count > 2 ? "s" : "")} in queue | Volume: {Program.Volume}%" }
 
                 }.Build();
                 return embed;
             }
-        }
 
         public Embed BuildDefaultEmbed()
         {
