@@ -75,6 +75,7 @@ namespace MusicBot.Commands
             var search = await node.SearchAsync(query);
             if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
             {
+                await Context.Channel.SendMessageAsync($"{search.Exception}");
                 return;
             }
 
@@ -334,7 +335,7 @@ namespace MusicBot.Commands
 
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
-                if (player.Queue.Count > 1)
+                if (player.Queue.Count >= 1)
                 {
                     await player.SkipAsync();
                 }

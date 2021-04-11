@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using MusicBot.Helpers;
 using Discord;
-using System.Linq;
-using System.Collections.Generic;
 using Victoria;
 using Victoria.Enums;
 
@@ -53,35 +51,52 @@ namespace MusicBot.Services
 
             if ((message.Author as IGuildUser)?.VoiceChannel == null)
             {
+                _ = Task.Run(async () =>
+                {
                 var embed = new EmbedBuilder
                 {
                     Color = Discord.Color.Orange,
                     Description = "You have to be in a voice channel."
                 }.Build();
-                var newMsg = await context.Channel.SendMessageAsync(embed:embed);
+                var newMsg = await context.Channel.SendMessageAsync(embed: embed);
 
-                await message.DeleteAsync();
+                _ = Task.Run(async () =>
+                {
+                    await message.DeleteAsync();
+                    await Task.Delay(5000);
+                    await newMsg.DeleteAsync();
+                });
+            });
                 return;
             }
 
             int argPos = 0;
             if (!message.HasStringPrefix("m?", ref argPos))
             {
-                var search = await node.SearchAsync(message.Content);
-                if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                _ = Task.Run(async () =>
                 {
-                    await message.DeleteAsync();
+                    var search = await node.SearchAsync(message.Content);
+                    if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            await message.DeleteAsync();
+                        });
+                        return;
+                    }
+
+                    if (!node.HasPlayer(context.Guild))
+                    {
+                        await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
+                    }
+
+                    await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
+                    _ = Task.Run(async () =>
+                    {
+                        await message.DeleteAsync();
+                    });
                     return;
-                }
-
-                if (!node.HasPlayer(context.Guild))
-                {
-                    await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
-                }
-
-                await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
-                await message.DeleteAsync();
-                return;
+                });
             }
 
             var result = await commands.ExecuteAsync(context, argPos, provider);
@@ -93,7 +108,10 @@ namespace MusicBot.Services
                 result.Error.Value != CommandError.UnknownCommand)
                 // TODO Look at custom parse errors
                 await context.Channel.SendMessageAsync(result.ToString());
-            await message.DeleteAsync();
+            _ = Task.Run(async () =>
+            {
+                await message.DeleteAsync();
+            });
         }
 
         public async Task InitializeAsync(IServiceProvider provider)

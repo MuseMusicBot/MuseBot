@@ -12,7 +12,7 @@ namespace MusicBot.Helpers
 
         public MessageHelper()
         {
-            DeleteTask = Task.Run(Delete);
+            //DeleteTask = Task.Run(Delete);
         }
 
         public Task RemoveMessageAfterTimeout(IMessage message, int timeout = 10000)
