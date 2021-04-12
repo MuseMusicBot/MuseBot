@@ -45,19 +45,10 @@ namespace MusicBot.Helpers
 
             };
 
-            // TODO: Fix default embed showing up after skipping
-            //No longer shows "No songs in queue, join a voice channel to get started" but fixes Default Embed showing up after skip command
             Node.OnTrackEnded += async (args) =>
             {
-                //This is responsible for Default Embed showing after skip command
                 if (!args.Reason.ShouldPlayNext())
                 {
-                    // var embed = BuildDefaultEmbed();
-                    // await Program.message.ModifyAsync(x =>
-                    // {
-                    //     x.Content = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
-                    //     x.Embed = embed;
-                    // });
                     return;
                 }
 
