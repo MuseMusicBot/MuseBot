@@ -397,7 +397,7 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var s = await audioHelper.UpdateEmbedQueue(player);
+            var s = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
             await Program.message.ModifyAsync(x => { x.Content = s; x.Embed = audioHelper.BuildDefaultEmbed(); });
             await node.LeaveAsync(player.VoiceChannel);
         }
