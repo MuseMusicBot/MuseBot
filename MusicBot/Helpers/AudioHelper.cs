@@ -22,11 +22,13 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private DiscordSocketClient _discord {get; set; }
+        public const string NoSongsInQueue = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
+        private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
         public AudioHelper(DiscordSocketClient discord, LavaNode lavanode)
         {
             Node = lavanode;
-            this._discord = discord;
+            _discord = discord;
 
             Node.OnTrackStarted += async (args) =>
             {
@@ -36,11 +38,17 @@ namespace MusicBot.Helpers
                 var queue = await UpdateEmbedQueue(player);
                 var embed = BuildMusicEmbed(player);
 
-                
+                var content = queue switch
+                {
+                    "" => NoSongsInQueue,
+                    _ => string.Format(QueueMayHaveSongs, queue)
+                };
+
+
                 await Program.message.ModifyAsync(x =>
                 {
                     x.Embed = embed;
-                    x.Content = $"__**Queue List:**__\n{(queue == "" ? "No songs in queue, join a voice channel to get started." : queue)}";
+                    x.Content = content;
                 });
 
             };
@@ -59,7 +67,7 @@ namespace MusicBot.Helpers
                     var embed = BuildDefaultEmbed();
                     await Program.message.ModifyAsync(x =>
                     {
-                        x.Content = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
+                        x.Content = NoSongsInQueue;
                         x.Embed = embed;
                     });
                     return;
@@ -93,7 +101,7 @@ namespace MusicBot.Helpers
                     Author = new EmbedAuthorBuilder
                     {
                         IconUrl = icon,
-                        Name = string.Format("[{0:d2}{1:d2}:{2:d2}] - {3}", length.Hours > 0 ? $"{length.Hours}:" : "", length.Minutes, length.Seconds, player.Track.Title),
+                        Name = string.Format($"[{length.ToTimecode()}] - {player.Track.Title}"),
                         Url = $"{player.Track.Url}"
                     },
                     ImageUrl = thumb,
@@ -176,7 +184,7 @@ namespace MusicBot.Helpers
                     var emebed = BuildMusicEmbed(player);
                     await Program.message.ModifyAsync(x =>
                     {
-                        x.Content = $"__**Queue List:**__\n{newQueue}";
+                        x.Content = string.Format(QueueMayHaveSongs, newQueue);
                         x.Embed = emebed;
                     });
                 }
@@ -193,10 +201,16 @@ namespace MusicBot.Helpers
                     newQueue = await UpdateEmbedQueue(player);
                     var embed = BuildMusicEmbed(player);
 
+                    var content = newQueue switch
+                    {
+                        "" => NoSongsInQueue,
+                        _ => string.Format(QueueMayHaveSongs, newQueue)
+                    };
+
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Embed = embed;
-                        x.Content = $"__**Queue List:**__\n{(newQueue == "" ? "No songs in queue, join a voice channel to get started." : newQueue)}";
+                        x.Content = content;
 
                     });
                 }

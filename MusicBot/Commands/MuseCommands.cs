@@ -16,7 +16,7 @@ namespace MusicBot.Commands
     public class MuseCommands : ModuleBase<SocketCommandContext>
     {
         private readonly LavaNode node;
-        private readonly Helpers.AudioHelper audioHelper;
+        private readonly AudioHelper audioHelper;
 
         public MuseCommands(Helpers.AudioHelper ah, LavaNode lavaNode)
         {
@@ -41,7 +41,7 @@ namespace MusicBot.Commands
             });
 
             var embed = audioHelper.BuildDefaultEmbed();
-            var msg = await channel.SendMessageAsync("__**Queue List:**__\nNo songs in queue, join a voice channel to get started.", embed: embed);
+            var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
 
             var guildId = Context.Guild.Id;
             var channelId = channel.Id;
@@ -397,8 +397,7 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var s = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
-            await Program.message.ModifyAsync(x => { x.Content = s; x.Embed = audioHelper.BuildDefaultEmbed(); });
+            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = audioHelper.BuildDefaultEmbed(); });
             await node.LeaveAsync(player.VoiceChannel);
         }
 
