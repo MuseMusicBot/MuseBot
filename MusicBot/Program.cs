@@ -8,6 +8,7 @@ using System;
 using System.Threading.Tasks;
 using Victoria;
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace MusicBot
 {
@@ -21,6 +22,7 @@ namespace MusicBot
         public static int endcount = 0;
         public static IUserMessage message;
         public const string testConfig = "testConfig.txt";
+        private ILogger victoriaLogger;
 
         static void Main(string[] args) =>
             new Program().MainAsync(args).GetAwaiter().GetResult();
@@ -34,6 +36,7 @@ namespace MusicBot
                 LogLevel = LogSeverity.Info,
                 GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildVoiceStates
             });
+
 
             var services = ConfigureServices();
 
@@ -70,16 +73,22 @@ namespace MusicBot
             //});
 
 
-            services.GetRequiredService<LoggingService>();
+            var loggingService = services.GetRequiredService<LoggingService>();
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
             var config = services.GetRequiredService<LavaConfig>();
             config.Authorization = "youshallnotpass";
+            var node = services.GetRequiredService<LavaNode>();
+
+            victoriaLogger = loggingService.CreateLogger("Victoria");
+            node.OnLog += LavaNodeOnLog;
+
             await discord.LoginAsync(TokenType.Bot, token);
             await discord.StartAsync();
 
             discord.Ready += async () =>
             {
                 var node = services.GetRequiredService<LavaNode>();
+
                 if (!node.IsConnected)
                 {
                     await node.ConnectAsync();
@@ -126,6 +135,18 @@ namespace MusicBot
 
             await Task.Delay(-1);
 
+        }
+
+        private Task LavaNodeOnLog(LogMessage message)
+        {
+            victoriaLogger.Log(
+            LoggingService.LogLevelFromSeverity(message.Severity),
+            0,
+            message,
+            message.Exception,
+            (_1, _2) => message.ToString(prependTimestamp: false));
+
+            return Task.CompletedTask;
         }
 
         private IServiceProvider ConfigureServices()

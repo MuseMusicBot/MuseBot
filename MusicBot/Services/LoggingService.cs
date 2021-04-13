@@ -36,7 +36,7 @@ namespace MusicBot.Services
             return loggerFactory;
         }
 
-        private static LogLevel LogLevelFromSeverity(LogSeverity severity)
+        public static LogLevel LogLevelFromSeverity(LogSeverity severity)
             => (LogLevel)Math.Abs((int)severity - 5);
 
         private Task LogDiscord(LogMessage message)
