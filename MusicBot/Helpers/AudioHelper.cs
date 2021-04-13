@@ -105,7 +105,7 @@ namespace MusicBot.Helpers
                         Url = $"{player.Track.Url}"
                     },
                     ImageUrl = thumb,
-                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} song{(player.Queue.Count > 1 ? "s" : "")} in queue | Volume: {Program.Volume}%" }
+                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%" }
 
                 }.Build();
                 return embed;

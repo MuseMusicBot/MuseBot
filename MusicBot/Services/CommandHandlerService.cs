@@ -17,15 +17,13 @@ namespace MusicBot.Services
         private IServiceProvider provider;
         private readonly AudioHelper ah;
         private readonly LavaNode node;
-        private readonly MessageHelper mh;
 
-        public CommandHandlerService(DiscordSocketClient discord, CommandService commands, IServiceProvider provider, AudioHelper audioHelper, LavaNode lavanode, MessageHelper messageHelper)
+        public CommandHandlerService(DiscordSocketClient discord, CommandService commands, IServiceProvider provider, AudioHelper audioHelper, LavaNode lavanode)
         {
             this.discord = discord;
             this.commands = commands;
             this.provider = provider;
             ah = audioHelper;
-            mh = messageHelper;
             node = lavanode;
 
             this.discord.MessageReceived += MessageReceived;
