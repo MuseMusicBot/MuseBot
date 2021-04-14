@@ -50,6 +50,9 @@ namespace MusicBot.Helpers
                     x.Embed = embed;
                     x.Content = content;
                 });
+                
+                //Sets Listening activity when song starts
+                //await _discord.SetGameAsync($"{player.Track.Title}", type:ActivityType.Listening);
 
             };
 
@@ -117,7 +120,7 @@ namespace MusicBot.Helpers
             {
                 Color = Discord.Color.DarkTeal,
                 Title = "No songs currently playing",
-                Description = "No, this is not Hydra. Please stop asking.",
+                Description = "This ain't Hydra. Please stop asking.",
                 ImageUrl = "https://i.imgur.com/ce9UMue.jpg",
                 Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
             }.Build();

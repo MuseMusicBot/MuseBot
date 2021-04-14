@@ -103,6 +103,8 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Playing)
             {
                 await player.PauseAsync();
+                //Add "Song Paused" in the footer
+                //await Program.message.ModifyAsync();
             }
         }
 
@@ -125,6 +127,7 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Paused)
             {
                 await player.ResumeAsync();
+                //Remove "Song Paused" in footer
             }
 
         }
@@ -226,6 +229,13 @@ namespace MusicBot.Commands
 
             string newQueue = await audioHelper.UpdateEmbedQueue(player);
             await Program.message.ModifyAsync(x => x.Content = newQueue);
+
+            var embed = new EmbedBuilder
+            {
+                Color = Color.Orange,
+                Description = $"**{trackToMove.Title}** moved to position 1."
+            }.Build();
+            await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout();
         }
 
         [Command("volume", RunMode = RunMode.Async)]

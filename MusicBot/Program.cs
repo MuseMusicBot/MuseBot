@@ -103,6 +103,9 @@ namespace MusicBot
 
                     message = await discord.GetGuild(guildId).GetTextChannel(chnlId).GetMessageAsync(msgId) as IUserMessage;
                 }
+
+                //Sets Listening activity
+                await discord.SetGameAsync("music", type:ActivityType.Listening);
             };
 
             // trap ctrl+c
