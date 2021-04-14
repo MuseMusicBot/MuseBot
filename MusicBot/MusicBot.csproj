@@ -18,10 +18,7 @@
     <PackageReference Include="Victoria" Version="5.1.11" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="opus.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="libsodium.dll">
+    <None Update="muse-banner.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -39,6 +39,8 @@ namespace MusicBot.Commands
                 x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
                 x.Topic = "Music Bot";
             });
+            
+            await channel.SendFileAsync("muse-banner.png","");
 
             var embed = audioHelper.BuildDefaultEmbed();
             var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
