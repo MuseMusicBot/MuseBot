@@ -22,7 +22,7 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private DiscordSocketClient _discord {get; set; }
-        public const string NoSongsInQueue = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
+        public const string NoSongsInQueue = "__**Queue List:**__\nQueue is empty, join a voice channel to get started.";
         private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
         public AudioHelper(DiscordSocketClient discord, LavaNode lavanode)
