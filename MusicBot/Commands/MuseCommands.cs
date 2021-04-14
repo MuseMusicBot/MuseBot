@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
+using Victoria.Payloads;
 using MusicBot.Helpers;
 
 namespace MusicBot.Commands
@@ -281,18 +282,7 @@ namespace MusicBot.Commands
                 return;
             }
 
-            if (vol > 150)
-            {
-                var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = "Volume can only be set between 0 - 150 inclusively"
-                }.Build();
-                await Context.Channel.SendMessageAsync(embed: embed);
-                return;
-            }
-
-            if (vol < 1)
+            if (vol > 150 || vol < 1)
             {
                 var embed = new EmbedBuilder
                 {
@@ -398,6 +388,23 @@ namespace MusicBot.Commands
             await player.StopAsync();
         }
 
+        [Command("restart", RunMode = RunMode.Async)]
+        public async Task RestartTrack()
+        {
+            var player = node.GetPlayer(Context.Guild);
+            if (player.PlayerState != PlayerState.Playing)
+            {
+                return;
+            }
+            await player.SeekAsync(TimeSpan.Zero);
+            var embed = new EmbedBuilder
+                {
+                    Color = Color.Orange,
+                    Description = "Let's run it one more time!"
+                }.Build();
+            await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout();
+        }
+
         [Command("disconnect", RunMode = RunMode.Async)]
         [Alias("d", "dc", "leave")]
         public async Task Disconnect()
@@ -412,6 +419,12 @@ namespace MusicBot.Commands
             await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = audioHelper.BuildDefaultEmbed(); });
             await node.LeaveAsync(player.VoiceChannel);
         }
+
+        // [Command("equalizer", RunMode = RunMode.Async)]
+        // [Alias("eq")]
+        // public async Task Equalizer()
+        // {
+        // }
 
         // [Command("ping", RunMode = RunMode.Async)]
         // public async Task Ping()

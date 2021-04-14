@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
+using Victoria.Payloads;
 using System.Net;
 using System.IO;
 using System.Drawing;
@@ -221,5 +222,9 @@ namespace MusicBot.Helpers
 
             await Task.CompletedTask;
         }
+
+        // public async Task EqualizerAsync(List<EqualizerBand> bands)
+        // {
+        // }
     }
 }
