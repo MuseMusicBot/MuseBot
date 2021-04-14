@@ -22,7 +22,7 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private DiscordSocketClient _discord {get; set; }
-        public const string NoSongsInQueue = "__**Queue List:**__\nQueue is empty, join a voice channel to get started.";
+        public const string NoSongsInQueue = "__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
         public AudioHelper(DiscordSocketClient discord, LavaNode lavanode)
@@ -119,7 +119,7 @@ namespace MusicBot.Helpers
             var embed = new EmbedBuilder
             {
                 Color = Discord.Color.DarkTeal,
-                Title = "No songs currently playing",
+                Title = "Nothing currently playing",
                 Description = "This ain't Hydra. Please stop asking.",
                 ImageUrl = "https://i.imgur.com/ce9UMue.jpg",
                 Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
