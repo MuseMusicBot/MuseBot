@@ -425,15 +425,24 @@ namespace MusicBot.Commands
         public async Task Equalizer(string eq = null)
         {
             var player = node.GetPlayer(Context.Guild);
-            if (eq == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            EQHelper.CurrentEQ = eq switch
             {
+                "earrape" => "Earrape",
+                "magic" => "Magic",
+                null => EQHelper.CurrentEQ,
+                _ => "Off"
+            };
+
+            if (eq == null)
+            {
+                await (await Context.Channel.SendMessageAsync(EQHelper.CurrentEQ)).RemoveAfterTimeout();
                 return;
             }
 
             EqualizerBand[] bands = eq switch
             {
-                "earrape" => EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25 }),
-                "magic" => EQHelper.BuildEQ(new[] { 0.25, 0.25, 0.15, 0.10, 0.05, 0, -0.05, -0.05, -0.05, -0.05, 0, 0.10, 0.15, 0.20, 0.25 }),
+                "earrape" => EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 }),
+                "magic" => EQHelper.BuildEQ(new[] { 0.15, 0.15, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.15, 0.15 }),
                 _ => EQHelper.BuildEQ(null)
             };
 
