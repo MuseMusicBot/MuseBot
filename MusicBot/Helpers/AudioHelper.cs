@@ -10,7 +10,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
-using Victoria.Payloads;
 using System.Net;
 using System.IO;
 using System.Drawing;
@@ -122,7 +121,7 @@ namespace MusicBot.Helpers
                 Color = Discord.Color.DarkTeal,
                 Title = "Nothing currently playing",
                 Description = "This ain't Hydra. Please stop asking.",
-                ImageUrl = "https://i.imgur.com/ce9UMue.jpg",
+                ImageUrl = "https://i.imgur.com/K4dWciL.jpg",
                 Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
             }.Build();
 
