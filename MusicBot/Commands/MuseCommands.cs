@@ -18,8 +18,9 @@ namespace MusicBot.Commands
     {
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
+        public EmbedHelper embedHelper { get; set; }
 
-        public MuseCommands(Helpers.AudioHelper ah, LavaNode lavaNode)
+        public MuseCommands(AudioHelper ah, LavaNode lavaNode)
         {
             node = lavaNode;
             audioHelper = ah;

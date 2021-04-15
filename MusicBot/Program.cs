@@ -159,6 +159,7 @@ namespace MusicBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<LavaNode>()
                 .AddSingleton<LavaConfig>()
+                .AddSingleton<EmbedHelper>()
                 .AddSingleton<AudioHelper>()
                 .AddSingleton<CommandHandlerService>()
                 .AddSingleton<Commands.MuseCommands>()
