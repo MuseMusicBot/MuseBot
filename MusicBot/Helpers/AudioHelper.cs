@@ -22,16 +22,12 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private DiscordSocketClient _discord {get; set; }
-
-        public EmbedHelper embedHelper { get; set; }
-
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
-        public AudioHelper(DiscordSocketClient discord, LavaNode lavanode)
+        public AudioHelper(LavaNode lavanode)
         {
             Node = lavanode;
-            _discord = discord;
 
             Node.OnTrackStarted += async (args) =>
             {
@@ -53,9 +49,6 @@ namespace MusicBot.Helpers
                     x.Embed = embed;
                     x.Content = content;
                 });
-                
-                //Sets Listening activity when song starts
-                //await _discord.SetGameAsync($"{player.Track.Title}", type:ActivityType.Listening);
 
             };
 
@@ -224,9 +217,5 @@ namespace MusicBot.Helpers
 
             await Task.CompletedTask;
         }
-
-        // public async Task EqualizerAsync(List<EqualizerBand> bands)
-        // {
-        // }
     }
 }
