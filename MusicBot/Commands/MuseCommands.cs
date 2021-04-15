@@ -429,107 +429,16 @@ namespace MusicBot.Commands
             {
                 return;
             }
-            if (eq.Equals("earrape"))
-            {
-                var band1 = new EqualizerBand(band: 0, gain: 1);
-                var band2 = new EqualizerBand(band: 1, gain: 1);
-                var band3 = new EqualizerBand(band: 2, gain: 1);
-                var band4 = new EqualizerBand(band: 3, gain: 1);
-                var band5 = new EqualizerBand(band: 4, gain: -0.25);
-                var band6 = new EqualizerBand(band: 5, gain: -0.25);
-                var band7 = new EqualizerBand(band: 6, gain: -0.25);
-                var band8 = new EqualizerBand(band: 7, gain: -0.25);
-                var band9 = new EqualizerBand(band: 8, gain: -0.25);
-                var band10 = new EqualizerBand(band: 9, gain: -0.25);
-                var band11 = new EqualizerBand(band: 10, gain: -0.25);
-                var band12 = new EqualizerBand(band: 11, gain: -0.25);
-                var band13 = new EqualizerBand(band: 12, gain: -0.25);
-                var band14 = new EqualizerBand(band: 13, gain: -0.25);
-                var band15 = new EqualizerBand(band: 14, gain: -0.25);
-                await player.EqualizerAsync(band1, band2, band3, band4, band5, band6, band7, band8, band9, band10, band11, band12, band13, band14, band15);
-                return;
-            }
-            if (eq.Equals("magic"))
-            {
-                var band1 = new EqualizerBand(band: 0, gain: 0.25);
-                var band2 = new EqualizerBand(band: 1, gain: 0.25);
-                var band3 = new EqualizerBand(band: 2, gain: 0.15);
-                var band4 = new EqualizerBand(band: 3, gain: 0.10);
-                var band5 = new EqualizerBand(band: 4, gain: 0.05);
-                var band6 = new EqualizerBand(band: 5, gain: 0);
-                var band7 = new EqualizerBand(band: 6, gain: -0.05);
-                var band8 = new EqualizerBand(band: 7, gain: -0.05);
-                var band9 = new EqualizerBand(band: 8, gain: -0.05);
-                var band10 = new EqualizerBand(band: 9, gain: -0.05);
-                var band11 = new EqualizerBand(band: 10, gain: 0);
-                var band12 = new EqualizerBand(band: 11, gain: 0.10);
-                var band13 = new EqualizerBand(band: 12, gain: 0.15);
-                var band14 = new EqualizerBand(band: 13, gain: 0.20);
-                var band15 = new EqualizerBand(band: 14, gain: 0.25);
-                await player.EqualizerAsync(band1, band2, band3, band4, band5, band6, band7, band8, band9, band10, band11, band12, band13, band14, band15);
-                return;
-            }
-            if (eq.Equals("off"))
-            {
-                var band1 = new EqualizerBand(band: 0, gain: 0);
-                var band2 = new EqualizerBand(band: 1, gain: 0);
-                var band3 = new EqualizerBand(band: 2, gain: 0);
-                var band4 = new EqualizerBand(band: 3, gain: 0);
-                var band5 = new EqualizerBand(band: 4, gain: 0);
-                var band6 = new EqualizerBand(band: 5, gain: 0);
-                var band7 = new EqualizerBand(band: 6, gain: 0);
-                var band8 = new EqualizerBand(band: 7, gain: 0);
-                var band9 = new EqualizerBand(band: 8, gain: 0);
-                var band10 = new EqualizerBand(band: 9, gain: 0);
-                var band11 = new EqualizerBand(band: 10, gain: 0);
-                var band12 = new EqualizerBand(band: 11, gain: 0);
-                var band13 = new EqualizerBand(band: 12, gain: 0);
-                var band14 = new EqualizerBand(band: 13, gain: 0);
-                var band15 = new EqualizerBand(band: 14, gain: 0);
-                await player.EqualizerAsync(band1, band2, band3, band4, band5, band6, band7, band8, band9, band10, band11, band12, band13, band14, band15);
-                return;
 
-            }
-            // switch (eq)
-            // {
-            //     case "earrape":
-            //         var band1 = new EqualizerBand(band: 0, gain: 1);
-            //         var band2 = new EqualizerBand(band: 1, gain: 1);
-            //         var band3 = new EqualizerBand(band: 2, gain: 1);
-            //         var band4 = new EqualizerBand(band: 3, gain: 1);
-            //         var band5 = new EqualizerBand(band: 4, gain: -0.25);
-            //         var band6 = new EqualizerBand(band: 5, gain: -0.25);
-            //         var band7 = new EqualizerBand(band: 6, gain: -0.25);
-            //         var band8 = new EqualizerBand(band: 7, gain: -0.25);
-            //         var band9 = new EqualizerBand(band: 8, gain: -0.25);
-            //         var band10 = new EqualizerBand(band: 9, gain: -0.25);
-            //         var band11 = new EqualizerBand(band: 10, gain: -0.25);
-            //         var band12 = new EqualizerBand(band: 11, gain: -0.25);
-            //         var band13 = new EqualizerBand(band: 12, gain: -0.25);
-            //         var band14 = new EqualizerBand(band: 13, gain: -0.25);
-            //         var band15 = new EqualizerBand(band: 14, gain: -0.25);
-            //         await player.EqualizerAsync(band1, band2, band3, band4, band5, band6, band7, band8, band9, band10, band11, band12, band13, band14, band15);
-            //         break;
-            //     case "off":
-            //         var band1 = new EqualizerBand(band: 0, gain: 0);
-            //         var band2 = new EqualizerBand(band: 1, gain: 0);
-            //         var band3 = new EqualizerBand(band: 2, gain: 0);
-            //         var band4 = new EqualizerBand(band: 3, gain: 0);
-            //         var band5 = new EqualizerBand(band: 4, gain: 0);
-            //         var band6 = new EqualizerBand(band: 5, gain: 0);
-            //         var band7 = new EqualizerBand(band: 6, gain: 0);
-            //         var band8 = new EqualizerBand(band: 7, gain: 0);
-            //         var band9 = new EqualizerBand(band: 8, gain: 0);
-            //         var band10 = new EqualizerBand(band: 9, gain: 0);
-            //         var band11 = new EqualizerBand(band: 10, gain: 0);
-            //         var band12 = new EqualizerBand(band: 11, gain: 0);
-            //         var band13 = new EqualizerBand(band: 12, gain: 0);
-            //         var band14 = new EqualizerBand(band: 13, gain: 0);
-            //         var band15 = new EqualizerBand(band: 14, gain: 0);
-            //         break;
-            //     default:
-            //         break;
-            // }
+            EqualizerBand[] bands = eq switch
+            {
+                "earrape" => EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25 }),
+                "magic" => EQHelper.BuildEQ(new[] { 0.25, 0.25, 0.15, 0.10, 0.05, 0, -0.05, -0.05, -0.05, -0.05, 0, 0.10, 0.15, 0.20, 0.25 }),
+                _ => EQHelper.BuildEQ(null)
+            };
+
+            await player.EqualizerAsync(bands);
+
             //EQ gets reset when bot disconnects.
             //EQ stays when skipping songs.
         }
