@@ -57,7 +57,7 @@ namespace MusicBot.Helpers
 
                 if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
                 {
-                    var embed = BuildDefaultEmbed();
+                    var embed = await embedHelper.BuildDefaultEmbed();
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = NoSongsInQueue;
@@ -68,54 +68,6 @@ namespace MusicBot.Helpers
 
                 await args.Player.PlayAsync(track);
             };
-        }
-
-        public Embed BuildMusicEmbed(LavaPlayer player)
-        {
-            var length = player.Track.Duration;
-            var icon = _discord.CurrentUser.GetAvatarUrl();
-            var thumb = YouTubeHelper.GetYtThumbnail(player.Track.Url);
-
-            /* TODO: Fix and make sure it doesn't throw */
-            //var thumb = player.Track.FetchArtworkAsync().Result;
-            //using var client = new HttpClient();
-            //var img = System.Drawing.Image.FromStream(client.GetStreamAsync(new Uri(thumb)).Result);
-
-            //if (img.Width == 120 && img.Height == 90)
-            //{
-            //    thumb = YouTubeHelper.GetYtThumbnail(player.Track.Url);
-            //}
-
-            //img.Dispose();
-
-            var embed = new EmbedBuilder
-                {
-                    Color = Discord.Color.DarkBlue,
-                    Author = new EmbedAuthorBuilder
-                    {
-                        IconUrl = icon,
-                        Name = string.Format($"[{length.ToTimecode()}] - {player.Track.Title}"),
-                        Url = $"{player.Track.Url}"
-                    },
-                    ImageUrl = thumb,
-                    Footer = new EmbedFooterBuilder { Text = $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%" }
-
-                }.Build();
-                return embed;
-            }
-
-        public Embed BuildDefaultEmbed()
-        {
-            var embed = new EmbedBuilder
-            {
-                Color = Discord.Color.DarkTeal,
-                Title = "Nothing currently playing",
-                Description = "This ain't Hydra. Please stop asking.",
-                ImageUrl = "https://i.imgur.com/K4dWciL.jpg",
-                Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
-            }.Build();
-
-            return embed;
         }
 
         public Task<string> UpdateEmbedQueue(LavaPlayer player)
@@ -174,7 +126,7 @@ namespace MusicBot.Helpers
                         player.Queue.Enqueue(track);
                     }
                     newQueue = await UpdateEmbedQueue(player);
-                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, "test");
+                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
@@ -192,7 +144,7 @@ namespace MusicBot.Helpers
 
                     await player.PlayAsync(newTrack);
                     newQueue = await UpdateEmbedQueue(player);
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, "test");
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
 
                     var content = newQueue switch
                     {

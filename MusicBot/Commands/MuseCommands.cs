@@ -27,7 +27,6 @@ namespace MusicBot.Commands
         [Command("setup", RunMode = RunMode.Async)]
         public async Task Setup()
         {
-            //Instead of automatically making text channel, make it so it requires a setup command.
             if (Context.Guild.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
             {
                 return;
@@ -42,7 +41,7 @@ namespace MusicBot.Commands
             
             await channel.SendFileAsync("muse-banner.png","");
 
-            var embed = audioHelper.BuildDefaultEmbed();
+            var embed = await embedHelper.BuildDefaultEmbed();
             var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
 
             var guildId = Context.Guild.Id;
@@ -194,6 +193,8 @@ namespace MusicBot.Commands
             player.Queue.Shuffle();
             string newQueue = await audioHelper.UpdateEmbedQueue(player);
             await Program.message.ModifyAsync(x => x.Content = newQueue);
+            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
+            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
 
         [Command("clear", RunMode = RunMode.Async)]
@@ -204,6 +205,8 @@ namespace MusicBot.Commands
             player.Queue.Clear();
             string newQueue = await audioHelper.UpdateEmbedQueue(player);
             await Program.message.ModifyAsync(x => x.Content = newQueue);
+            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue cleared");
+            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
 
         [Command("move", RunMode = RunMode.Async)]
@@ -291,21 +294,10 @@ namespace MusicBot.Commands
 
             var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
             await Program.message.ModifyAsync(x => x.Embed = embed);
+
+            var volmsg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Volume is now set to `{Program.Volume}%`.");
+            await (await Context.Channel.SendMessageAsync(embed: volmsg)).RemoveAfterTimeout();
         }
-
-        // [Command("nowplaying")]
-        // [Alias("np")]
-        // public async Task NowPlaying()
-        // {
-        //     string s = await ah.NowPlaying();
-
-        //     if (s == "")
-        //     {
-        //         return;
-        //     }
-
-        //     await Context.Channel.SendMessageAsync($"**Now Playing**: {s}");
-        // }
 
         [Command("skip", RunMode = RunMode.Async)]
         public async Task Skip()
@@ -325,38 +317,6 @@ namespace MusicBot.Commands
                 }
             }
         }
-
-        //[Command("queue")]
-        //[Alias("q")]
-        //public async Task DisplayQueue()
-        //{
-        //    //===================
-        //    //Check to see if bot message is less than 2000 characters. If more, than append "And **X** more..."
-        //    //===================
-
-        //    StringBuilder sb = new StringBuilder();
-        //    if (!node.HasPlayer(Context.Guild))
-        //    {
-        //        return;
-        //    }
-
-        //    var player = node.GetPlayer(Context.Guild);
-        //    var q = player.Queue.ToList();
-
-        //    if (q.Count == 0)
-        //    {
-        //        return;
-        //    }
-
-        //    int idx = 1;
-        //    foreach (var i in q)
-        //    {
-        //        //Append Track Duration
-        //        sb.AppendLine($"{idx++}. {i.Title}");
-        //    }
-
-        //    await Context.Channel.SendMessageAsync(sb.ToString());
-        //}
 
         [Command("stop", RunMode = RunMode.Async)]
         public async Task Stop()
@@ -398,7 +358,8 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = audioHelper.BuildDefaultEmbed(); });
+            var embed = await embedHelper.BuildDefaultEmbed();
+            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             await node.LeaveAsync(player.VoiceChannel);
         }
 
@@ -410,28 +371,30 @@ namespace MusicBot.Commands
             EQHelper.CurrentEQ = eq switch
             {
                 "earrape" => "Earrape",
-                "magic" => "Magic",
+                "bass" => "Bass",
+                "pop" => "Pop",
                 null => EQHelper.CurrentEQ,
                 _ => "Off"
             };
 
             if (eq == null)
             {
-                await (await Context.Channel.SendMessageAsync(EQHelper.CurrentEQ)).RemoveAfterTimeout();
+                var eqmsg = await embedHelper.BuildMessageEmbed(Color.Orange, (EQHelper.CurrentEQ == "Off") ? "No EQ applied." : $"Current EQ is: `{EQHelper.CurrentEQ}`");
+                await (await Context.Channel.SendMessageAsync(embed: eqmsg)).RemoveAfterTimeout();
                 return;
             }
 
             EqualizerBand[] bands = eq switch
             {
                 "earrape" => EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 }),
-                "magic" => EQHelper.BuildEQ(new[] { 0.15, 0.15, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.15, 0.15 }),
+                "bass" => EQHelper.BuildEQ(new[] { 0.10, 0.10, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.10, 0.10 }),
+                "pop" => EQHelper.BuildEQ(new[] { -0.01, -0.01, 0, 0.01, 0.02, 0.05, 0.07, 0.10, 0.07, 0.05, 0.02, 0.01, 0, -0.01, -0.01 }),
                 _ => EQHelper.BuildEQ(null)
             };
 
             await player.EqualizerAsync(bands);
-
-            //EQ gets reset when bot disconnects.
-            //EQ stays when skipping songs.
+            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, (EQHelper.CurrentEQ == "Off") ? "EQ turned off" : $"`{EQHelper.CurrentEQ}`: working my magic!");
+            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
         }
 
         // [Command("ping", RunMode = RunMode.Async)]
