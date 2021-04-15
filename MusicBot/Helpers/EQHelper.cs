@@ -10,6 +10,7 @@ namespace MusicBot.Helpers
         /// </summary>
         /// <param name="bands">gain for bands 0-14. If null, all bands will have 0.0 gain.</param>
         /// <returns>Array of EqualizerBands with specified gain.</returns>
+        public static string CurrentEQ = "Off";
         public static EqualizerBand[] BuildEQ(double[] bands = null)
         {
             List<EqualizerBand> eqBands = new List<EqualizerBand>();
