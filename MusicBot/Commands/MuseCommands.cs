@@ -1,16 +1,13 @@
 ﻿using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
+using MusicBot.Helpers;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.Payloads;
-using MusicBot.Helpers;
 
 namespace MusicBot.Commands
 {
@@ -18,12 +15,13 @@ namespace MusicBot.Commands
     {
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
-        public EmbedHelper embedHelper { get; set; }
+        public EmbedHelper embedHelper;
 
-        public MuseCommands(AudioHelper ah, LavaNode lavaNode)
+        public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh)
         {
             node = lavaNode;
             audioHelper = ah;
+            embedHelper = eh;
         }
 
         [Command("setup", RunMode = RunMode.Async)]

@@ -1,19 +1,12 @@
 ﻿using Discord;
-using Discord.Audio;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using SharpLink;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
-using System.Net;
-using System.IO;
-using System.Text;
-using System.Net.Http;
 
 namespace MusicBot.Helpers
 {
@@ -21,13 +14,14 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private DiscordSocketClient _discord {get; set; }
-        public EmbedHelper embedHelper { get; set; }
+        private EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
-        public AudioHelper(LavaNode lavanode)
+        public AudioHelper(LavaNode lavanode, EmbedHelper eh)
         {
             Node = lavanode;
+            embedHelper = eh;
 
             Node.OnTrackStarted += async (args) =>
             {
@@ -180,7 +174,7 @@ namespace MusicBot.Helpers
                         player.Queue.Enqueue(track);
                     }
                     newQueue = await UpdateEmbedQueue(player);
-                    var emebed = BuildMusicEmbed(player);
+                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, "test");
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
@@ -198,7 +192,7 @@ namespace MusicBot.Helpers
 
                     await player.PlayAsync(newTrack);
                     newQueue = await UpdateEmbedQueue(player);
-                    var embed = BuildMusicEmbed(player);
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, "test");
 
                     var content = newQueue switch
                     {

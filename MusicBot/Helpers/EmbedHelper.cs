@@ -10,7 +10,12 @@ namespace MusicBot.Helpers
 {
     public class EmbedHelper
     {
-        public DiscordSocketClient discord { get; set; }
+        private DiscordSocketClient discord;
+
+        public EmbedHelper(DiscordSocketClient _discord)
+        {
+            discord = _discord;
+        }
 
         public Task<Embed> BuildMusicEmbed(LavaPlayer player, Color color, string footer)
         {
