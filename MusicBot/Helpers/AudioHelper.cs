@@ -12,7 +12,6 @@ using Victoria;
 using Victoria.Enums;
 using System.Net;
 using System.IO;
-using System.Drawing;
 using System.Text;
 using System.Net.Http;
 
@@ -22,6 +21,7 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private DiscordSocketClient _discord {get; set; }
+        public EmbedHelper embedHelper { get; set; }
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
@@ -35,7 +35,7 @@ namespace MusicBot.Helpers
                 await player.UpdateVolumeAsync(Program.Volume);
 
                 var queue = await UpdateEmbedQueue(player);
-                var embed = BuildMusicEmbed(player);
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
 
                 var content = queue switch
                 {

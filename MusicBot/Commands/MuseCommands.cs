@@ -107,8 +107,8 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Playing)
             {
                 await player.PauseAsync();
-                //Add "Song Paused" in the footer
-                //await Program.message.ModifyAsync();
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}% | Song paused");
+                await Program.message.ModifyAsync(x => x.Embed = embed);
             }
         }
 
@@ -131,7 +131,8 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Paused)
             {
                 await player.ResumeAsync();
-                //Remove "Song Paused" in footer
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+                await Program.message.ModifyAsync(x => x.Embed = embed);
             }
 
         }
@@ -157,13 +158,8 @@ namespace MusicBot.Commands
 
             if (seekTime == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
             {
-                var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = $"Current Position: {pos.ToTimecode()}/{len.ToTimecode()}"
-                }.Build();
-
-                await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Current Position: {pos.ToTimecode()}/{len.ToTimecode()}");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
                 return;
             }
 
@@ -179,27 +175,37 @@ namespace MusicBot.Commands
 
             if (len.TotalMilliseconds - seek.TotalMilliseconds < 0)
             {
-                var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = $"You can only seek up to {len.ToTimecode()}"
-                }.Build();
-
-                await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"You can only seek up to {len.ToTimecode()}");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
                 return;
             }
 
             else
             {
                 await player.SeekAsync(seek);
-
-                var embed = new EmbedBuilder
-                {
-                    Color = Discord.Color.Orange,
-                    Description = $"Seeked to `{seek.ToTimecode()}`."
-                }.Build();
-                await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(5000);
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Seeked to `{seek.ToTimecode()}`.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
+                return;
             }
+        }
+
+        [Command("shuffle", RunMode = RunMode.Async)]
+        public async Task Shuffle()
+        {
+            var player = node.GetPlayer(Context.Guild);
+            player.Queue.Shuffle();
+            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            await Program.message.ModifyAsync(x => x.Content = newQueue);
+        }
+
+        [Command("clear", RunMode = RunMode.Async)]
+        [Alias("clearqueue")]
+        public async Task Clear()
+        {
+            var player = node.GetPlayer(Context.Guild);
+            player.Queue.Clear();
+            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            await Program.message.ModifyAsync(x => x.Content = newQueue);
         }
 
         [Command("move", RunMode = RunMode.Async)]
@@ -234,12 +240,8 @@ namespace MusicBot.Commands
             string newQueue = await audioHelper.UpdateEmbedQueue(player);
             await Program.message.ModifyAsync(x => x.Content = newQueue);
 
-            var embed = new EmbedBuilder
-            {
-                Color = Color.Orange,
-                Description = $"**{trackToMove.Title}** moved to position 1."
-            }.Build();
-            await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout();
+            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToMove.Title}** moved to position 1.");
+            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
 
         [Command("volume", RunMode = RunMode.Async)]
@@ -250,22 +252,14 @@ namespace MusicBot.Commands
             {
                 if (vol == null)
                 {
-                    var embed = new EmbedBuilder
-                    {
-                        Color = Color.Orange,
-                        Description = $"Volume is at `{Program.Volume}%`."
-                    }.Build();
-                    await Context.Channel.SendMessageAsync(embed: embed);
+                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Volume is at `{Program.Volume}%`.");
+                    await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                     return;
                 }
                 else
                 {
-                    var embed = new EmbedBuilder
-                    {
-                        Color = Color.Orange,
-                        Description = "The bot must be in a voice channel to change volume."
-                    }.Build();
-                    await Context.Channel.SendMessageAsync(embed: embed);
+                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "The bot must be in a voice channel to change volume.");
+                    await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                     return;
                 }
             }
@@ -274,42 +268,31 @@ namespace MusicBot.Commands
 
             if (vol == null)
             {
-                var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = $"Current volume is at `{player.Volume}%`."
-                }.Build();
-                await Context.Channel.SendMessageAsync(embed: embed);
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Current volume is at `{player.Volume}%`.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 return;
             }
 
             if (vol > 150 || vol < 1)
             {
-                var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = "Volume can only be set between 0 - 150 inclusively"
-                }.Build();
-                await Context.Channel.SendMessageAsync(embed: embed);
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Volume can only be set between 0 - 150 inclusively");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 return;
             }
 
             if (player.PlayerState == PlayerState.Stopped)
             {
                 Program.Volume = vol.Value;
-                var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = $"Volume is now set to `{Program.Volume}%`."
-                }.Build();
-                await Context.Channel.SendMessageAsync(embed: embed);
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Volume is now set to `{Program.Volume}%`.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 return;
             }
 
             Program.Volume = vol.Value;
             await player.UpdateVolumeAsync(vol.Value);
 
-            await Program.message.ModifyAsync(x => x.Embed = audioHelper.BuildMusicEmbed(player));
+            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+            await Program.message.ModifyAsync(x => x.Embed = embed);
         }
 
         // [Command("nowplaying")]
