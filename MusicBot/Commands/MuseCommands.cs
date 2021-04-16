@@ -192,7 +192,7 @@ namespace MusicBot.Commands
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Shuffle();
             string newQueue = await audioHelper.UpdateEmbedQueue(player);
-            await Program.message.ModifyAsync(x => x.Content = newQueue);
+            await Program.message.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
@@ -203,8 +203,8 @@ namespace MusicBot.Commands
         {
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            string newQueue = await audioHelper.UpdateEmbedQueue(player);
-            await Program.message.ModifyAsync(x => x.Content = newQueue);
+            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue cleared");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
@@ -327,6 +327,9 @@ namespace MusicBot.Commands
             }
 
             var player = node.GetPlayer(Context.Guild);
+            player.Queue.Clear();
+            var embed = await embedHelper.BuildDefaultEmbed();
+            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             await player.StopAsync();
         }
 
@@ -339,12 +342,8 @@ namespace MusicBot.Commands
                 return;
             }
             await player.SeekAsync(TimeSpan.Zero);
-            var embed = new EmbedBuilder
-                {
-                    Color = Color.Orange,
-                    Description = "Let's run it one more time!"
-                }.Build();
-            await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout();
+            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Let's run it one more time!");
+            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
 
         [Command("disconnect", RunMode = RunMode.Async)]
