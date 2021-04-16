@@ -3,6 +3,8 @@ using Discord.WebSocket;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
 using MusicBot.Helpers;
 using Discord;
 using Victoria;
@@ -17,14 +19,16 @@ namespace MusicBot.Services
         private IServiceProvider provider;
         private readonly AudioHelper ah;
         private readonly LavaNode node;
+        public EmbedHelper embedHelper;
 
-        public CommandHandlerService(DiscordSocketClient discord, CommandService commands, IServiceProvider provider, AudioHelper audioHelper, LavaNode lavanode)
+        public CommandHandlerService(DiscordSocketClient discord, CommandService commands, IServiceProvider provider, AudioHelper audioHelper, LavaNode lavanode, EmbedHelper eh)
         {
             this.discord = discord;
             this.commands = commands;
             this.provider = provider;
             ah = audioHelper;
             node = lavanode;
+            embedHelper = eh;
 
             this.discord.MessageReceived += MessageReceived;
         }
@@ -41,9 +45,14 @@ namespace MusicBot.Services
                 return;
 
             var context = new SocketCommandContext(discord, message);
+            var channelid = File.ReadLines(Program.testConfig).ElementAt(1);
 
-            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Name != "muse-song-requests")
+            //Channel id needs to be fixed, I have no idea how to make it work. For now hardcoded.
+            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != 831789041506058271)
             {
+                // await message.DeleteAsync();
+                // var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelid}>.");
+                // await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
                 return;
             }
 
