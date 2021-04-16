@@ -57,5 +57,14 @@ namespace MusicBot.Helpers
                 Description = text
             }.Build());
         }
+
+        public Task<Embed> BuildErrorEmbed(string error)
+        {
+            return Task.FromResult(new EmbedBuilder
+            {
+                Color = Color.DarkRed,
+                Description = error
+            }.Build());
+        }
     }
 }

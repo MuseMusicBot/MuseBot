@@ -16,7 +16,7 @@ namespace MusicBot.Helpers
         private DiscordSocketClient _discord {get; set; }
         private EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
-        private const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
+        public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
         {
