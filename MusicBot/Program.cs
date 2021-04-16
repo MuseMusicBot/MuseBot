@@ -6,8 +6,9 @@ using MusicBot.Services;
 using MusicBot.Helpers;
 using System;
 using System.Threading.Tasks;
-using Victoria;
 using System.IO;
+using System.Linq;
+using Victoria;
 using Microsoft.Extensions.Logging;
 
 namespace MusicBot
@@ -29,7 +30,7 @@ namespace MusicBot
 
         private async Task MainAsync(string[] args)
         {
-            string token = "MTk2MDY3MjYyMDY5NzM1NDM0.V23X3g.5d7fjXNoohw1w2N3smANm8WYmQE";
+            string token = File.ReadLines(Program.testConfig).ElementAt(3);
 
             discord = new DiscordSocketClient(new DiscordSocketConfig
             {
