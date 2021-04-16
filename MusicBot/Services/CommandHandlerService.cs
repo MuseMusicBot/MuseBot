@@ -46,38 +46,32 @@ namespace MusicBot.Services
 
             var context = new SocketCommandContext(discord, message);
             var channelid = File.ReadLines(Program.testConfig).ElementAt(1);
+            int argPos = 0;
 
             //Channel id needs to be fixed, I have no idea how to make it work. For now hardcoded.
             if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != 831789041506058271)
             {
-                // await message.DeleteAsync();
-                // var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelid}>.");
-                // await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
-                return;
+                if (message.HasStringPrefix("m?", ref argPos))
+                {
+                    await message.DeleteAsync();
+                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelid}>.");
+                    await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
+                    return;
+                }
+                else { return; }
             }
 
-            if ((message.Author as IGuildUser)?.VoiceChannel == null)
+            if (message.Content != "m?premium" && (message.Author as IGuildUser)?.VoiceChannel == null)
             {
                 _ = Task.Run(async () =>
                 {
-                var embed = new EmbedBuilder
-                {
-                    Color = Discord.Color.Orange,
-                    Description = "You have to be in a voice channel."
-                }.Build();
-                var newMsg = await context.Channel.SendMessageAsync(embed: embed);
-
-                _ = Task.Run(async () =>
-                {
                     await message.DeleteAsync();
-                    await Task.Delay(5000);
-                    await newMsg.DeleteAsync();
+                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "You have to be in a voice channel.");
+                    await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 });
-            });
                 return;
             }
 
-            int argPos = 0;
             if (!message.HasStringPrefix("m?", ref argPos))
             {
                 _ = Task.Run(async () =>
