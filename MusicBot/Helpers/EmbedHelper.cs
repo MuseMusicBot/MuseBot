@@ -28,7 +28,7 @@ namespace MusicBot.Helpers
                     Name = $"[{player.Track.Duration.ToTimecode()}] - {player.Track.Title}",
                     Url = player.Track.Url
                 },
-                ImageUrl = YouTubeHelper.GetYtThumbnail(player.Track.Url),
+                ImageUrl = YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
                 Footer = new EmbedFooterBuilder { Text = footer }
             }.Build();
 

@@ -12,6 +12,12 @@ namespace MusicBot.Helpers
             const string hqDef = "/hqdefault.jpg";
             Regex r = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?<id>[A-z0-9_-]{1,11})", RegexOptions.Compiled);
             var match = r.Match(url);
+            
+            if (!match.Success)
+            {
+                return null;
+            }
+
             string hdthumb = baseUrl + match.Groups["id"].Value + maxRes;
 
             try
