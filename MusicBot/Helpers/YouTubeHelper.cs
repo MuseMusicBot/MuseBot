@@ -7,21 +7,23 @@ namespace MusicBot.Helpers
     {
         public static string GetYtThumbnail(string url)
         {
-            string baseUrl = "https://img.youtube.com/vi/";
-            string jpg = "/maxresdefault.jpg";
-            Regex r = new Regex(@"https?:\/\/(?:www.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?<id>[A-z0-9_-]{1,11})", RegexOptions.Compiled);
+            const string baseUrl = "https://img.youtube.com/vi/";
+            const string maxRes = "/maxresdefault.jpg";
+            const string hqDef = "/hqdefault.jpg";
+            Regex r = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?<id>[A-z0-9_-]{1,11})", RegexOptions.Compiled);
             var match = r.Match(url);
-            string hdthumb = baseUrl + match.Groups["id"].Value + jpg;
+            string hdthumb = baseUrl + match.Groups["id"].Value + maxRes;
 
             try
             {
-                byte[] imageData = new WebClient().DownloadData(hdthumb);
+                // Making sure to dispose of the webclient after
+                using var wc = new WebClient();
+                _ = wc.DownloadData(hdthumb);
                 return hdthumb;
             }
             catch
             {
-                string sdthumb = baseUrl + match.Groups["id"].Value + jpg.Replace("/maxresdefault.jpg", "/hqdefault.jpg");
-                return sdthumb;
+                return baseUrl + match.Groups["id"].Value + hqDef;
             }
         }
     }
