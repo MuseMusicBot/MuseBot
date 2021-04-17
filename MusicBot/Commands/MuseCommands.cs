@@ -2,6 +2,7 @@
 using Discord.Commands;
 using MusicBot.Helpers;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -393,17 +394,15 @@ namespace MusicBot.Commands
         #region equalizer
         [Command("equalizer", RunMode = RunMode.Async)]
         [Alias("eq")]
-        public async Task Equalizer(string eq = null)
+        public async Task Equalizer([Remainder]string eq = null)
         {
-            var player = node.GetPlayer(Context.Guild);
-            EQHelper.CurrentEQ = eq switch
+            if (!node.HasPlayer(Context.Guild))
             {
-                "earrape" => "Earrape",
-                "bass" => "Bass",
-                "pop" => "Pop",
-                null => EQHelper.CurrentEQ,
-                _ => "Off"
-            };
+                await (await Context.Channel.SendMessageAsync(embed: await embedHelper.BuildErrorEmbed("Player is not in a voice channel"))).RemoveAfterTimeout(5000);
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
 
             if (eq == null)
             {
@@ -412,12 +411,32 @@ namespace MusicBot.Commands
                 return;
             }
 
-            EqualizerBand[] bands = eq switch
+            var textInfo = CultureInfo.InvariantCulture.TextInfo;
+            EqualizerBand[] bands;
+            switch (eq)
             {
-                "earrape" => EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 }),
-                "bass" => EQHelper.BuildEQ(new[] { 0.10, 0.10, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.10, 0.10 }),
-                "pop" => EQHelper.BuildEQ(new[] { -0.01, -0.01, 0, 0.01, 0.02, 0.05, 0.07, 0.10, 0.07, 0.05, 0.02, 0.01, 0, -0.01, -0.01 }),
-                _ => EQHelper.BuildEQ(null)
+                case "earrape":
+                    bands = EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 });
+                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
+                    break;
+
+                case "bass":
+                    bands = EQHelper.BuildEQ(new[] { 0.10, 0.10, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.10, 0.10 });
+                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
+                    break;
+
+                case "pop":
+                    bands = EQHelper.BuildEQ(new[] { -0.01, -0.01, 0, 0.01, 0.02, 0.05, 0.07, 0.10, 0.07, 0.05, 0.02, 0.01, 0, -0.01, -0.01 });
+                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
+                    break;
+
+                case "off":
+                    bands = EQHelper.BuildEQ(null);
+                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
+                    break;
+                default:
+                    await (await Context.Channel.SendMessageAsync(embed: await embedHelper.BuildMessageEmbed(Color.Orange, "Valid EQ modes: `earrape`, `bass`, `pop`, `off`"))).RemoveAfterTimeout(6000);
+                    return;
             };
 
             await player.EqualizerAsync(bands);
