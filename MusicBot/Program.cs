@@ -130,13 +130,7 @@ namespace MusicBot
 
         private Task LavaNodeOnLog(LogMessage message)
         {
-            victoriaLogger.Log(
-            LoggingService.LogLevelFromSeverity(message.Severity),
-            0,
-            message,
-            message.Exception,
-            (_1, _2) => message.ToString(prependTimestamp: false));
-
+            victoriaLogger.LogMessage(message);
             return Task.CompletedTask;
         }
 

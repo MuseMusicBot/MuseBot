@@ -1,8 +1,10 @@
 ﻿using Discord;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using MusicBot.Services;
 
 namespace MusicBot.Helpers
 {
@@ -31,6 +33,17 @@ namespace MusicBot.Helpers
             }
 
             return res;
+        }
+        public static Task LogMessage(this ILogger logger, LogMessage message)
+        {
+            logger.Log(
+            LoggingService.LogLevelFromSeverity(message.Severity),
+            0,
+            message,
+            message.Exception,
+            (_1, _2) => message.ToString(prependTimestamp: false));
+
+            return Task.CompletedTask;
         }
     }
 }

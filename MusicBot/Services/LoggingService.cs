@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using MusicBot.Helpers;
 
 namespace MusicBot.Services
 {
@@ -41,13 +42,7 @@ namespace MusicBot.Services
 
         private Task LogDiscord(LogMessage message)
         {
-            discordLogger.Log(
-                LogLevelFromSeverity(message.Severity),
-                0,
-                message,
-                message.Exception,
-                (_1, _2) => message.ToString(prependTimestamp: false));
-
+            discordLogger.LogMessage(message);
             return Task.CompletedTask;
         }
 
