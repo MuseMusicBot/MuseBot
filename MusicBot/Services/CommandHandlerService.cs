@@ -1,12 +1,12 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using MusicBot.Helpers;
 using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
-using MusicBot.Helpers;
-using Discord;
+using System.Reflection;
+using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 
@@ -49,16 +49,19 @@ namespace MusicBot.Services
             int argPos = 0;
 
             //Channel id needs to be fixed, I have no idea how to make it work. For now hardcoded.
-            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != 831789041506058271)
+            // ulong parse the channel id - Devin
+            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != ulong.Parse(channelid))
             {
                 if (message.HasStringPrefix("m?", ref argPos))
                 {
-                    await message.DeleteAsync();
-                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelid}>.");
-                    await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
-                    return;
+                    _ = Task.Run(async () =>
+                    {
+                        await message.DeleteAsync();
+                        var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelid}>.");
+                        await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
+                    });
                 }
-                else { return; }
+                return;
             }
 
             if (message.Content != "m?premium" && (message.Author as IGuildUser)?.VoiceChannel == null)
