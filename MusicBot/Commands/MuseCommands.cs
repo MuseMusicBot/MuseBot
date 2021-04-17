@@ -15,15 +15,18 @@ namespace MusicBot.Commands
     {
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
-        public EmbedHelper embedHelper;
+        private readonly EmbedHelper embedHelper;
 
+        #region ctor
         public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh)
         {
             node = lavaNode;
             audioHelper = ah;
             embedHelper = eh;
         }
+        #endregion
 
+        #region setup
         [Command("setup", RunMode = RunMode.Async)]
         public async Task Setup()
         {
@@ -52,7 +55,9 @@ namespace MusicBot.Commands
 
             Program.message = msg;
         }
+        #endregion
 
+        #region play
         [Command("play", RunMode = RunMode.Async)]
         public async Task Play([Remainder] string query)
         {
@@ -84,7 +89,9 @@ namespace MusicBot.Commands
 
             await audioHelper.QueueTracksToPlayer(player, search);
         }
+        #endregion
 
+        #region pause
         [Command("pause")]
         [Alias("p")]
         public async Task Pause()
@@ -108,7 +115,9 @@ namespace MusicBot.Commands
                 await Program.message.ModifyAsync(x => x.Embed = embed);
             }
         }
+        #endregion
 
+        #region resume
         [Command("resume")]
         [Alias("r")]
         public async Task Resume()
@@ -133,7 +142,9 @@ namespace MusicBot.Commands
             }
 
         }
+        #endregion
 
+        #region seek
         [Command("seek", RunMode = RunMode.Async)]
         [Alias("s")]
         public async Task Seek(string seekTime = null)
@@ -185,7 +196,9 @@ namespace MusicBot.Commands
                 return;
             }
         }
+        #endregion
 
+        #region shuffle
         [Command("shuffle", RunMode = RunMode.Async)]
         public async Task Shuffle()
         {
@@ -196,7 +209,9 @@ namespace MusicBot.Commands
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
+        #endregion
 
+        #region clear
         [Command("clear", RunMode = RunMode.Async)]
         [Alias("clearqueue")]
         public async Task Clear()
@@ -208,7 +223,9 @@ namespace MusicBot.Commands
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue cleared");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
+        #endregion
 
+        #region move
         [Command("move", RunMode = RunMode.Async)]
         [Alias("mv")]
         public async Task MoveQueue(int indexToMove)
@@ -244,7 +261,9 @@ namespace MusicBot.Commands
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToMove.Title}** moved to position 1.");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
+        #endregion
 
+        #region volume
         [Command("volume", RunMode = RunMode.Async)]
         [Alias("vol")]
         public async Task SetVolume(ushort? vol = null)
@@ -298,7 +317,9 @@ namespace MusicBot.Commands
             var volmsg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Volume is now set to `{Program.Volume}%`.");
             await (await Context.Channel.SendMessageAsync(embed: volmsg)).RemoveAfterTimeout();
         }
+        #endregion
 
+        #region skip
         [Command("skip", RunMode = RunMode.Async)]
         public async Task Skip()
         {
@@ -317,7 +338,9 @@ namespace MusicBot.Commands
                 }
             }
         }
+        #endregion
 
+        #region stop
         [Command("stop", RunMode = RunMode.Async)]
         public async Task Stop()
         {
@@ -332,7 +355,9 @@ namespace MusicBot.Commands
             await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             await player.StopAsync();
         }
+        #endregion
 
+        #region restart
         [Command("restart", RunMode = RunMode.Async)]
         public async Task RestartTrack()
         {
@@ -345,7 +370,9 @@ namespace MusicBot.Commands
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Let's run it one more time!");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
         }
+        #endregion
 
+        #region disconnect
         [Command("disconnect", RunMode = RunMode.Async)]
         [Alias("d", "dc", "leave")]
         public async Task Disconnect()
@@ -361,7 +388,9 @@ namespace MusicBot.Commands
             await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             await node.LeaveAsync(player.VoiceChannel);
         }
+        #endregion
 
+        #region equalizer
         [Command("equalizer", RunMode = RunMode.Async)]
         [Alias("eq")]
         public async Task Equalizer(string eq = null)
@@ -395,6 +424,7 @@ namespace MusicBot.Commands
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, (EQHelper.CurrentEQ == "Off") ? "EQ turned off" : $"`{EQHelper.CurrentEQ}`: working my magic!");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
         }
+        #endregion
 
         // [Command("ping", RunMode = RunMode.Async)]
         // public async Task Ping()
