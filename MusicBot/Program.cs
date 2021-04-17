@@ -16,21 +16,42 @@ namespace MusicBot
     class Program
     {
         private DiscordSocketClient discord;
-        //private Task LavalinkTask;
         public static ushort Volume = 5;
-
         public static int count = 0;
         public static int endcount = 0;
         public static IUserMessage message;
         public const string testConfig = "testConfig.txt";
         private ILogger victoriaLogger;
 
-        static void Main(string[] args) =>
-            new Program().MainAsync(args).GetAwaiter().GetResult();
+        static void Main()
+            => new Program().MainAsync().GetAwaiter().GetResult();
 
-        private async Task MainAsync(string[] args)
+        private async Task MainAsync()
         {
-            string token = File.ReadLines(Program.testConfig).ElementAt(3);
+            if (!int.TryParse(ProcessHelper.GetJavaVersion(), out int javaVer))
+            {
+                Console.WriteLine("Couldn't get the Java version installed.\n" +
+                    "Maybe Java is not installed or in PATH?");
+                return;
+            }
+
+            if (javaVer < 11)
+            {
+                Console.WriteLine("Java version 11 or greater required.");
+                return;
+            }
+
+            string token = "";
+
+            try
+            {
+                token = File.ReadLines(testConfig).ElementAt(3);
+            }
+            catch
+            {
+                Console.WriteLine($"Token is not line 4 of {testConfig}");
+                return;
+            }
 
             discord = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -40,40 +61,6 @@ namespace MusicBot
 
 
             var services = ConfigureServices();
-
-            //LavalinkTask = Task.Factory.StartNew(() =>
-            //{
-            //    var logging = services.GetRequiredService<LoggingService>();
-            //    var logger = logging.CreateLogger("LavaLink");
-            //    Process p = new Process
-            //    {
-            //        StartInfo = new ProcessStartInfo
-            //        {
-            //            FileName = "java.exe",
-            //            WorkingDirectory = @"C:\\tools",
-            //            Arguments = "-jar lavalink.jar",
-            //            RedirectStandardOutput = true,
-            //            RedirectStandardError = true
-            //        }
-            //    };
-
-            //    if (!p.Start())
-            //    {
-            //        p.Kill();
-            //        Console.WriteLine("Lavalink did not start properly, stopping execution.");
-            //        Environment.Exit(255);
-            //    }
-
-            //    while (!p.HasExited)
-            //    {
-            //        logger.LogInformation(p.StandardOutput.ReadToEnd());
-            //    }
-
-
-            //    Task.Delay(-1);
-            //});
-
-
             var loggingService = services.GetRequiredService<LoggingService>();
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
             var config = services.GetRequiredService<LavaConfig>();
@@ -106,7 +93,7 @@ namespace MusicBot
                 }
 
                 //Sets Listening activity
-                await discord.SetGameAsync("music", type:ActivityType.Listening);
+                await discord.SetGameAsync("music", type: ActivityType.Listening);
             };
 
             // trap ctrl+c

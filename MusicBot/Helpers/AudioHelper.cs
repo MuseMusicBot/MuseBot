@@ -13,7 +13,6 @@ namespace MusicBot.Helpers
     public class AudioHelper
     {
         private LavaNode Node { get; set; }
-        private DiscordSocketClient _discord {get; set; }
         private EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
