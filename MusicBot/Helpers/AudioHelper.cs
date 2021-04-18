@@ -7,23 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
+using Victoria.Responses.Rest;
 
 namespace MusicBot.Helpers
 {
     public class AudioHelper
     {
-        //private struct Song
-        //{
-        //    LavaNode Track;
-        //    IGuildUser Requester;
-        //}
-
         private LavaNode Node { get; set; }
         private EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
         public const string FooterText = "{0} song{1} in queue | Volume: {2}{3}{4}";
-        //private LinkedList<Song> SongQueue;
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
         {
@@ -108,7 +102,7 @@ namespace MusicBot.Helpers
 
         }
 
-        public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search)
+        public async Task QueueTracksToPlayer(LavaPlayer player, SearchResponse search, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
             {

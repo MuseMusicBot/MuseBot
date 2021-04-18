@@ -10,7 +10,7 @@ namespace MusicBot.Helpers
 {
     public class EmbedHelper
     {
-        private DiscordSocketClient discord;
+        private readonly DiscordSocketClient discord;
 
         public EmbedHelper(DiscordSocketClient _discord)
         {
