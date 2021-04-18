@@ -12,10 +12,18 @@ namespace MusicBot.Helpers
 {
     public class AudioHelper
     {
+        //private struct Song
+        //{
+        //    LavaNode Track;
+        //    IGuildUser Requester;
+        //}
+
         private LavaNode Node { get; set; }
         private EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
+        public const string FooterText = "{0} song{1} in queue | Volume: {2}{3}{4}";
+        //private LinkedList<Song> SongQueue;
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
         {
@@ -28,7 +36,7 @@ namespace MusicBot.Helpers
                 await player.UpdateVolumeAsync(Program.Volume);
 
                 var queue = await UpdateEmbedQueue(player);
-                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
                 var content = queue switch
                 {
@@ -125,7 +133,7 @@ namespace MusicBot.Helpers
                         player.Queue.Enqueue(track);
                     }
                     newQueue = await UpdateEmbedQueue(player);
-                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
@@ -143,7 +151,7 @@ namespace MusicBot.Helpers
 
                     await player.PlayAsync(newTrack);
                     newQueue = await UpdateEmbedQueue(player);
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
                     var content = newQueue switch
                     {

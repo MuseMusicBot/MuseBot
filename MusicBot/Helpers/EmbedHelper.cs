@@ -17,8 +17,15 @@ namespace MusicBot.Helpers
             discord = _discord;
         }
 
-        public Task<Embed> BuildMusicEmbed(LavaPlayer player, Color color, string footer)
+        public Task<Embed> BuildMusicEmbed(LavaPlayer player, Color color, bool paused = false)
         {
+            string footerText = string.Format(AudioHelper.FooterText,
+                                              player.Queue.Count,
+                                              player.Queue.Count switch { 1 => "", _ => "s" },
+                                              Program.Volume,
+                                              paused ? " | Song paused" : "",
+                                              " | Requested by: REQUESTER#1234");
+
             Embed embed = new EmbedBuilder
             {
                 Color = color,
@@ -29,7 +36,7 @@ namespace MusicBot.Helpers
                     Url = player.Track.Url
                 },
                 ImageUrl = YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
-                Footer = new EmbedFooterBuilder { Text = footer }
+                Footer = new EmbedFooterBuilder { Text = footerText }
             }.Build();
 
             return Task.FromResult(embed);

@@ -112,7 +112,7 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Playing)
             {
                 await player.PauseAsync();
-                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}% | Song paused");
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
                 await Program.message.ModifyAsync(x => x.Embed = embed);
             }
         }
@@ -138,7 +138,7 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Paused)
             {
                 await player.ResumeAsync();
-                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
                 await Program.message.ModifyAsync(x => x.Embed = embed);
             }
 
@@ -219,7 +219,7 @@ namespace MusicBot.Commands
         {
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
             await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue cleared");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
@@ -312,7 +312,7 @@ namespace MusicBot.Commands
             Program.Volume = vol.Value;
             await player.UpdateVolumeAsync(vol.Value);
 
-            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, $"{player.Queue.Count} song{player.Queue.Count switch { 1 => "", _ => "s" }} in queue | Volume: {Program.Volume}%");
+            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
             await Program.message.ModifyAsync(x => x.Embed = embed);
 
             var volmsg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Volume is now set to `{Program.Volume}%`.");
