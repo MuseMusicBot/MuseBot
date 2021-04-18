@@ -417,28 +417,25 @@ namespace MusicBot.Commands
             {
                 case "earrape":
                     bands = EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 });
-                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
                     break;
 
                 case "bass":
                     bands = EQHelper.BuildEQ(new[] { 0.10, 0.10, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.10, 0.10 });
-                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
                     break;
 
                 case "pop":
                     bands = EQHelper.BuildEQ(new[] { -0.01, -0.01, 0, 0.01, 0.02, 0.05, 0.07, 0.10, 0.07, 0.05, 0.02, 0.01, 0, -0.01, -0.01 });
-                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
                     break;
 
                 case "off":
                     bands = EQHelper.BuildEQ(null);
-                    EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
                     break;
                 default:
                     await (await Context.Channel.SendMessageAsync(embed: await embedHelper.BuildMessageEmbed(Color.Orange, "Valid EQ modes: `earrape`, `bass`, `pop`, `off`"))).RemoveAfterTimeout(6000);
                     return;
             };
-
+            
+            EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
             await player.EqualizerAsync(bands);
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, (EQHelper.CurrentEQ == "Off") ? "EQ turned off" : $"`{EQHelper.CurrentEQ}`: working my magic!");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
