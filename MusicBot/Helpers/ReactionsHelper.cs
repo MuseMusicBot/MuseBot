@@ -25,7 +25,7 @@ namespace MusicBot.Helpers
 
         public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah)
         {
-            Console.WriteLine("In ReactionsHelper");
+			//Uiharu was here. :)
             discord = client;
             node = lavaNode;
             audioHelper = ah;
