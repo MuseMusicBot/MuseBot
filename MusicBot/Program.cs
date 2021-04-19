@@ -22,6 +22,7 @@ namespace MusicBot
         public static IUserMessage message;
         public const string testConfig = "testConfig.txt";
         private ILogger victoriaLogger;
+        public ConfigHelper.Config BotConfig { get; set; }
 
         static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
@@ -41,17 +42,12 @@ namespace MusicBot
                 return;
             }
 
-            string token = "";
+            if (!File.Exists(ConfigHelper.ConfigName))
+            {
+                ConfigHelper.CreateConfigFile();
+            }
 
-            try
-            {
-                token = File.ReadLines(testConfig).ElementAt(3);
-            }
-            catch
-            {
-                Console.WriteLine($"Token is not line 4 of {testConfig}");
-                return;
-            }
+            BotConfig = ConfigHelper.LoadConfigFile();
 
             discord = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -70,7 +66,7 @@ namespace MusicBot
             victoriaLogger = loggingService.CreateLogger("Victoria");
             node.OnLog += LavaNodeOnLog;
 
-            await discord.LoginAsync(TokenType.Bot, token);
+            await discord.LoginAsync(TokenType.Bot, BotConfig.Token);
             await discord.StartAsync();
 
             discord.Ready += async () =>
