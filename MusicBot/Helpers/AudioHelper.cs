@@ -1,5 +1,5 @@
 ﻿using Discord;
-using Discord.WebSocket;
+using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
-using Victoria.Responses.Rest;
 
 namespace MusicBot.Helpers
 {
@@ -18,11 +17,20 @@ namespace MusicBot.Helpers
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
         public const string FooterText = "{0} song{1} in queue | Volume: {2}{3}{4}";
+        public SpotifyClient Spotify;
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
         {
             Node = lavanode;
             embedHelper = eh;
+
+            var config = SpotifyClientConfig.CreateDefault();
+
+            var request = new ClientCredentialsRequest("id", "secret");
+            var response = new OAuthClient(config).RequestToken(request);
+
+            var spotify = new SpotifyClient(config.WithToken(response.Result.AccessToken));
+            Spotify = spotify;
 
             Node.OnTrackStarted += async (args) =>
             {
@@ -102,7 +110,7 @@ namespace MusicBot.Helpers
 
         }
 
-        public async Task QueueTracksToPlayer(LavaPlayer player, SearchResponse search, IGuildUser requester = null)
+        public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
             {
@@ -119,6 +127,66 @@ namespace MusicBot.Helpers
                     search.Tracks.First()
                 };
                 }
+
+                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+                {
+                    foreach (var track in lavaTracks)
+                    {
+                        player.Queue.Enqueue(track);
+                    }
+                    newQueue = await UpdateEmbedQueue(player);
+                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                    await Program.message.ModifyAsync(x =>
+                    {
+                        x.Content = string.Format(QueueMayHaveSongs, newQueue);
+                        x.Embed = emebed;
+                    });
+                }
+                else
+                {
+                    foreach (var track in lavaTracks)
+                    {
+                        player.Queue.Enqueue(track);
+                    }
+
+                    _ = player.Queue.TryDequeue(out var newTrack);
+
+                    await player.PlayAsync(newTrack);
+                    newQueue = await UpdateEmbedQueue(player);
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+
+                    var content = newQueue switch
+                    {
+                        "" => NoSongsInQueue,
+                        _ => string.Format(QueueMayHaveSongs, newQueue)
+                    };
+
+                    await Program.message.ModifyAsync(x =>
+                    {
+                        x.Embed = embed;
+                        x.Content = content;
+
+                    });
+                }
+            });
+
+            await Task.CompletedTask;
+        }
+
+        public async Task QueueSpotifyToPlayer(LavaPlayer player, List<string> spotifyTracks)
+        {
+            _ = Task.Run(async () =>
+            {
+                Dictionary<int, LavaTrack> dict = new Dictionary<int, LavaTrack>();
+                string newQueue;
+
+                spotifyTracks.AsParallel().ForAll(x =>
+                {
+                    var response = Node.SearchYouTubeAsync(x).Result;
+                    dict.Add(spotifyTracks.IndexOf(x), response.Tracks[0]);
+                });
+
+                var lavaTracks = dict.OrderBy(x => x.Key).Select(s => s.Value).ToArray();
 
                 if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
                 {

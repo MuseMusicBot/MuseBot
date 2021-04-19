@@ -2,15 +2,15 @@
 using Discord.Commands;
 using MusicBot.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.Payloads;
-using SpotifyAPI.Web;
-using System.Text.RegularExpressions;
 
 namespace MusicBot.Commands
 {
@@ -450,9 +450,8 @@ namespace MusicBot.Commands
         [Command("spotify", RunMode = RunMode.Async)]
         public async Task Test([Remainder] string url)
         {
-            Regex r = new Regex(@"");
-            var spotify = new SpotifyClient("BQDWfGwOIoj6gnQmjoPPxQMjbgPviUTZlowBDgpZvQybXhS-l73U8LphZmRPGgqQeXJETyL5Vd_ig3PofIsN0frw5kge1yQ77mp3nWsdMTpPNeyR-ts20zrmuVhl-Z5Rehg_W57mB1AEG1f0tXNpILexq5bbes6wiHiYOJLuojGG-kTuAi7myarvJlLxua1QBssJNs59cpxbMwBf7CM2fLeQjVkswKL-SzlLcu1qKBC_g3GlRnQnXRPVRlRH7MuaWzF_TPoOpLKDKZcbRC0FhkM");
-            var album = await spotify.Albums.Get(url);
+            Regex r = new Regex(@"https?:\/\/open\.spotify\.com\/(?<type>.*?)\/");
+            var album = await audioHelper.Spotify.Albums.Get(url);
 
             if (!node.HasPlayer(Context.Guild))
             {
@@ -461,11 +460,14 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
-            await foreach (var item in spotify.Paginate(album.Tracks))
+            List<string> tracks = new List<string>();
+            await foreach (var item in audioHelper.Spotify.Paginate(album.Tracks))
             {
-                var search = await node.SearchYouTubeAsync($"{item.Name} {item.Artists[0]}");
-                await audioHelper.QueueTracksToPlayer(player, search);
+                //await Console.Out.WriteLineAsync(item.Name);
+                tracks.Add($"{item.Name} {item.Artists[0].Name}");
             }
+
+            await audioHelper.QueueSpotifyToPlayer(player, tracks);
             
             //var track = await spotify.Tracks.Get(null);
             //var search = await node.SearchYouTubeAsync($"{track.Name} {track.Artists[0]}");
