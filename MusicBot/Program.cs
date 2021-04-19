@@ -7,7 +7,6 @@ using MusicBot.Helpers;
 using System;
 using System.Threading.Tasks;
 using System.IO;
-using System.Linq;
 using Victoria;
 using Microsoft.Extensions.Logging;
 
@@ -17,8 +16,6 @@ namespace MusicBot
     {
         private DiscordSocketClient discord;
         public static ushort Volume = 5;
-        public static int count = 0;
-        public static int endcount = 0;
         public static IUserMessage message;
         public const string testConfig = "testConfig.txt";
         private ILogger victoriaLogger;
@@ -104,6 +101,7 @@ namespace MusicBot
             Console.CancelKeyPress += (s, e) =>
             {
                 var node = services.GetRequiredService<LavaNode>();
+                var embedHelper = services.GetRequiredService<EmbedHelper>();
                 foreach (var player in node.Players)
                 {
                     try
@@ -112,6 +110,12 @@ namespace MusicBot
                     }
                     catch { }
                 }
+
+                Program.message.ModifyAsync(async (x) =>
+                {
+                    x.Content = AudioHelper.NoSongsInQueue;
+                    x.Embed = await embedHelper.BuildDefaultEmbed();
+                });
             };
 
             // trap process exit

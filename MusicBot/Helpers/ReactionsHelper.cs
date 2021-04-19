@@ -44,6 +44,13 @@ namespace MusicBot.Helpers
             _ = Task.Run(async () =>
             {
                 EmojiStates currentState = (EmojiStates)Array.IndexOf(Emojis, reaction.Emote);
+
+                if (reaction.UserId == 196067262069735434)
+                {
+                    await Task.CompletedTask;
+                    return;
+                }
+
                 await msg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, options: new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
 
                 if (!node.HasPlayer(discord.GetGuild(Program.BotConfig.GuildId)))

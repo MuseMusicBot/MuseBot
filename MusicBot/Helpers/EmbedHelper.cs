@@ -22,7 +22,7 @@ namespace MusicBot.Helpers
             string footerText = string.Format(AudioHelper.FooterText,
                                               player.Queue.Count,
                                               player.Queue.Count switch { 1 => "", _ => "s" },
-                                              Program.Volume,
+                                              $"{Program.Volume}%",
                                               paused ? " | Song paused" : "",
                                               " | Requested by: REQUESTER#1234");
 

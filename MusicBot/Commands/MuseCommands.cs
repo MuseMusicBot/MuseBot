@@ -10,6 +10,7 @@ using Victoria;
 using Victoria.Enums;
 using Victoria.Payloads;
 using SpotifyAPI.Web;
+using System.Text.RegularExpressions;
 
 namespace MusicBot.Commands
 {
@@ -445,18 +446,31 @@ namespace MusicBot.Commands
         }
         #endregion
 
-        [Command("spotify", RunMode= RunMode.Async)]
-        public async Task Test([Remainder] string id)
+        #region spotify
+        [Command("spotify", RunMode = RunMode.Async)]
+        public async Task Test([Remainder] string url)
         {
-            var spotify = new SpotifyClient("BQA_-IC8WAAGRr9cOz7wOdWePcytLBgi2lwgDlyiwlLFSF5ebzQm6dq2vJ0ViQwqqEnw70MnBMU-LbMX2jvxiy1PmR1cVevab40xFRyegIxjJaC3GM2E5YG8mqRd_XwNvVvbHTECh1VO2EGBojjmpAq-vX800mJ35nNWs-isjvJRwIfLlH69k8B31zo4AHo_i7FTQ9DvPsiqm76fF34RVy3fvOa69NqzdC66AfVyXMsVmVEE_hDtJTuGQMRp7XI1Z7imCS7cyg9pw6SENcjoicI");
-            var track = await spotify.Tracks.Get(id);
-            var artist = await spotify.Artists.Get(id);
-            Console.WriteLine(artist.Name);
-            var search = await node.SearchAsync($"ytsearch: {track.Name}");
+            Regex r = new Regex(@"");
+            var spotify = new SpotifyClient("BQDWfGwOIoj6gnQmjoPPxQMjbgPviUTZlowBDgpZvQybXhS-l73U8LphZmRPGgqQeXJETyL5Vd_ig3PofIsN0frw5kge1yQ77mp3nWsdMTpPNeyR-ts20zrmuVhl-Z5Rehg_W57mB1AEG1f0tXNpILexq5bbes6wiHiYOJLuojGG-kTuAi7myarvJlLxua1QBssJNs59cpxbMwBf7CM2fLeQjVkswKL-SzlLcu1qKBC_g3GlRnQnXRPVRlRH7MuaWzF_TPoOpLKDKZcbRC0FhkM");
+            var album = await spotify.Albums.Get(url);
+
+            if (!node.HasPlayer(Context.Guild))
+            {
+                await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+            }
 
             var player = node.GetPlayer(Context.Guild);
-            await audioHelper.QueueTracksToPlayer(player, search);
+
+            await foreach (var item in spotify.Paginate(album.Tracks))
+            {
+                var search = await node.SearchYouTubeAsync($"{item.Name} {item.Artists[0]}");
+                await audioHelper.QueueTracksToPlayer(player, search);
+            }
+            
+            //var track = await spotify.Tracks.Get(null);
+            //var search = await node.SearchYouTubeAsync($"{track.Name} {track.Artists[0]}");
         }
+        #endregion
 
         // [Command("ping", RunMode = RunMode.Async)]
         // public async Task Ping()

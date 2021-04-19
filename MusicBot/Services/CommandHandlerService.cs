@@ -45,19 +45,27 @@ namespace MusicBot.Services
                 return;
 
             var context = new SocketCommandContext(discord, message);
-            var channelid = File.ReadLines(Program.testConfig).ElementAt(1);
+
+            string channelId = "";
+
+            try
+            {
+                channelId = File.ReadLines(Program.testConfig).ElementAt(1);
+            }
+            catch { }
+
             int argPos = 0;
 
             //Channel id needs to be fixed, I have no idea how to make it work. For now hardcoded.
             // ulong parse the channel id - Devin
-            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != ulong.Parse(channelid))
+            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != ulong.Parse(channelId))
             {
                 if (message.HasStringPrefix("m?", ref argPos))
                 {
                     _ = Task.Run(async () =>
                     {
                         await message.DeleteAsync();
-                        var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelid}>.");
+                        var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelId}>.");
                         await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
                     });
                 }
