@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.Payloads;
+using SpotifyAPI.Web;
 
 namespace MusicBot.Commands
 {
@@ -443,6 +444,19 @@ namespace MusicBot.Commands
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
         }
         #endregion
+
+        [Command("spotify", RunMode= RunMode.Async)]
+        public async Task Test([Remainder] string id)
+        {
+            var spotify = new SpotifyClient("BQA_-IC8WAAGRr9cOz7wOdWePcytLBgi2lwgDlyiwlLFSF5ebzQm6dq2vJ0ViQwqqEnw70MnBMU-LbMX2jvxiy1PmR1cVevab40xFRyegIxjJaC3GM2E5YG8mqRd_XwNvVvbHTECh1VO2EGBojjmpAq-vX800mJ35nNWs-isjvJRwIfLlH69k8B31zo4AHo_i7FTQ9DvPsiqm76fF34RVy3fvOa69NqzdC66AfVyXMsVmVEE_hDtJTuGQMRp7XI1Z7imCS7cyg9pw6SENcjoicI");
+            var track = await spotify.Tracks.Get(id);
+            var artist = await spotify.Artists.Get(id);
+            Console.WriteLine(artist.Name);
+            var search = await node.SearchAsync($"ytsearch: {track.Name}");
+
+            var player = node.GetPlayer(Context.Guild);
+            await audioHelper.QueueTracksToPlayer(player, search);
+        }
 
         // [Command("ping", RunMode = RunMode.Async)]
         // public async Task Ping()
