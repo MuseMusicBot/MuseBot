@@ -47,6 +47,8 @@ namespace MusicBot.Commands
 
             var embed = await embedHelper.BuildDefaultEmbed();
             var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
+            IEmote[] emojis = { new Emoji("⏯️"), new Emoji("⏹️"), new Emoji("⏭️"), new Emoji("🔁"), new Emoji("🔀")};
+            await msg.AddReactionsAsync(emojis);
 
             var guildId = Context.Guild.Id;
             var channelId = channel.Id;
