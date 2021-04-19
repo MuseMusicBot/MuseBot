@@ -13,6 +13,7 @@ namespace MusicBot.Helpers
         private readonly DiscordSocketClient discord;
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
+        private readonly EmbedHelper embedHelper;
         private readonly IEmote[] Emojis = { new Emoji("⏯️"), new Emoji("⏹️"), new Emoji("⏭️"), new Emoji("🔁"), new Emoji("🔀") };
         private enum EmojiStates
         {
@@ -23,12 +24,13 @@ namespace MusicBot.Helpers
             Shuffle
         };
 
-        public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah)
+        public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh)
         {
 			//Uiharu was here. :)
             discord = client;
             node = lavaNode;
             audioHelper = ah;
+            embedHelper = eh;
             discord.ReactionAdded += OnReactionAdded;
         }
 
@@ -66,16 +68,23 @@ namespace MusicBot.Helpers
                         if (player.PlayerState == PlayerState.Paused)
                         {
                             await player.ResumeAsync();
+                            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                            await Program.message.ModifyAsync(x => x.Embed = embed);
                         }
                         else if (player.PlayerState == PlayerState.Playing)
                         {
                             await player.PauseAsync();
+                            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
+                            await Program.message.ModifyAsync(x => x.Embed = embed);
                         }
                         break;
                     case EmojiStates.Stop:
                         if (player.PlayerState == PlayerState.Playing ||
                             player.PlayerState == PlayerState.Paused)
                         {
+                            player.Queue.Clear();
+                            var embed = await embedHelper.BuildDefaultEmbed();
+                            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
                             await player.StopAsync();
                         }
                         break;
@@ -106,6 +115,8 @@ namespace MusicBot.Helpers
                             player.Queue.Shuffle();
                             string newQueue = await audioHelper.UpdateEmbedQueue(player);
                             await Program.message.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
+                            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
+                            await (await channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                         }
                         break;
                     default:
