@@ -22,7 +22,7 @@ namespace MusicBot
         public static IUserMessage message;
         public const string testConfig = "testConfig.txt";
         private ILogger victoriaLogger;
-        public ConfigHelper.Config BotConfig { get; set; }
+        public static ConfigHelper.Config BotConfig { get; set; }
 
         static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
@@ -59,6 +59,7 @@ namespace MusicBot
             var services = ConfigureServices();
             var loggingService = services.GetRequiredService<LoggingService>();
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
+            services.GetRequiredService<ReactionsHelper>();
             var config = services.GetRequiredService<LavaConfig>();
             config.Authorization = "youshallnotpass";
             var node = services.GetRequiredService<LavaNode>();
@@ -84,6 +85,13 @@ namespace MusicBot
                     var guildId = ulong.Parse(msgIds[0]);
                     var chnlId = ulong.Parse(msgIds[1]);
                     var msgId = ulong.Parse(msgIds[2]);
+
+                    var config = BotConfig;
+                    config.GuildId = guildId;
+                    config.ChannelId = chnlId;
+                    config.MessageId = msgId;
+
+                    BotConfig = config;
 
                     message = await discord.GetGuild(guildId).GetTextChannel(chnlId).GetMessageAsync(msgId) as IUserMessage;
                 }
@@ -140,6 +148,7 @@ namespace MusicBot
                 .AddSingleton<EmbedHelper>()
                 .AddSingleton<AudioHelper>()
                 .AddSingleton<CommandHandlerService>()
+                .AddSingleton<ReactionsHelper>()
                 .AddSingleton<Commands.MuseCommands>()
                 .AddLogging()
                 .AddSingleton<LoggingService>()
