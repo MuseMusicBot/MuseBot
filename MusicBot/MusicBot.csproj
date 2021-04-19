@@ -4,18 +4,20 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Resources\**" />
-    <EmbeddedResource Remove="Resources\**" />
-    <None Remove="Resources\**" />
+    <Compile Remove="Resources\**"/>
+    <EmbeddedResource Remove="Resources\**"/>
+    <None Remove="Resources\**"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="2.3.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
-    <PackageReference Include="SharpLink" Version="1.0.0-beta-0005" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.1.21102.12" />
-    <PackageReference Include="Victoria" Version="5.1.11" />
+    <PackageReference Include="Discord.Net" Version="2.3.1"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0"/>
+    <PackageReference Include="SharpLink" Version="1.0.0-beta-0005"/>
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.1.21102.12"/>
+    <PackageReference Include="Victoria" Version="5.1.11"/>
+    <PackageReference Include="SpotifyAPI.Web" Version="6.1.0"/>
+    <PackageReference Include="SpotifyAPI.Web.Auth" Version="6.1.0"/>
   </ItemGroup>
   <ItemGroup>
     <None Update="muse-banner.png">
