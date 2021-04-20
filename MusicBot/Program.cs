@@ -57,11 +57,6 @@ namespace MusicBot
             var loggingService = services.GetRequiredService<LoggingService>();
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
             services.GetRequiredService<ReactionsHelper>();
-            var config = services.GetRequiredService<LavaConfig>();
-            config.Hostname = BotConfig.LavalinkHost;
-            config.Port = (ushort)BotConfig.LavalinkPort;
-            config.Authorization = BotConfig.LavalinkPassword;
-            config.LogSeverity = LogSeverity.Info;
             var node = services.GetRequiredService<LavaNode>();
 
             victoriaLogger = loggingService.CreateLogger("Victoria");
@@ -150,8 +145,13 @@ namespace MusicBot
             return new ServiceCollection()
                 .AddSingleton(discord)
                 .AddSingleton<CommandService>()
-                .AddSingleton<LavaNode>()
-                .AddSingleton<LavaConfig>()
+                .AddLavaNode(x =>
+                {
+                    x.Authorization = BotConfig.LavalinkPassword;
+                    x.Hostname = BotConfig.LavalinkHost;
+                    x.Port = (ushort)BotConfig.LavalinkPort;
+                    x.LogSeverity = LogSeverity.Info;
+                })
                 .AddSingleton<EmbedHelper>()
                 .AddSingleton<AudioHelper>()
                 .AddSingleton<CommandHandlerService>()
