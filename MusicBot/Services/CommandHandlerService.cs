@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
+using System.Text.RegularExpressions;
 
 namespace MusicBot.Services
 {
@@ -87,14 +88,28 @@ namespace MusicBot.Services
             {
                 _ = Task.Run(async () =>
                 {
-                    var search = await node.SearchAsync(message.Content);
+                    Victoria.Responses.Rest.SearchResponse search = await node.SearchAsync(message.Content);
                     if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
                     {
-                        _ = Task.Run(async () =>
+                        var msg = await embedHelper.BuildErrorEmbed($"The link `{message.Content}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
+                        Regex r = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
+                        if (r.Match(message.Content).Success)
+                        {
+                            string type = r.Match(message.Content).Groups["vid"].Value;
+                            search = await node.SearchAsync(type);
+                            if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                            {
+                                await message.DeleteAsync();
+                                await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
+                                return;
+                            }
+                        }
+                        else
                         {
                             await message.DeleteAsync();
-                        });
-                        return;
+                            await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
+                            return;
+                        }
                     }
 
                     if (!node.HasPlayer(context.Guild))
@@ -115,7 +130,7 @@ namespace MusicBot.Services
 
             if (result.Error.HasValue &&
                 result.Error.Value == CommandError.UnknownCommand)
-                    return;
+                return;
             if (result.Error.HasValue &&
                 result.Error.Value != CommandError.UnknownCommand)
                 // TODO Look at custom parse errors

@@ -403,7 +403,6 @@ namespace MusicBot.Commands
         {
             if (!node.HasPlayer(Context.Guild))
             {
-                await (await Context.Channel.SendMessageAsync(embed: await embedHelper.BuildErrorEmbed("Player is not in a voice channel"))).RemoveAfterTimeout(5000);
                 return;
             }
 

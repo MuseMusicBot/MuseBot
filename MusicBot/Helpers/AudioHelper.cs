@@ -124,7 +124,6 @@ namespace MusicBot.Helpers
                     search.Tracks.First()
                 };
                 }
-
                 if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
                 {
                     foreach (var track in lavaTracks)

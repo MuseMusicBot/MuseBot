@@ -24,7 +24,7 @@ namespace MusicBot.Helpers
                                               player.Queue.Count switch { 1 => "", _ => "s" },
                                               $"{Program.Volume}%",
                                               paused ? " | Song paused" : "",
-                                              " | Requested by: REQUESTER#1234");
+                                              "");
 
             Embed embed = new EmbedBuilder
             {
@@ -65,11 +65,12 @@ namespace MusicBot.Helpers
             }.Build());
         }
 
-        public Task<Embed> BuildErrorEmbed(string error)
+        public Task<Embed> BuildErrorEmbed(string title, string error)
         {
             return Task.FromResult(new EmbedBuilder
             {
                 Color = Color.DarkRed,
+                Title = title,
                 Description = error
             }.Build());
         }
