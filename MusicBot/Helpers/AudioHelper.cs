@@ -197,16 +197,18 @@ namespace MusicBot.Helpers
 
                     newQueue = await UpdateEmbedQueue(player);
 
-                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
-                        x.Embed = emebed;
+                        x.Embed = embed;
                     });
                 }
                 else
                 {
+                    //This seems to be running multiple times?
+                    await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading...");});
 
                     await player.PlayAsync(await lavaTracks.ElementAt(0));
 
@@ -228,7 +230,6 @@ namespace MusicBot.Helpers
                     {
                         x.Embed = embed;
                         x.Content = content;
-
                     });
                 }
             });
