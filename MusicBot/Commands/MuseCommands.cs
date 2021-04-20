@@ -469,7 +469,7 @@ namespace MusicBot.Commands
                 case "album":
                     await foreach (var item in audioHelper.Spotify.Paginate((await audioHelper.Spotify.Albums.Get(id)).Tracks))
                     {
-                        tracks.Add($"{item.Name} {item.Artists[0].Name}");
+                        tracks.Add($"{item.Name} {string.Join(" ", item.Artists.Select(x => x.Name))}");
                     }
                     break;
 
@@ -479,14 +479,14 @@ namespace MusicBot.Commands
                     {
                         if (item.Track is FullTrack track)
                         {
-                            tracks.Add($"{track.Name} {track.Artists[0].Name}");
+                            tracks.Add($"{track.Name} {string.Join(" ", track.Artists.Select(x => x.Name))}");
                         }
                     }
                     break;
 
                 case "track":
                     var trackItem = await audioHelper.Spotify.Tracks.Get(id);
-                    tracks.Add($"{trackItem.Name} {trackItem.Artists[0].Name}");
+                    tracks.Add($"{trackItem.Name} {string.Join(" ", trackItem.Artists.Select(x => x.Name))}");
                     break;
 
                 default:

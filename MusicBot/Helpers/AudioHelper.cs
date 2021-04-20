@@ -1,6 +1,5 @@
 ﻿using Discord;
 using SpotifyAPI.Web;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,7 @@ namespace MusicBot.Helpers
     public class AudioHelper
     {
         private LavaNode Node { get; set; }
-        private EmbedHelper embedHelper;
+        private readonly EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
         public const string FooterText = "{0} song{1} in queue | Volume: {2}{3}{4}";
@@ -24,11 +23,10 @@ namespace MusicBot.Helpers
             Node = lavanode;
             embedHelper = eh;
 
+            // TODO: Make SpotifyClient own class
             var config = SpotifyClientConfig.CreateDefault();
-
-            var request = new ClientCredentialsRequest("id", "secret");
+            var request = new ClientCredentialsRequest(Program.BotConfig.SpotifyClientId, Program.BotConfig.SpotifySecret);
             var response = new OAuthClient(config).RequestToken(request);
-
             var spotify = new SpotifyClient(config.WithToken(response.Result.AccessToken));
             Spotify = spotify;
 
@@ -81,7 +79,6 @@ namespace MusicBot.Helpers
 
         public Task<string> UpdateEmbedQueue(LavaPlayer player)
         {
-            IEnumerable<int> Range = Enumerable.Range(0, 1500);
             StringBuilder sb = new StringBuilder();
             var q = player.Queue.ToList();
             int idx = 1;
@@ -95,7 +92,7 @@ namespace MusicBot.Helpers
             {
                 var s = $"{idx++}. {p.Title} [{p.Duration.ToTimecode()}]";
 
-                if (Range.Contains(s.Length + sb.Length + 2))
+                if (s.Length + sb.Length + 2 <= 1500)
                 {
                     sb.AppendLine(s);
                 }
@@ -177,25 +174,32 @@ namespace MusicBot.Helpers
         {
             _ = Task.Run(async () =>
             {
-                Dictionary<int, LavaTrack> dict = new Dictionary<int, LavaTrack>();
                 string newQueue;
-
-                spotifyTracks.AsParallel().ForAll(x =>
+                var lavaTracks = spotifyTracks.OrderedParallel(async e =>
                 {
-                    var response = Node.SearchYouTubeAsync(x).Result;
-                    dict.Add(spotifyTracks.IndexOf(x), response.Tracks[0]);
+                    int i = 0;
+                    int maxRetries = 3;
+                    Victoria.Responses.Rest.SearchResponse node;
+                    do
+                    {
+                        node = await Node.SearchYouTubeAsync(e);
+                        i++;
+                    } while ((node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) && i <= maxRetries);
+
+                    return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
                 });
 
-                var lavaTracks = dict.OrderBy(x => x.Key).Select(s => s.Value).ToArray();
-
-                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Playing)
                 {
                     foreach (var track in lavaTracks)
                     {
-                        player.Queue.Enqueue(track);
+                        player.Queue.Enqueue(await track);
                     }
+
                     newQueue = await UpdateEmbedQueue(player);
+
                     var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
@@ -204,17 +208,17 @@ namespace MusicBot.Helpers
                 }
                 else
                 {
-                    foreach (var track in lavaTracks)
+
+                    await player.PlayAsync(await lavaTracks.ElementAt(0));
+
+                    foreach (var track in lavaTracks.Skip(1))
                     {
-                        player.Queue.Enqueue(track);
+                        if (track != null)
+                            player.Queue.Enqueue(await track);
                     }
 
-                    _ = player.Queue.TryDequeue(out var newTrack);
-
-                    await player.PlayAsync(newTrack);
                     newQueue = await UpdateEmbedQueue(player);
                     var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-
                     var content = newQueue switch
                     {
                         "" => NoSongsInQueue,
@@ -229,7 +233,6 @@ namespace MusicBot.Helpers
                     });
                 }
             });
-
             await Task.CompletedTask;
         }
     }

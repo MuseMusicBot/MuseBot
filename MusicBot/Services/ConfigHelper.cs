@@ -14,6 +14,11 @@ namespace MusicBot.Services
             public ulong MessageId { get; set; }
             public string Token { get; set; }
             public string Prefix { get; set; }
+            public string LavalinkHost { get; set; }
+            public int LavalinkPort { get; set; }
+            public string LavalinkPassword { get; set; }
+            public string SpotifyClientId { get; set; }
+            public string SpotifySecret { get; set; }
 
             [JsonIgnore]
             public IMessage BotEmbedMessage { get; set; }

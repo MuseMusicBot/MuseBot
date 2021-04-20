@@ -9,13 +9,13 @@ namespace MusicBot.Helpers
 {
     public class SongQueue
     {
-        public struct Song
+        public class Song
         {
             public LavaTrack Track;
             public IGuildUser Requester;
         }
 
-        private LinkedList<Song> Queue = new LinkedList<Song>();
+        private readonly LinkedList<Song> Queue = new LinkedList<Song>();
         private readonly object QueueLock = new object();
         private static readonly Random random = new Random();
         public int Count

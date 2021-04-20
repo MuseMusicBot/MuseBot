@@ -26,18 +26,18 @@ namespace MusicBot
 
         private async Task MainAsync()
         {
-            if (!int.TryParse(ProcessHelper.GetJavaVersion(), out int javaVer))
-            {
-                Console.WriteLine("Couldn't get the Java version installed.\n" +
-                    "Maybe Java is not installed or in PATH?");
-                return;
-            }
+            //if (!int.TryParse(ProcessHelper.GetJavaVersion(), out int javaVer))
+            //{
+            //    Console.WriteLine("Couldn't get the Java version installed.\n" +
+            //        "Maybe Java is not installed or in PATH?");
+            //    return;
+            //}
 
-            if (javaVer < 11)
-            {
-                Console.WriteLine("Java version 11 or greater required.");
-                return;
-            }
+            //if (javaVer < 11)
+            //{
+            //    Console.WriteLine("Java version 11 or greater required.");
+            //    return;
+            //}
 
             if (!File.Exists(ConfigHelper.ConfigName))
             {
@@ -58,7 +58,10 @@ namespace MusicBot
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
             services.GetRequiredService<ReactionsHelper>();
             var config = services.GetRequiredService<LavaConfig>();
-            config.Authorization = "youshallnotpass";
+            config.Hostname = BotConfig.LavalinkHost;
+            config.Port = (ushort)BotConfig.LavalinkPort;
+            config.Authorization = BotConfig.LavalinkPassword;
+            config.LogSeverity = LogSeverity.Info;
             var node = services.GetRequiredService<LavaNode>();
 
             victoriaLogger = loggingService.CreateLogger("Victoria");
