@@ -111,11 +111,11 @@ namespace MusicBot
                         node.LeaveAsync(player.VoiceChannel);
                         Program.message.ModifyAsync(async (x) =>
                         {
-                            x.Content = string.Format(AudioHelper.QueueMayHaveSongs, $"Fix this <@134073221938020352>!");
+                            x.Content = AudioHelper.NoSongsInQueue;
                             x.Embed = await embedHelper.BuildDefaultEmbed();
                         });
                         //Fix this too
-                        Console.WriteLine("Miguel is horny 🏴‍☠️");
+                        Console.WriteLine("No :p");
                     }
                     catch { }
 
