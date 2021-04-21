@@ -126,6 +126,12 @@ namespace MusicBot.Helpers
                             await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
                             await node.LeaveAsync(player.VoiceChannel);
                         }
+                        else
+                        {
+                            var embed = await embedHelper.BuildDefaultEmbed();
+                            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+                            await node.LeaveAsync(player.VoiceChannel);
+                        }
                         break;
                     default:
                         return;
