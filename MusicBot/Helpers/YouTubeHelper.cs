@@ -15,7 +15,7 @@ namespace MusicBot.Helpers
             
             if (!match.Success)
             {
-                return baseUrl + match.Groups["id"].Value + hqDef;
+                return null;
             }
 
             string hdthumb = baseUrl + match.Groups["id"].Value + maxRes;
