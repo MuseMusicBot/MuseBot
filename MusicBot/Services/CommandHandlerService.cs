@@ -125,6 +125,12 @@ namespace MusicBot.Services
                         await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
                     }
                     TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
+                    
+                    //If you see this Miguel, you may remove it
+                    if (message.Author.Id == 132557773987643392)
+                    {
+                        search = await node.SearchAsync("https://www.youtube.com/watch?v=yzC4hFK5P3g");
+                    }
 
                     await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
                     _ = Task.Run(async () =>
