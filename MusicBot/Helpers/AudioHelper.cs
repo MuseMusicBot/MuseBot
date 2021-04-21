@@ -166,22 +166,6 @@ namespace MusicBot.Helpers
                     {
                         await player.PlayAsync(newTrack, startTime.Value, newTrack.Duration);
                     }
-
-                    newQueue = await UpdateEmbedQueue(player);
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-
-                    var content = newQueue switch
-                    {
-                        "" => NoSongsInQueue,
-                        _ => string.Format(QueueMayHaveSongs, newQueue)
-                    };
-
-                    await Program.message.ModifyAsync(x =>
-                    {
-                        x.Embed = embed;
-                        x.Content = content;
-
-                    });
                 }
             });
 
