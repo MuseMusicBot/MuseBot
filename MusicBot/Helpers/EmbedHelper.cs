@@ -17,7 +17,7 @@ namespace MusicBot.Helpers
             discord = _discord;
         }
 
-        public Task<Embed> BuildMusicEmbed(LavaPlayer player, Color color, bool paused = false)
+        public ValueTask<Embed> BuildMusicEmbed(LavaPlayer player, Color color, bool paused = false)
         {
             string footerText = string.Format(AudioHelper.FooterText,
                                               player.Queue.Count,
@@ -39,10 +39,10 @@ namespace MusicBot.Helpers
                 Footer = new EmbedFooterBuilder { Text = footerText }
             }.Build();
 
-            return Task.FromResult(embed);
+            return new ValueTask<Embed>(embed);
         }
 
-        public Task<Embed> BuildDefaultEmbed()
+        public ValueTask<Embed> BuildDefaultEmbed()
         {
             var embed = new EmbedBuilder
             {
@@ -53,26 +53,22 @@ namespace MusicBot.Helpers
                 Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
             }.Build();
 
-            return Task.FromResult(embed);
+            return new ValueTask<Embed>(embed);
         }
 
-        public Task<Embed> BuildMessageEmbed(Color color, string text)
-        {
-            return Task.FromResult(new EmbedBuilder
+        public ValueTask<Embed> BuildMessageEmbed(Color color, string text)
+            => new ValueTask<Embed>(new EmbedBuilder
             {
                 Color = color,
                 Description = text
             }.Build());
-        }
 
-        public Task<Embed> BuildErrorEmbed(string title, string error)
-        {
-            return Task.FromResult(new EmbedBuilder
+        public ValueTask<Embed> BuildErrorEmbed(string title, string error)
+            => new ValueTask<Embed>(new EmbedBuilder
             {
                 Color = Color.DarkRed,
                 Title = title,
                 Description = error
             }.Build());
-        }
     }
 }

@@ -17,6 +17,8 @@ namespace MusicBot.Helpers
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
         public const string FooterText = "{0} song{1} in queue | Volume: {2}{3}{4}";
         public SpotifyClient Spotify;
+        public bool RepeatFlag { get; set; } = false;
+        public LavaTrack RepeatTrack { get; set; }
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
         {
@@ -55,12 +57,20 @@ namespace MusicBot.Helpers
 
             Node.OnTrackEnded += async (args) =>
             {
+                var player = args.Player;
+
+                if (RepeatFlag)
+                {
+                    await player.PlayAsync(RepeatTrack);
+                    return;
+                }
+
+                RepeatFlag = false;
+
                 if (!args.Reason.ShouldPlayNext())
                 {
                     return;
                 }
-
-                var player = args.Player;
 
                 if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
                 {
@@ -77,7 +87,7 @@ namespace MusicBot.Helpers
             };
         }
 
-        public Task<string> UpdateEmbedQueue(LavaPlayer player)
+        public ValueTask<string> UpdateEmbedQueue(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();
             var q = player.Queue.ToList();
@@ -85,7 +95,7 @@ namespace MusicBot.Helpers
 
             if (q.Count == 0)
             {
-                return Task.FromResult("");
+                return new ValueTask<string>("");
             }
 
             foreach (var p in q)
@@ -103,7 +113,7 @@ namespace MusicBot.Helpers
                 }
             }
 
-            return Task.FromResult(sb.ToString());
+            return new ValueTask<string>(sb.ToString());
 
         }
 

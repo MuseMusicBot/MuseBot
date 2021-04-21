@@ -98,7 +98,16 @@ namespace MusicBot.Helpers
                         if (player.PlayerState == PlayerState.Playing ||
                             player.PlayerState == PlayerState.Paused)
                         {
-                            await player.SeekAsync(TimeSpan.FromSeconds(0));
+                            audioHelper.RepeatFlag = !audioHelper.RepeatFlag;
+                            audioHelper.RepeatTrack = audioHelper.RepeatFlag switch
+                            {
+                                true => player.Track,
+                                false => null
+                            };
+
+                            var embed = await embedHelper.BuildMessageEmbed(Color.Orange, $"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
+                            var send = await channel.SendMessageAsync(embed: embed);
+                            await send.RemoveAfterTimeout(5000);
                         }
                         break;
                     case EmojiStates.Shuffle:

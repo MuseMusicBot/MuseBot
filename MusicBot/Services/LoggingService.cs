@@ -54,12 +54,7 @@ namespace MusicBot.Services
                 var _ = cmd.Context.Channel.SendMessageAsync($"Error: {cmd.Message}");
             }
 
-            commandLogger.Log(
-                LogLevelFromSeverity(message.Severity),
-                0,
-                message,
-                message.Exception,
-                (_1, _2) => message.ToString(prependTimestamp: false));
+            commandLogger.LogMessage(message);
             return Task.CompletedTask;
         }
 
