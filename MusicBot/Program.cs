@@ -120,11 +120,19 @@ namespace MusicBot
             AppDomain.CurrentDomain.ProcessExit += (s, e) =>
             {
                 var node = services.GetRequiredService<LavaNode>();
+                var embedHelper = services.GetRequiredService<EmbedHelper>();
                 foreach (var player in node.Players)
                 {
                     try
                     {
                         node.LeaveAsync(player.VoiceChannel);
+                        Program.message.ModifyAsync(async (x) =>
+                        {
+                            x.Content = string.Format(AudioHelper.QueueMayHaveSongs, $"Fix this <@134073221938020352>!");
+                            x.Embed = await embedHelper.BuildDefaultEmbed();
+                        });
+                        //Fix this too
+                        Console.WriteLine("Miguel is horny 🏴‍☠️");
                     }
                     catch { }
                 }
