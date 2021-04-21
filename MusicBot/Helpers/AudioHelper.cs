@@ -142,11 +142,9 @@ namespace MusicBot.Helpers
                         player.Queue.Enqueue(track);
                     }
                     newQueue = await UpdateEmbedQueue(player);
-                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
-                        x.Embed = emebed;
                     });
                 }
                 else
