@@ -127,7 +127,7 @@ namespace MusicBot.Services
                     TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
                     
                     //If you see this Miguel, you may remove it
-                    if (message.Author.Id == 132557773987643392)
+                    if (message.Author.Id == 134073221938020352)
                     {
                         search = await node.SearchAsync("https://www.youtube.com/watch?v=yzC4hFK5P3g");
                     }
