@@ -142,9 +142,11 @@ namespace MusicBot.Helpers
                         player.Queue.Enqueue(track);
                     }
                     newQueue = await UpdateEmbedQueue(player);
+                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
                     await Program.message.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
+                        x.Embed = emebed;
                     });
                 }
                 else
@@ -198,7 +200,7 @@ namespace MusicBot.Helpers
 
                     newQueue = await UpdateEmbedQueue(player);
 
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen);
 
                     await Program.message.ModifyAsync(x =>
                     {
@@ -220,7 +222,7 @@ namespace MusicBot.Helpers
                     }
 
                     newQueue = await UpdateEmbedQueue(player);
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen);
                     var content = newQueue switch
                     {
                         "" => NoSongsInQueue,
