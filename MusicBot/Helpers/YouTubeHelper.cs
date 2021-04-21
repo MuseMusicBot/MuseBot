@@ -15,11 +15,10 @@ namespace MusicBot.Helpers
             
             if (!match.Success)
             {
-                return null;
+                return baseUrl + match.Groups["id"].Value + hqDef;
             }
 
             string hdthumb = baseUrl + match.Groups["id"].Value + maxRes;
-
             try
             {
                 // Making sure to dispose of the webclient after
