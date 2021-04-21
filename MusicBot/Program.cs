@@ -109,6 +109,13 @@ namespace MusicBot
                     try
                     {
                         node.LeaveAsync(player.VoiceChannel);
+                        Program.message.ModifyAsync(async (x) =>
+                        {
+                            x.Content = string.Format(AudioHelper.QueueMayHaveSongs, $"Fix this <@134073221938020352>!");
+                            x.Embed = await embedHelper.BuildDefaultEmbed();
+                        });
+                        //Fix this too
+                        Console.WriteLine("Miguel is horny 🏴‍☠️");
                     }
                     catch { }
 
