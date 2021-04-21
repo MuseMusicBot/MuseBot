@@ -208,7 +208,7 @@ namespace MusicBot.Helpers
                 else
                 {
                     //This seems to be running multiple times?
-                    await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading...");});
+                    await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); });
 
                     await player.PlayAsync(await lavaTracks.ElementAt(0));
 

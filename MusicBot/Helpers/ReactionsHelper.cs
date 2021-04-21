@@ -48,7 +48,7 @@ namespace MusicBot.Helpers
             {
                 EmojiStates currentState = (EmojiStates)Array.IndexOf(Emojis, reaction.Emote);
 
-                if (reaction.UserId == 196067262069735434)
+                if (reaction.UserId == discord.CurrentUser.Id)
                 {
                     await Task.CompletedTask;
                     return;
@@ -118,21 +118,19 @@ namespace MusicBot.Helpers
                         }
                         break;
                     case EmojiStates.Eject:
-                        if (player.PlayerState == PlayerState.Playing ||
-                            player.PlayerState == PlayerState.Paused)
                         {
                             player.Queue.Clear();
                             var embed = await embedHelper.BuildDefaultEmbed();
                             await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-                            await node.LeaveAsync(player.VoiceChannel);
+
+                            try
+                            {
+                                await node.LeaveAsync(player.VoiceChannel);
+                            }
+                            catch { }
+                            break;
                         }
-                        else
-                        {
-                            var embed = await embedHelper.BuildDefaultEmbed();
-                            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-                            await node.LeaveAsync(player.VoiceChannel);
-                        }
-                        break;
+
                     default:
                         return;
                 }
