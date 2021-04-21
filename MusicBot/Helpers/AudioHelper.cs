@@ -1,5 +1,6 @@
 ﻿using Discord;
 using SpotifyAPI.Web;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -117,7 +118,7 @@ namespace MusicBot.Helpers
 
         }
 
-        public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search, IGuildUser requester = null)
+        public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search, TimeSpan? startTime = null, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
             {
@@ -157,7 +158,15 @@ namespace MusicBot.Helpers
 
                     _ = player.Queue.TryDequeue(out var newTrack);
 
-                    await player.PlayAsync(newTrack);
+                    if (startTime == null)
+                    {
+                        await player.PlayAsync(newTrack);
+                    }
+                    else
+                    {
+                        await player.PlayAsync(newTrack, startTime.Value, newTrack.Duration);
+                    }
+
                     newQueue = await UpdateEmbedQueue(player);
                     var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 

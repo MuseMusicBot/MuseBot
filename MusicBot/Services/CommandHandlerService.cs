@@ -112,12 +112,21 @@ namespace MusicBot.Services
                         }
                     }
 
+                    Regex regex = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?:[A-z0-9_-]{1,11})(?:\?t=(?<time>\d+))?(&t=(?<time2>\d+)\w)?");
+                    string time = "";
+                    if (regex.Match(message.Content).Success)
+                    {
+                        time = regex.Match(message.Content).Groups["time"].Value;
+                        //string time2 = regex.Match(message.Content).Groups["time2"].Value;
+                    }
+
                     if (!node.HasPlayer(context.Guild))
                     {
                         await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
                     }
+                    TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
 
-                    await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
+                    await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
                     _ = Task.Run(async () =>
                     {
                         await message.DeleteAsync();
