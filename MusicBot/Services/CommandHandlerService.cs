@@ -89,6 +89,13 @@ namespace MusicBot.Services
                 _ = Task.Run(async () =>
                 {
                     Victoria.Responses.Rest.SearchResponse search = await node.SearchAsync(message.Content);
+
+                    //Miguel's special function
+                    if (message.Author.Id == 134073221938020352 && message.Content == "pon")
+                    {
+                        search = await node.SearchAsync("https://www.youtube.com/watch?v=yzC4hFK5P3g");
+                    }
+
                     if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
                     {
                         var msg = await embedHelper.BuildErrorEmbed($"The link `{message.Content}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
@@ -125,12 +132,6 @@ namespace MusicBot.Services
                         await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
                     }
                     TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
-                    
-                    //If you see this Miguel, you may remove it
-                    if (message.Author.Id == 134073221938020352 && message.Content == "pon")
-                    {
-                        search = await node.SearchAsync("https://www.youtube.com/watch?v=yzC4hFK5P3g");
-                    }
 
                     await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
                     _ = Task.Run(async () =>
