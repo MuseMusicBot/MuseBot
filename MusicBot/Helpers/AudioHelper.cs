@@ -180,7 +180,7 @@ namespace MusicBot.Helpers
                 string newQueue;
                 int startIdx = 0;
 
-                if (player.PlayerState != PlayerState.Playing || player.PlayerState != PlayerState.Paused)
+                if (player.PlayerState == PlayerState.Connected || player.PlayerState == PlayerState.Stopped)
                 {
                     var node = await Node.SearchYouTubeAsync(spotifyTracks[0]);
                     if (node.LoadStatus != LoadStatus.NoMatches || node.LoadStatus != LoadStatus.LoadFailed)
@@ -188,25 +188,28 @@ namespace MusicBot.Helpers
                     startIdx = 1;
                 }
 
-                var lavaTracks = spotifyTracks.Skip(startIdx).OrderedParallel(async e =>
+                if (spotifyTracks.Count - startIdx > 0)
                 {
-                    int i = 0;
-                    int maxRetries = 3;
-                    Victoria.Responses.Rest.SearchResponse node;
-                    do
+                    var lavaTracks = spotifyTracks.Skip(startIdx).OrderedParallel(async e =>
                     {
-                        node = await Node.SearchYouTubeAsync(e);
-                        i++;
-                    } while ((node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) && i <= maxRetries);
+                        int i = 0;
+                        int maxRetries = 3;
+                        Victoria.Responses.Rest.SearchResponse node;
+                        do
+                        {
+                            node = await Node.SearchYouTubeAsync(e);
+                            i++;
+                        } while ((node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) && i <= maxRetries);
 
-                    return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
-                });
+                        return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
+                    });
 
-                await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
+                    await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
 
-                foreach (var track in lavaTracks)
-                {
-                    player.Queue.Enqueue(await track);
+                    foreach (var track in lavaTracks)
+                    {
+                        player.Queue.Enqueue(await track);
+                    }
                 }
 
                 newQueue = await UpdateEmbedQueue(player).ConfigureAwait(false);
