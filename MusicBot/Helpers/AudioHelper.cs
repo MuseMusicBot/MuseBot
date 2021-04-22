@@ -178,7 +178,17 @@ namespace MusicBot.Helpers
             _ = Task.Run(async () =>
             {
                 string newQueue;
-                var lavaTracks = spotifyTracks.OrderedParallel(async e =>
+                int startIdx = 0;
+
+                if (player.PlayerState != PlayerState.Playing || player.PlayerState != PlayerState.Paused)
+                {
+                    var node = await Node.SearchYouTubeAsync(spotifyTracks[0]);
+                    if (node.LoadStatus != LoadStatus.NoMatches || node.LoadStatus != LoadStatus.LoadFailed)
+                        await player.PlayAsync(node.Tracks[0]);
+                    startIdx = 1;
+                }
+
+                var lavaTracks = spotifyTracks.Skip(startIdx).OrderedParallel(async e =>
                 {
                     int i = 0;
                     int maxRetries = 3;
@@ -192,50 +202,26 @@ namespace MusicBot.Helpers
                     return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
                 });
 
-                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Playing)
+                await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
+
+                foreach (var track in lavaTracks)
                 {
-                    foreach (var track in lavaTracks)
-                    {
-                        player.Queue.Enqueue(await track);
-                    }
-
-                    newQueue = await UpdateEmbedQueue(player);
-
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen);
-
-                    await Program.message.ModifyAsync(x =>
-                    {
-                        x.Content = string.Format(QueueMayHaveSongs, newQueue);
-                        x.Embed = embed;
-                    });
+                    player.Queue.Enqueue(await track);
                 }
-                else
+
+                newQueue = await UpdateEmbedQueue(player).ConfigureAwait(false);
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen).ConfigureAwait(false);
+                var content = newQueue switch
                 {
-                    //This seems to be running multiple times?
-                    await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); });
+                    "" => NoSongsInQueue,
+                    _ => string.Format(QueueMayHaveSongs, newQueue)
+                };
 
-                    await player.PlayAsync(await lavaTracks.ElementAt(0));
-
-                    foreach (var track in lavaTracks.Skip(1))
-                    {
-                        if (track != null)
-                            player.Queue.Enqueue(await track);
-                    }
-
-                    newQueue = await UpdateEmbedQueue(player);
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen);
-                    var content = newQueue switch
-                    {
-                        "" => NoSongsInQueue,
-                        _ => string.Format(QueueMayHaveSongs, newQueue)
-                    };
-
-                    await Program.message.ModifyAsync(x =>
-                    {
-                        x.Embed = embed;
-                        x.Content = content;
-                    });
-                }
+                await Program.message.ModifyAsync(x =>
+                {
+                    x.Embed = embed;
+                    x.Content = content;
+                }).ConfigureAwait(false);
             });
             await Task.CompletedTask;
         }
