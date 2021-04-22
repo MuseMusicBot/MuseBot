@@ -77,6 +77,7 @@ namespace MusicBot.Commands
                     }
 
                     await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+                    await node.GetPlayer(Context.Guild).UpdateVolumeAsync(Program.Volume);
                 }
                 catch (Exception e)
                 {
@@ -498,6 +499,7 @@ namespace MusicBot.Commands
             if (!node.HasPlayer(Context.Guild))
             {
                 await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+                await node.GetPlayer(Context.Guild).UpdateVolumeAsync(Program.Volume);
             }
 
             var player = node.GetPlayer(Context.Guild);

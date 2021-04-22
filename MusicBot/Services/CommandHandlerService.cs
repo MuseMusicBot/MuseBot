@@ -126,6 +126,7 @@ namespace MusicBot.Services
                         if (!node.HasPlayer(context.Guild))
                         {
                             await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
+                            await node.GetPlayer(context.Guild).UpdateVolumeAsync(Program.Volume);
                         }
                         TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
 
@@ -141,6 +142,7 @@ namespace MusicBot.Services
                         if (!node.HasPlayer(context.Guild))
                         {
                             await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
+                            await node.GetPlayer(context.Guild).UpdateVolumeAsync(Program.Volume);
                         }
                         Victoria.Responses.Rest.SearchResponse search = await node.SearchYouTubeAsync(message.Content);
                         await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);

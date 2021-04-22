@@ -36,7 +36,6 @@ namespace MusicBot.Helpers
             Node.OnTrackStarted += async (args) =>
             {
                 var player = args.Player;
-                await player.UpdateVolumeAsync(Program.Volume);
 
                 var queue = await UpdateEmbedQueue(player);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
