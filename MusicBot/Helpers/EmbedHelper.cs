@@ -22,9 +22,7 @@ namespace MusicBot.Helpers
             string footerText = string.Format(AudioHelper.FooterText,
                                               player.Queue.Count,
                                               player.Queue.Count switch { 1 => "", _ => "s" },
-                                              $"{Program.Volume}%",
-                                              paused ? " | Song paused" : "",
-                                              "");
+                                              $"{Program.Volume}%");
 
             Embed embed = new EmbedBuilder
             {
