@@ -88,57 +88,68 @@ namespace MusicBot.Services
             {
                 _ = Task.Run(async () =>
                 {
-                    Victoria.Responses.Rest.SearchResponse search = await node.SearchAsync(message.Content);
-
-                    //Miguel's special function
-                    if (message.Author.Id == 134073221938020352 && message.Content == "pon")
+                    bool isUri = Uri.TryCreate(message.Content, UriKind.Absolute, out _);
+                    if (isUri == true)
                     {
-                        search = await node.SearchAsync("https://www.youtube.com/watch?v=yzC4hFK5P3g");
-                    }
-
-                    if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
-                    {
-                        var msg = await embedHelper.BuildErrorEmbed($"The link `{message.Content}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
-                        Regex r = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
-                        if (r.Match(message.Content).Success)
+                        Victoria.Responses.Rest.SearchResponse search = await node.SearchAsync(message.Content);
+                        if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
                         {
-                            string type = r.Match(message.Content).Groups["vid"].Value;
-                            search = await node.SearchAsync(type);
-                            if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                            var msg = await embedHelper.BuildErrorEmbed($"The link `{message.Content}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
+                            Regex r = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
+                            if (r.Match(message.Content).Success)
+                            {
+                                string type = r.Match(message.Content).Groups["vid"].Value;
+                                search = await node.SearchAsync(type);
+                                if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                                {
+                                    await message.DeleteAsync();
+                                    await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
+                                    return;
+                                }
+                            }
+                            else
                             {
                                 await message.DeleteAsync();
                                 await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
                                 return;
                             }
                         }
-                        else
+
+                        Regex regex = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?:[A-z0-9_-]{1,11})(?:\?t=(?<time>\d+))?(&t=(?<time2>\d+)\w)?");
+                        string time = "";
+                        if (regex.Match(message.Content).Success)
+                        {
+                            time = regex.Match(message.Content).Groups["time"].Value;
+                            //string time2 = regex.Match(message.Content).Groups["time2"].Value;
+                        }
+
+                        if (!node.HasPlayer(context.Guild))
+                        {
+                            await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
+                        }
+                        TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
+
+                        await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
+                        _ = Task.Run(async () =>
                         {
                             await message.DeleteAsync();
-                            await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
-                            return;
+                        });
+                        return;
+                    }
+                    else
+                    {
+                        if (!node.HasPlayer(context.Guild))
+                        {
+                            await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
                         }
+                        Victoria.Responses.Rest.SearchResponse search = await node.SearchYouTubeAsync(message.Content);
+                        await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
+                        _ = Task.Run(async () =>
+                        {
+                            await message.DeleteAsync();
+                        });
+                        return;
                     }
-
-                    Regex regex = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?:[A-z0-9_-]{1,11})(?:\?t=(?<time>\d+))?(&t=(?<time2>\d+)\w)?");
-                    string time = "";
-                    if (regex.Match(message.Content).Success)
-                    {
-                        time = regex.Match(message.Content).Groups["time"].Value;
-                        //string time2 = regex.Match(message.Content).Groups["time2"].Value;
-                    }
-
-                    if (!node.HasPlayer(context.Guild))
-                    {
-                        await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
-                    }
-                    TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
-
-                    await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
-                    _ = Task.Run(async () =>
-                    {
-                        await message.DeleteAsync();
-                    });
-                    return;
                 });
             }
 

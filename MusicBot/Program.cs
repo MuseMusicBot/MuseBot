@@ -131,8 +131,6 @@ namespace MusicBot
                             x.Content = AudioHelper.NoSongsInQueue;
                             x.Embed = await embedHelper.BuildDefaultEmbed();
                         });
-                        //Fix this too
-                        Console.WriteLine("No :p");
                     }
                     catch { }
                 }

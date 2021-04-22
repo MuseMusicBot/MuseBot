@@ -141,6 +141,7 @@ namespace MusicBot.Helpers
                     {
                         player.Queue.Enqueue(track);
                     }
+                    //Pause flag needed!
                     newQueue = await UpdateEmbedQueue(player);
                     var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
                     await Program.message.ModifyAsync(x =>
