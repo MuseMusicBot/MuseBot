@@ -35,7 +35,7 @@ namespace MusicBot.Helpers
                     Name = $"[{player.Track.Duration.ToTimecode()}] - {player.Track.Title}",
                     Url = player.Track.Url
                 },
-                ImageUrl = YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
+                ImageUrl = paused ? "https://i.imgur.com/eeJQfhB.gif" : YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
                 Footer = new EmbedFooterBuilder { Text = footerText }
             }.Build();
 
@@ -70,5 +70,30 @@ namespace MusicBot.Helpers
                 Title = title,
                 Description = error
             }.Build());
+
+        public ValueTask<Embed> BuildJokeEmbed(LavaPlayer player, bool paused = false)
+        {
+            string footerText = string.Format(AudioHelper.FooterText,
+                                              player.Queue.Count,
+                                              player.Queue.Count switch { 1 => "", _ => "s" },
+                                              $"{Program.Volume}%",
+                                              paused ? " | Song paused" : "",
+                                              "");
+
+            Embed embed = new EmbedBuilder
+            {
+                Color = Color.DarkTeal,
+                Author = new EmbedAuthorBuilder
+                {
+                    IconUrl = discord.CurrentUser.GetAvatarUrl(),
+                    Name = $"[69:69] - Rick Astley - Never Gonna Give You Up (Video)",
+                    Url = "https://youtu.be/dQw4w9WgXcQ"
+                },
+                ImageUrl = "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", // If not youtube, have Victoria fetch the artwork
+                Footer = new EmbedFooterBuilder { Text = footerText }
+            }.Build();
+
+            return new ValueTask<Embed>(embed);
+        }
     }
 }
