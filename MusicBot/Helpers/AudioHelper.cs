@@ -16,7 +16,7 @@ namespace MusicBot.Helpers
         private readonly EmbedHelper embedHelper;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
-        public const string FooterText = "{0} song{1} in queue | Volume: {2}{3}{4}";
+        public const string FooterText = "{0} song{1} in queue | Volume: {2}";
         public SpotifyClient Spotify;
         public bool RepeatFlag { get; set; } = false;
         public LavaTrack RepeatTrack { get; set; }
