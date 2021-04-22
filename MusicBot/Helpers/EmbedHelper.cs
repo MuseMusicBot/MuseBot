@@ -34,7 +34,7 @@ namespace MusicBot.Helpers
                     Name = $"[{player.Track.Duration.ToTimecode()}] - {player.Track.Title}",
                     Url = player.Track.Url
                 },
-                ImageUrl = paused ? "https://i.imgur.com/eeJQfhB.gif" : YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
+                ImageUrl = paused ? "https://i.imgur.com/rx0quZg.gif" : YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
                 Footer = new EmbedFooterBuilder { Text = footerText }
             }.Build();
 
