@@ -47,7 +47,7 @@ namespace MusicBot.Helpers
                 };
 
 
-                await Program.message.ModifyAsync(x =>
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                 {
                     x.Embed = embed;
                     x.Content = content;
@@ -75,7 +75,7 @@ namespace MusicBot.Helpers
                 if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
                 {
                     var embed = await embedHelper.BuildDefaultEmbed();
-                    await Program.message.ModifyAsync(x =>
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                     {
                         x.Content = NoSongsInQueue;
                         x.Embed = embed;
@@ -143,7 +143,7 @@ namespace MusicBot.Helpers
                     //Pause flag needed!
                     newQueue = await UpdateEmbedQueue(player);
                     var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-                    await Program.message.ModifyAsync(x =>
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
                         x.Embed = emebed;
@@ -203,7 +203,7 @@ namespace MusicBot.Helpers
                         return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
                     });
 
-                    await Program.message.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
 
                     foreach (var track in lavaTracks)
                     {
@@ -219,7 +219,7 @@ namespace MusicBot.Helpers
                     _ => string.Format(QueueMayHaveSongs, newQueue)
                 };
 
-                await Program.message.ModifyAsync(x =>
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                 {
                     x.Embed = embed;
                     x.Content = content;

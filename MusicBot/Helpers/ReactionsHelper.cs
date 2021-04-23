@@ -77,13 +77,13 @@ namespace MusicBot.Helpers
                         {
                             await player.ResumeAsync();
                             var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-                            await Program.message.ModifyAsync(x => x.Embed = embed);
+                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
                         }
                         else if (player.PlayerState == PlayerState.Playing)
                         {
                             await player.PauseAsync();
                             var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
-                            await Program.message.ModifyAsync(x => x.Embed = embed);
+                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
                         }
                         break;
                     case EmojiStates.Next:
@@ -93,7 +93,6 @@ namespace MusicBot.Helpers
                             await player.SkipAsync();
                         }
                         break;
-                    // TODO: Make flag instead of seeking
                     case EmojiStates.Loop:
                         if (player.PlayerState == PlayerState.Playing ||
                             player.PlayerState == PlayerState.Paused)
@@ -121,7 +120,7 @@ namespace MusicBot.Helpers
 
                             player.Queue.Shuffle();
                             string newQueue = await audioHelper.UpdateEmbedQueue(player);
-                            await Program.message.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
+                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
                             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
                             await (await channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                         }
@@ -130,7 +129,7 @@ namespace MusicBot.Helpers
                         {
                             player.Queue.Clear();
                             var embed = await embedHelper.BuildDefaultEmbed();
-                            await Program.message.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
 
                             try
                             {

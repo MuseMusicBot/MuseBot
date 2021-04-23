@@ -23,7 +23,7 @@ namespace MusicBot.Helpers
             string footerText = string.Format(AudioHelper.FooterText,
                                               player.Queue.Count,
                                               player.Queue.Count switch { 1 => "", _ => "s" },
-                                              $"{Program.Volume}%");
+                                              $"{Program.BotConfig.Volume}%");
 
             Embed embed = new EmbedBuilder
             {
@@ -75,7 +75,7 @@ namespace MusicBot.Helpers
             string footerText = string.Format(AudioHelper.FooterText,
                                               player.Queue.Count,
                                               player.Queue.Count switch { 1 => "", _ => "s" },
-                                              $"{Program.Volume}%",
+                                              $"{Program.BotConfig.Volume}%",
                                               paused ? " | Song paused" : "",
                                               "");
 

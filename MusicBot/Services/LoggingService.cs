@@ -1,10 +1,11 @@
-﻿using System;
-using Discord;
-using Discord.WebSocket;
+﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using MusicBot.Helpers;
+using System;
+using System.Threading.Tasks;
+using Victoria;
 
 namespace MusicBot.Services
 {
@@ -15,17 +16,20 @@ namespace MusicBot.Services
         private readonly ILoggerFactory logger;
         private readonly ILogger commandLogger;
         private readonly ILogger discordLogger;
+        private readonly ILogger victoriaLogger;
 
-        public LoggingService(DiscordSocketClient client, CommandService cmdService, ILoggerFactory loggerFactory)
+        public LoggingService(DiscordSocketClient client, LavaNode lavaNode, CommandService cmdService, ILoggerFactory loggerFactory)
         {
             discord = client;
             commandService = cmdService;
             logger = ConfigureLogging(loggerFactory);
             discordLogger = logger.CreateLogger("Discord");
             commandLogger = logger.CreateLogger("Commands");
-            
+            victoriaLogger = logger.CreateLogger("Victoria");
+
             discord.Log += LogDiscord;
             commandService.Log += LogCommandService;
+            lavaNode.OnLog += LavaNodeOnLog;
         }
 
         public ILogger CreateLogger(string loggerName)
@@ -43,6 +47,12 @@ namespace MusicBot.Services
         private Task LogDiscord(LogMessage message)
         {
             discordLogger.LogMessage(message);
+            return Task.CompletedTask;
+        }
+
+        private Task LavaNodeOnLog(LogMessage message)
+        {
+            victoriaLogger.LogMessage(message);
             return Task.CompletedTask;
         }
 

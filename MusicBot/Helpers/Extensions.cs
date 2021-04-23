@@ -47,6 +47,11 @@ namespace MusicBot.Helpers
             return Task.CompletedTask;
         }
 
+        public static bool IsUri(this string url)
+        {
+            return Uri.TryCreate(url, UriKind.Absolute, out _);
+        }
+
         public static IEnumerable<T1> OrderedParallel<T, T1>(this IEnumerable<T> list, Func<T, T1> action)
         {
             var unorderedResult = new ConcurrentBag<(long, T1)>();

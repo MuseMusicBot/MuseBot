@@ -7,6 +7,7 @@ namespace MusicBot.Services
 {
     public class ConfigHelper
     {
+        public static ushort DefaultVolume { get; } = 10;
         public struct Config
         {
             public ulong GuildId { get; set; }
@@ -21,7 +22,7 @@ namespace MusicBot.Services
             public string SpotifySecret { get; set; }
 
             [JsonIgnore]
-            public IMessage BotEmbedMessage { get; set; }
+            public IUserMessage BotEmbedMessage { get; set; }
 
             [JsonIgnore]
             public ushort Volume { get; set; }
@@ -32,11 +33,14 @@ namespace MusicBot.Services
         public static Config LoadConfigFile()
         {
             string json = File.ReadAllText(ConfigName);
-            return JsonConvert.DeserializeObject<Config>(json);
+            var config = JsonConvert.DeserializeObject<Config>(json);
+            config.Volume = DefaultVolume;
+            return config;   
         }
 
         public static void CreateConfigFile()
         {
+            // TODO: Get Spotify and Lavalink details
             string token;
             do
             {

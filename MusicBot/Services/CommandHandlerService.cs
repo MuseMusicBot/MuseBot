@@ -6,10 +6,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
-using System.Text.RegularExpressions;
 
 namespace MusicBot.Services
 {
@@ -47,26 +47,16 @@ namespace MusicBot.Services
 
             var context = new SocketCommandContext(discord, message);
 
-            string channelId = "";
-
-            try
-            {
-                channelId = File.ReadLines(Program.testConfig).ElementAt(1);
-            }
-            catch { }
-
             int argPos = 0;
 
-            //Channel id needs to be fixed, I have no idea how to make it work. For now hardcoded.
-            // ulong parse the channel id - Devin
-            if (message.Content != "m?setup" && context.Guild.GetTextChannel(message.Channel.Id).Id != ulong.Parse(channelId))
+            if (message.Content != "m?setup" && message.Channel.Id != Program.BotConfig.ChannelId)
             {
                 if (message.HasStringPrefix("m?", ref argPos))
                 {
                     _ = Task.Run(async () =>
                     {
                         await message.DeleteAsync();
-                        var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{channelId}>.");
+                        var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{Program.BotConfig.ChannelId}>.");
                         await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
                     });
                 }
@@ -88,8 +78,7 @@ namespace MusicBot.Services
             {
                 _ = Task.Run(async () =>
                 {
-                    bool isUri = Uri.TryCreate(message.Content, UriKind.Absolute, out _);
-                    if (isUri == true)
+                    if (message.Content.IsUri())
                     {
                         Victoria.Responses.Rest.SearchResponse search = await node.SearchAsync(message.Content);
                         if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
@@ -116,19 +105,19 @@ namespace MusicBot.Services
                         }
 
                         Regex regex = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?:[A-z0-9_-]{1,11})(?:\?t=(?<time>\d+))?(&t=(?<time2>\d+)\w)?");
-                        string time = "";
-                        if (regex.Match(message.Content).Success)
+                        Match m = regex.Match(message.Content);
+                        double time = m switch
                         {
-                            time = regex.Match(message.Content).Groups["time"].Value;
-                            //string time2 = regex.Match(message.Content).Groups["time2"].Value;
-                        }
+                            _ when m.Groups["time"].Value != "" => double.Parse(m.Groups["time"].Value),
+                            _ when m.Groups["time2"].Value != "" => double.Parse(m.Groups["time2"].Value),
+                            _ => -1
+                        };
 
                         if (!node.HasPlayer(context.Guild))
                         {
                             await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
-                            await node.GetPlayer(context.Guild).UpdateVolumeAsync(Program.Volume);
                         }
-                        TimeSpan? timeSpan = (time == "") ? (TimeSpan?)null : TimeSpan.FromSeconds(double.Parse(time));
+                        TimeSpan? timeSpan = (time == -1) ? (TimeSpan?)null : TimeSpan.FromSeconds(time);
 
                         await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
                         _ = Task.Run(async () =>
@@ -142,9 +131,8 @@ namespace MusicBot.Services
                         if (!node.HasPlayer(context.Guild))
                         {
                             await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
-                            await node.GetPlayer(context.Guild).UpdateVolumeAsync(Program.Volume);
                         }
-                        Victoria.Responses.Rest.SearchResponse search = await node.SearchYouTubeAsync(message.Content);
+                        Victoria.Responses.Rest.SearchResponse search = await node.SearchYouTubeAsync(message.Content.Trim());
                         await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
                         _ = Task.Run(async () =>
                         {

@@ -2,23 +2,18 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using MusicBot.Services;
 using MusicBot.Helpers;
+using MusicBot.Services;
 using System;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
 using Victoria;
-using Microsoft.Extensions.Logging;
 
 namespace MusicBot
 {
     class Program
     {
         private DiscordSocketClient discord;
-        public static ushort Volume = 5;
-        public static IUserMessage message;
-        public const string testConfig = "testConfig.txt";
-        private ILogger victoriaLogger;
         public static ConfigHelper.Config BotConfig { get; set; }
 
         static void Main()
@@ -26,19 +21,6 @@ namespace MusicBot
 
         private async Task MainAsync()
         {
-            //if (!int.TryParse(ProcessHelper.GetJavaVersion(), out int javaVer))
-            //{
-            //    Console.WriteLine("Couldn't get the Java version installed.\n" +
-            //        "Maybe Java is not installed or in PATH?");
-            //    return;
-            //}
-
-            //if (javaVer < 11)
-            //{
-            //    Console.WriteLine("Java version 11 or greater required.");
-            //    return;
-            //}
-
             if (!File.Exists(ConfigHelper.ConfigName))
             {
                 ConfigHelper.CreateConfigFile();
@@ -52,16 +34,10 @@ namespace MusicBot
                 GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildVoiceStates
             });
 
-
             var services = ConfigureServices();
             var loggingService = services.GetRequiredService<LoggingService>();
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
             services.GetRequiredService<ReactionsHelper>();
-            var node = services.GetRequiredService<LavaNode>();
-
-            victoriaLogger = loggingService.CreateLogger("Victoria");
-            node.OnLog += LavaNodeOnLog;
-
             await discord.LoginAsync(TokenType.Bot, BotConfig.Token);
             await discord.StartAsync();
 
@@ -74,21 +50,11 @@ namespace MusicBot
                     await node.ConnectAsync();
                 }
 
-                if (File.Exists(testConfig))
+                if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
                 {
-                    var msgIds = (await File.ReadAllLinesAsync(testConfig));
-                    var guildId = ulong.Parse(msgIds[0]);
-                    var chnlId = ulong.Parse(msgIds[1]);
-                    var msgId = ulong.Parse(msgIds[2]);
-
                     var config = BotConfig;
-                    config.GuildId = guildId;
-                    config.ChannelId = chnlId;
-                    config.MessageId = msgId;
-
+                    config.BotEmbedMessage = await discord.GetGuild(config.GuildId).GetTextChannel(config.ChannelId).GetMessageAsync(config.MessageId) as IUserMessage;
                     BotConfig = config;
-
-                    message = await discord.GetGuild(guildId).GetTextChannel(chnlId).GetMessageAsync(msgId) as IUserMessage;
                 }
 
                 //Sets Listening activity
@@ -103,13 +69,13 @@ namespace MusicBot
                     {
                         var node = services.GetRequiredService<LavaNode>();
                         var player = node.GetPlayer((user as IGuildUser).Guild);
-                        await player.UpdateVolumeAsync(Program.Volume);
+                        await player.UpdateVolumeAsync(BotConfig.Volume);
                     }
                     catch { }
                 }
             };
 
-            // trap ctrl+c
+            // Trap Ctrl+C
             Console.CancelKeyPress += (s, e) =>
             {
                 var node = services.GetRequiredService<LavaNode>();
@@ -123,14 +89,16 @@ namespace MusicBot
                     catch { }
                 }
 
-                Program.message.ModifyAsync(async (x) =>
+                BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
                 {
                     x.Content = AudioHelper.NoSongsInQueue;
                     x.Embed = await embedHelper.BuildDefaultEmbed();
                 });
+
+                ConfigHelper.UpdateConfigFile(BotConfig);
             };
 
-            // trap process exit
+            // Trap process exit
             AppDomain.CurrentDomain.ProcessExit += (s, e) =>
             {
                 var node = services.GetRequiredService<LavaNode>();
@@ -140,24 +108,19 @@ namespace MusicBot
                     try
                     {
                         node.LeaveAsync(player.VoiceChannel);
-                        Program.message.ModifyAsync(async (x) =>
-                        {
-                            x.Content = AudioHelper.NoSongsInQueue;
-                            x.Embed = await embedHelper.BuildDefaultEmbed();
-                        });
                     }
                     catch { }
+
+                    BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
+                    {
+                        x.Content = AudioHelper.NoSongsInQueue;
+                        x.Embed = await embedHelper.BuildDefaultEmbed();
+                    });
+
+                    ConfigHelper.UpdateConfigFile(BotConfig);
                 }
             };
-
             await Task.Delay(-1);
-
-        }
-
-        private Task LavaNodeOnLog(LogMessage message)
-        {
-            victoriaLogger.LogMessage(message);
-            return Task.CompletedTask;
         }
 
         private IServiceProvider ConfigureServices()
