@@ -52,12 +52,12 @@ namespace MusicBot.Helpers
             return Uri.TryCreate(url, UriKind.Absolute, out _);
         }
 
-        public static IEnumerable<T1> OrderedParallel<T, T1>(this IEnumerable<T> list, Func<T, T1> action)
+        public static IEnumerable<T1> OrderedParallel<T, T1>(this IEnumerable<T> list, Func<T, Task<T1>> action)
         {
             var unorderedResult = new ConcurrentBag<(long, T1)>();
-            Parallel.ForEach(list, (o, state, i) =>
+            Parallel.ForEach(list, async (o, state, i) =>
             {
-                unorderedResult.Add((i, action.Invoke(o)));
+                unorderedResult.Add((i, await action.Invoke(o)));
             });
             var ordered = unorderedResult.OrderBy(o => o.Item1);
             return ordered.Select(o => o.Item2);

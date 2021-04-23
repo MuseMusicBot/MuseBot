@@ -207,7 +207,7 @@ namespace MusicBot.Helpers
 
                     foreach (var track in lavaTracks)
                     {
-                        player.Queue.Enqueue(await track);
+                        player.Queue.Enqueue(track);
                     }
                 }
 
