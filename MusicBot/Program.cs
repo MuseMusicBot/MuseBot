@@ -95,6 +95,20 @@ namespace MusicBot
                 await discord.SetGameAsync("music", type: ActivityType.Listening);
             };
 
+            discord.UserVoiceStateUpdated += async (user, before, after) =>
+            {
+                if (user.Id == discord.CurrentUser.Id && before.VoiceChannel == null)
+                {
+                    try
+                    {
+                        var node = services.GetRequiredService<LavaNode>();
+                        var player = node.GetPlayer((user as IGuildUser).Guild);
+                        await player.UpdateVolumeAsync(Program.Volume);
+                    }
+                    catch { }
+                }
+            };
+
             // trap ctrl+c
             Console.CancelKeyPress += (s, e) =>
             {
@@ -154,7 +168,7 @@ namespace MusicBot
                 .AddLavaNode(x =>
                 {
                     x.Authorization = BotConfig.LavalinkPassword;
-                    x.Hostname = BotConfig.LavalinkHost;
+                    x.Hostname = "lavalink.asuna.us";//BotConfig.LavalinkHost;
                     x.Port = (ushort)BotConfig.LavalinkPort;
                     x.LogSeverity = LogSeverity.Info;
                 })
