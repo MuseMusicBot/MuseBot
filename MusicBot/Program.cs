@@ -41,6 +41,8 @@ namespace MusicBot
             await discord.LoginAsync(TokenType.Bot, BotConfig.Token);
             await discord.StartAsync();
 
+            discord.GuildAvailable += OnGuildAvaiable;
+
             discord.Ready += async () =>
             {
                 var node = services.GetRequiredService<LavaNode>();
@@ -48,13 +50,6 @@ namespace MusicBot
                 if (!node.IsConnected)
                 {
                     await node.ConnectAsync();
-                }
-
-                if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
-                {
-                    var config = BotConfig;
-                    config.BotEmbedMessage = await discord.GetGuild(config.GuildId).GetTextChannel(config.ChannelId).GetMessageAsync(config.MessageId) as IUserMessage;
-                    BotConfig = config;
                 }
 
                 //Sets Listening activity
@@ -121,6 +116,16 @@ namespace MusicBot
                 }
             };
             await Task.Delay(-1);
+        }
+
+        private async Task OnGuildAvaiable(SocketGuild guild)
+        {
+            if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
+            {
+                var config = BotConfig;
+                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId).GetMessageAsync(config.MessageId) as IUserMessage;
+                BotConfig = config;
+            }
         }
 
         private IServiceProvider ConfigureServices()
