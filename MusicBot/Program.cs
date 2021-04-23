@@ -168,7 +168,7 @@ namespace MusicBot
                 .AddLavaNode(x =>
                 {
                     x.Authorization = BotConfig.LavalinkPassword;
-                    x.Hostname = "lavalink.asuna.us";//BotConfig.LavalinkHost;
+                    x.Hostname = BotConfig.LavalinkHost;
                     x.Port = (ushort)BotConfig.LavalinkPort;
                     x.LogSeverity = LogSeverity.Info;
                 })
