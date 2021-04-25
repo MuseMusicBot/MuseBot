@@ -2,9 +2,11 @@
 using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using Victoria;
 using Victoria.Enums;
 
@@ -14,6 +16,7 @@ namespace MusicBot.Helpers
     {
         private LavaNode Node { get; set; }
         private readonly EmbedHelper embedHelper;
+        private readonly ConcurrentDictionary<ulong, CancellationTokenSource> _disconnectTokens;
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
         public const string FooterText = "{0} song{1} in queue | Volume: {2}";
@@ -32,6 +35,7 @@ namespace MusicBot.Helpers
             var response = new OAuthClient(config).RequestToken(request);
             var spotify = new SpotifyClient(config.WithToken(response.Result.AccessToken));
             Spotify = spotify;
+            _disconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
             Node.OnTrackStarted += async (args) =>
             {
@@ -52,41 +56,75 @@ namespace MusicBot.Helpers
                     x.Embed = embed;
                     x.Content = content;
                 });
+                if (!_disconnectTokens.TryGetValue(args.Player.VoiceChannel.Id, out var value))
+                {
+                    return;
+                }
+                if (value.IsCancellationRequested)
+                {
+                    return;
+                }
 
+                value.Cancel(true);
             };
 
             Node.OnTrackEnded += async (args) =>
-            {
-                var player = args.Player;
-
-                if (RepeatFlag)
                 {
-                    await player.PlayAsync(RepeatTrack);
-                    return;
-                }
+                    var player = args.Player;
 
-                RepeatFlag = false;
+                    if (RepeatFlag)
+                    {
+                        await player.PlayAsync(RepeatTrack);
+                        return;
+                    }
 
-                if (!args.Reason.ShouldPlayNext())
-                {
-                    return;
-                }
+                    RepeatFlag = false;
 
-                if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
-                {
-                    var embed = await embedHelper.BuildDefaultEmbed();
-                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
+                    if (!args.Reason.ShouldPlayNext())
+                    {
+                        return;
+                    }
+
+                    if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
+                    {
+                        var embed = await embedHelper.BuildDefaultEmbed();
+                        await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                     {
                         x.Content = NoSongsInQueue;
                         x.Embed = embed;
                     });
-                    return;
-                }
 
-                await args.Player.PlayAsync(track);
-            };
+                    _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromSeconds(15));
+                        return;
+                    }
+
+                    await args.Player.PlayAsync(track);
+                };
         }
 
+        private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeSpan)
+        {
+            if (!_disconnectTokens.TryGetValue(player.VoiceChannel.Id, out var value))
+            {
+                value = new CancellationTokenSource();
+                _disconnectTokens.TryAdd(player.VoiceChannel.Id, value);
+            }
+            else if (value.IsCancellationRequested)
+            {
+                _disconnectTokens.TryUpdate(player.VoiceChannel.Id, new CancellationTokenSource(), value);
+                value = _disconnectTokens[player.VoiceChannel.Id];
+            }
+
+            var isCancelled = SpinWait.SpinUntil(() => value.IsCancellationRequested, timeSpan);
+            if (isCancelled)
+            {
+                return;
+            }
+
+            await Node.LeaveAsync(player.VoiceChannel);
+            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Muse has disconnected due to inactivity.");
+            await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
+        }
         public ValueTask<string> UpdateEmbedQueue(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();
