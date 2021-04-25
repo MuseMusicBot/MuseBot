@@ -70,29 +70,12 @@ namespace MusicBot.Helpers
                 Description = error
             }.Build());
 
-        public ValueTask<Embed> BuildJokeEmbed(LavaPlayer player, bool paused = false)
-        {
-            string footerText = string.Format(AudioHelper.FooterText,
-                                              player.Queue.Count,
-                                              player.Queue.Count switch { 1 => "", _ => "s" },
-                                              $"{Program.BotConfig.Volume}%",
-                                              paused ? " | Song paused" : "",
-                                              "");
-
-            Embed embed = new EmbedBuilder
+        public ValueTask<Embed> BuildTrackErrorEmbed(string error)
+            => new ValueTask<Embed>(new EmbedBuilder
             {
-                Color = Color.DarkTeal,
-                Author = new EmbedAuthorBuilder
-                {
-                    IconUrl = discord.CurrentUser.GetAvatarUrl(),
-                    Name = $"[69:69] - Rick Astley - Never Gonna Give You Up (Video)",
-                    Url = "https://youtu.be/dQw4w9WgXcQ"
-                },
-                ImageUrl = "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", // If not youtube, have Victoria fetch the artwork
-                Footer = new EmbedFooterBuilder { Text = footerText }
-            }.Build();
-
-            return new ValueTask<Embed>(embed);
-        }
+                Color = Color.DarkRed,
+                Title = "An error has occurred",
+                Description = error
+            }.Build());
     }
 }

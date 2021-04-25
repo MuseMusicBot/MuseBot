@@ -69,37 +69,45 @@ namespace MusicBot.Helpers
             };
 
             Node.OnTrackEnded += async (args) =>
+            {
+                var player = args.Player;
+
+                if (RepeatFlag)
                 {
-                    var player = args.Player;
+                    await player.PlayAsync(RepeatTrack);
+                    return;
+                }
 
-                    if (RepeatFlag)
-                    {
-                        await player.PlayAsync(RepeatTrack);
-                        return;
-                    }
+                RepeatFlag = false;
 
-                    RepeatFlag = false;
+                if (!args.Reason.ShouldPlayNext())
+                {
+                    return;
+                }
 
-                    if (!args.Reason.ShouldPlayNext())
-                    {
-                        return;
-                    }
-
-                    if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
-                    {
-                        var embed = await embedHelper.BuildDefaultEmbed();
-                        await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
-                    {
-                        x.Content = NoSongsInQueue;
-                        x.Embed = embed;
-                    });
+                if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
+                {
+                    var embed = await embedHelper.BuildDefaultEmbed();
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
+                {
+                    x.Content = NoSongsInQueue;
+                    x.Embed = embed;
+                });
 
                     _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(5));
-                        return;
-                    }
+                    return;
+                }
 
-                    await args.Player.PlayAsync(track);
-                };
+                await args.Player.PlayAsync(track);
+            };
+
+            Node.OnTrackException += async (args) =>
+            {
+                var player = args.Player;
+                var msg = await embedHelper.BuildTrackErrorEmbed($"{player.Track.Title}({player.Track.Url})\nNo track formats found.");
+                await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
+                return;
+            };
         }
 
         private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeSpan)
