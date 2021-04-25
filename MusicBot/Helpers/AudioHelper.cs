@@ -40,7 +40,6 @@ namespace MusicBot.Helpers
             Node.OnTrackStarted += async (args) =>
             {
                 var player = args.Player;
-
                 var queue = await UpdateEmbedQueue(player);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
@@ -49,7 +48,6 @@ namespace MusicBot.Helpers
                     "" => NoSongsInQueue,
                     _ => string.Format(QueueMayHaveSongs, queue)
                 };
-
 
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                 {
@@ -93,7 +91,6 @@ namespace MusicBot.Helpers
                     x.Content = NoSongsInQueue;
                     x.Embed = embed;
                 });
-
                     _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(5));
                     return;
                 }
