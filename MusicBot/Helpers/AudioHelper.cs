@@ -94,12 +94,7 @@ namespace MusicBot.Helpers
                     x.Embed = embed;
                 });
 
-<<<<<<< HEAD
                     _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(5));
-=======
-                // test
-                _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(5));
->>>>>>> 153f272 (test)
                     return;
                 }
 
