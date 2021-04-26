@@ -274,6 +274,7 @@ namespace MusicBot.Commands
         [Alias("vol")]
         public async Task SetVolume(ushort? vol = null)
         {
+            //If user sets volume when Bot is not in a voice channel
             if (!node.HasPlayer(Context.Guild))
             {
                 if (vol == null)
@@ -292,20 +293,28 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
+            //If user does not specify a volume
             if (vol == null)
             {
                 var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Current volume is at `{player.Volume}%`.");
                 await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 return;
             }
-
+            //If user sets the volume to the same level as it currently is
+            if (vol == Program.BotConfig.Volume)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"Volume is already set to `{player.Volume}%`.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                return;
+            }
+            //If user sets the volume below 1 or above 150
             if (vol > 150 || vol < 1)
             {
                 var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Volume can only be set between 0 - 150 inclusively");
                 await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 return;
             }
-
+            //If user sets the volume when music is stopped (not paused)
             if (player.PlayerState == PlayerState.Stopped)
             {
                 var config2 = Program.BotConfig;
