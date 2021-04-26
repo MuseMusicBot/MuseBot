@@ -104,6 +104,16 @@ namespace MusicBot.Helpers
                 var player = args.Player;
                 var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\nVideo might still be processing, try again later.");
                 await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
+                //Works but might require some better debugging
+                //Having whats below above the messageasync doesn't trigger it for some reason?
+                if (player.Queue.Count == 0)
+                {
+                    //If no songs in queue it will stop playback to reset the embed
+                    await player.StopAsync();
+                    return;
+                }
+                //If queue has any songs it will skip to the next track
+                await player.SkipAsync();
                 return;
             };
         }
