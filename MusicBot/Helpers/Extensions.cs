@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace MusicBot.Helpers
 {
@@ -35,6 +36,12 @@ namespace MusicBot.Helpers
 
             return res;
         }
+
+        public static MuseTrack CreateTrack(this LavaTrack track, IGuildUser requester)
+        {
+            return new MuseTrack(track, requester);
+        }
+
         public static Task LogMessage(this ILogger logger, LogMessage message)
         {
             logger.Log(
