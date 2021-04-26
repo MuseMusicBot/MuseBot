@@ -45,13 +45,23 @@ namespace MusicBot
 
             discord.Ready += async () =>
             {
-                var node = services.GetRequiredService<LavaNode>();
-
-                if (!node.IsConnected)
+                _ = Task.Run(async () =>
                 {
-                    await node.ConnectAsync();
-                }
+                    var node = services.GetRequiredService<LavaNode>();
 
+                    if (!node.IsConnected)
+                    {
+                        await node.ConnectAsync();
+                    }
+
+                    if (!node.TryGetPlayer(discord.GetGuild(BotConfig.GuildId), out var player))
+                    {
+                        return;
+                    }
+
+                    await player.UpdateVolumeAsync(BotConfig.Volume);
+
+                });
                 //Sets Listening activity
                 await discord.SetGameAsync("music", type: ActivityType.Listening);
             };
