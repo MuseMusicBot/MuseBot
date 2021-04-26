@@ -91,7 +91,8 @@ namespace MusicBot.Helpers
                     x.Content = NoSongsInQueue;
                     x.Embed = embed;
                 });
-                    _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(5));
+
+                    _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(15));
                     return;
                 }
 
@@ -101,7 +102,7 @@ namespace MusicBot.Helpers
             Node.OnTrackException += async (args) =>
             {
                 var player = args.Player;
-                var msg = await embedHelper.BuildTrackErrorEmbed($"{player.Track.Title}({player.Track.Url})\nNo track formats found.");
+                var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\nVideo might still be processing, try again later.");
                 await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
                 return;
             };
@@ -185,7 +186,7 @@ namespace MusicBot.Helpers
                     }
                     //Pause flag needed!
                     newQueue = await UpdateEmbedQueue(player);
-                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                    var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
                     await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                     {
                         x.Content = string.Format(QueueMayHaveSongs, newQueue);
@@ -229,6 +230,7 @@ namespace MusicBot.Helpers
                         await player.PlayAsync(node.Tracks[0]);
                     startIdx = 1;
                 }
+                Console.WriteLine(spotifyTracks.Count);
 
                 if (spotifyTracks.Count - startIdx > 0)
                 {
