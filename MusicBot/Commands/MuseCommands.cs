@@ -528,58 +528,17 @@ namespace MusicBot.Commands
         [Command("spotify", RunMode = RunMode.Async)]
         public async Task Test([Remainder] string url)
         {
-            Regex r = new Regex(@"https?:\/\/(?:open\.spotify\.com)\/(?<type>\w+)\/(?<id>[\w-]{22})(?:\?si=(?:[\w-]{22}))?");
-            if (!r.Match(url).Success)
-            {
-                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid Spotify link.");
-                var send = await Context.Channel.SendMessageAsync(embed: msg);
-                await send.RemoveAfterTimeout(5000);
-                return;
-            }
-
-            string type = r.Match(url).Groups["type"].Value;
-            string id = r.Match(url).Groups["id"].Value;
-            List<string> tracks = new List<string>();
-
-            switch (type)
-            {
-                case "album":
-                    await foreach (var item in audioHelper.Spotify.Paginate((await audioHelper.Spotify.Albums.Get(id)).Tracks))
-                    {
-                        tracks.Add($"{item.Name} {string.Join(" ", item.Artists.Select(x => x.Name))}");
-                    }
-                    break;
-
-                case "playlist":
-                    var playlist = await audioHelper.Spotify.Playlists.Get(id);
-                    await foreach (var item in audioHelper.Spotify.Paginate(playlist.Tracks))
-                    {
-                        if (item.Track is FullTrack track)
-                        {
-                            tracks.Add($"{track.Name} {string.Join(" ", track.Artists.Select(x => x.Name))}");
-                        }
-                    }
-                    break;
-
-                case "track":
-                    var trackItem = await audioHelper.Spotify.Tracks.Get(id);
-                    tracks.Add($"{trackItem.Name} {string.Join(" ", trackItem.Artists.Select(x => x.Name))}");
-                    break;
-
-                default:
-                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Must be a `track`, `playlist`, or `album`.");
-                    var send = await Context.Channel.SendMessageAsync(embed: msg);
-                    await send.RemoveAfterTimeout(6000);
-                    return;
-            }
-
             if (!node.HasPlayer(Context.Guild))
             {
                 await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
             }
 
             var player = node.GetPlayer(Context.Guild);
-            await audioHelper.QueueSpotifyToPlayer(player, tracks);
+            var tracks = await audioHelper.SearchSpotify(Context.Channel, url);
+            if (tracks != null)
+            {
+                await audioHelper.QueueSpotifyToPlayer(player, tracks);
+            }
         }
         #endregion
 

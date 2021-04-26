@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using MusicBot.Services;
 using System;
@@ -25,6 +26,7 @@ namespace MusicBot.Helpers
         {
             await Task.Delay(timeout);
             await message.DeleteAsync(new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
+            await Task.CompletedTask;
         }
 
         public static TimeSpan ToTimeSpan(this string timecode)
@@ -37,7 +39,13 @@ namespace MusicBot.Helpers
             return res;
         }
 
-        public static MuseTrack CreateTrack(this LavaTrack track, IGuildUser requester)
+        public static async Task SendAndRemove(this ISocketMessageChannel channel, string content = null, Embed embed = null, int timeout = 10000)
+        {
+            var msg = await channel.SendMessageAsync(text: content, embed: embed);
+            await msg.RemoveAfterTimeout(timeout);
+            await Task.CompletedTask;
+        }
+        public static MuseTrack CreateMuseTrack(this LavaTrack track, IGuildUser requester)
         {
             return new MuseTrack(track, requester);
         }
@@ -54,9 +62,9 @@ namespace MusicBot.Helpers
             return Task.CompletedTask;
         }
 
-        public static bool IsUri(this string url)
+        public static bool IsUri(this string url, out Uri uri)
         {
-            return Uri.TryCreate(url, UriKind.Absolute, out _);
+            return Uri.TryCreate(url, UriKind.Absolute, out uri);
         }
 
         public static IEnumerable<T1> OrderedParallel<T, T1>(this IEnumerable<T> list, Func<T, Task<T1>> action)

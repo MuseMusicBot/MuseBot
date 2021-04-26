@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using Victoria;
 using Victoria.Enums;
+using Discord.Commands;
+using System.Text.RegularExpressions;
 
 namespace MusicBot.Helpers
 {
@@ -20,7 +23,7 @@ namespace MusicBot.Helpers
         public const string NoSongsInQueue = "​__**Queue List:**__\nNo songs in queue, join a voice channel to get started.";
         public const string QueueMayHaveSongs = "__**Queue List:**__\n{0}";
         public const string FooterText = "{0} song{1} in queue | Volume: {2}";
-        public SpotifyClient Spotify;
+        public SpotifyClient Spotify { get; }
         public bool RepeatFlag { get; set; } = false;
         public LavaTrack RepeatTrack { get; set; }
 
@@ -141,6 +144,124 @@ namespace MusicBot.Helpers
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Muse has disconnected due to inactivity.");
             await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
         }
+
+        public async Task SearchForTrack(SocketCommandContext context, string query)
+        {
+            Victoria.Responses.Rest.SearchResponse search;
+            Regex regex;
+            Match match;
+
+            if (!Node.TryGetPlayer(context.Guild, out var player))
+            {
+                await Node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
+                player = Node.GetPlayer(context.Guild);
+            }
+
+            if (!query.IsUri(out var uri))
+            {
+                search = await Node.SearchYouTubeAsync(query.Trim());
+                await QueueTracksToPlayer(player, search, requester: context.User as IGuildUser);
+                return;
+            }
+
+
+            if (uri.Host.ToLower() == "spotify")
+            {
+                var tracks = await SearchSpotify(context.Channel, query);
+
+                if (tracks != null)
+                {
+                    await QueueSpotifyToPlayer(player, tracks);
+                }
+                return;
+            }
+
+            search = await Node.SearchAsync(query);
+
+            if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+            {
+                var msg = await embedHelper.BuildErrorEmbed($"The link `{query}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
+                regex = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
+                match = regex.Match(query);
+
+                if (!match.Success)
+                {
+                    await context.Channel.SendAndRemove(embed: msg, timeout: 15000);
+                    return;
+                }
+
+                string type = match.Groups["vid"].Value;
+                search = await Node.SearchYouTubeAsync(type);
+
+                if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                {
+                    await context.Channel.SendAndRemove(embed: msg, timeout: 15000);
+                    return;
+                }
+            }
+
+            regex = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?:[A-z0-9_-]{1,11})(?:\?t=(?<time>\d+))?(&t=(?<time2>\d+)\w)?");
+            match = regex.Match(query);
+            double time = match switch
+            {
+                _ when match.Groups["time"].Value != "" => double.Parse(match.Groups["time"].Value),
+                _ when match.Groups["time2"].Value != "" => double.Parse(match.Groups["time2"].Value),
+                _ => -1
+            };
+            TimeSpan? timeSpan = (time == -1) ? (TimeSpan?)null : TimeSpan.FromSeconds(time);
+            await QueueTracksToPlayer(player, search, timeSpan, context.User as IGuildUser);
+        }
+
+        public async Task<List<string>> SearchSpotify(ISocketMessageChannel channel, string url)
+        {
+            Regex r = new Regex(@"https?:\/\/(?:open\.spotify\.com)\/(?<type>\w+)\/(?<id>[\w-]{22})(?:\?si=(?:[\w-]{22}))?");
+            if (!r.Match(url).Success)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid Spotify link.");
+                var send = await channel.SendMessageAsync(embed: msg);
+                await send.RemoveAfterTimeout(5000);
+                return null;
+            }
+
+            string type = r.Match(url).Groups["type"].Value;
+            string id = r.Match(url).Groups["id"].Value;
+            List<string> tracks = new List<string>();
+
+            switch (type)
+            {
+                case "album":
+                    await foreach (var item in Spotify.Paginate((await Spotify.Albums.Get(id)).Tracks))
+                    {
+                        tracks.Add($"{item.Name} {string.Join(" ", item.Artists.Select(x => x.Name))}");
+                    }
+                    break;
+
+                case "playlist":
+                    var playlist = await Spotify.Playlists.Get(id);
+                    await foreach (var item in Spotify.Paginate(playlist.Tracks))
+                    {
+                        if (item.Track is FullTrack track)
+                        {
+                            tracks.Add($"{track.Name} {string.Join(" ", track.Artists.Select(x => x.Name))}");
+                        }
+                    }
+                    break;
+
+                case "track":
+                    var trackItem = await Spotify.Tracks.Get(id);
+                    tracks.Add($"{trackItem.Name} {string.Join(" ", trackItem.Artists.Select(x => x.Name))}");
+                    break;
+
+                default:
+                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Must be a `track`, `playlist`, or `album`.");
+                    var send = await channel.SendMessageAsync(embed: msg);
+                    await send.RemoveAfterTimeout(6000);
+                    return null;
+            }
+
+            return tracks;
+        }
+
         public ValueTask<string> UpdateEmbedQueue(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();

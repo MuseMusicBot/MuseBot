@@ -78,69 +78,11 @@ namespace MusicBot.Services
             {
                 _ = Task.Run(async () =>
                 {
-                    if (message.Content.IsUri())
-                    {
-                        Victoria.Responses.Rest.SearchResponse search = await node.SearchAsync(message.Content);
-                        if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
-                        {
-                            var msg = await embedHelper.BuildErrorEmbed($"The link `{message.Content}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
-                            Regex r = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
-                            if (r.Match(message.Content).Success)
-                            {
-                                string type = r.Match(message.Content).Groups["vid"].Value;
-                                search = await node.SearchAsync(type);
-                                if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
-                                {
-                                    await message.DeleteAsync();
-                                    await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                await message.DeleteAsync();
-                                await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
-                                return;
-                            }
-                        }
-
-                        Regex regex = new Regex(@"https?:\/\/(?:www\.)?(?:youtube|youtu)\.(?:com|be)\/?(?:watch\?v=)?(?:[A-z0-9_-]{1,11})(?:\?t=(?<time>\d+))?(&t=(?<time2>\d+)\w)?");
-                        Match m = regex.Match(message.Content);
-                        double time = m switch
-                        {
-                            _ when m.Groups["time"].Value != "" => double.Parse(m.Groups["time"].Value),
-                            _ when m.Groups["time2"].Value != "" => double.Parse(m.Groups["time2"].Value),
-                            _ => -1
-                        };
-
-                        if (!node.HasPlayer(context.Guild))
-                        {
-                            await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
-                        }
-                        TimeSpan? timeSpan = (time == -1) ? (TimeSpan?)null : TimeSpan.FromSeconds(time);
-
-                        await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search, timeSpan);
-                        _ = Task.Run(async () =>
-                        {
-                            await message.DeleteAsync();
-                        });
-                        return;
-                    }
-                    else
-                    {
-                        if (!node.HasPlayer(context.Guild))
-                        {
-                            await node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
-                        }
-                        Victoria.Responses.Rest.SearchResponse search = await node.SearchYouTubeAsync(message.Content.Trim());
-                        await ah.QueueTracksToPlayer(node.GetPlayer(context.Guild), search);
-                        _ = Task.Run(async () =>
-                        {
-                            await message.DeleteAsync();
-                        });
-                        return;
-                    }
+                    await ah.SearchForTrack(context, message.Content);
                 });
+
+                await message.DeleteAsync();
+                return;
             }
 
             var result = await commands.ExecuteAsync(context, argPos, provider);
