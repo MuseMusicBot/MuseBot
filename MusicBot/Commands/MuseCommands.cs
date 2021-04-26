@@ -45,8 +45,8 @@ namespace MusicBot.Commands
                 x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
                 x.Topic = "Music Bot";
             });
-            
-            await channel.SendFileAsync("muse-banner.png","");
+
+            await channel.SendFileAsync("muse-banner.png", "");
 
             var embed = await embedHelper.BuildDefaultEmbed();
             var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
@@ -234,7 +234,7 @@ namespace MusicBot.Commands
         #region move
         [Command("move", RunMode = RunMode.Async)]
         [Alias("mv")]
-        public async Task MoveQueue(int indexToMove)
+        public async Task MoveQueue(int indexToMove = 0)
         {
             if (!node.HasPlayer(Context.Guild))
             {
@@ -244,9 +244,24 @@ namespace MusicBot.Commands
             var player = node.GetPlayer(Context.Guild);
             var queue = player.Queue.ToList();
 
-
-            if (indexToMove < 1 || indexToMove > queue.Count)
+            if (indexToMove == 0)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Please specify a track to move.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 return;
+            }
+            if (queue.Count == 0)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Nothing in queue to remove.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                return;
+            }
+            if (indexToMove > queue.Count)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid track nuumber.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                return;
+            }
 
             --indexToMove;
 
@@ -264,8 +279,8 @@ namespace MusicBot.Commands
             string newQueue = await audioHelper.UpdateEmbedQueue(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
 
-            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToMove.Title}** moved to position 1.");
-            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+            var msg2 = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToMove.Title}** moved to position 1.");
+            await (await Context.Channel.SendMessageAsync(embed: msg2)).RemoveAfterTimeout();
         }
         #endregion
 
@@ -409,10 +424,60 @@ namespace MusicBot.Commands
         }
         #endregion
 
+        #region remove
+        [Command("remove", RunMode = RunMode.Async)]
+        public async Task Remove(int indexToMove = 0)
+        {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
+            var player = node.GetPlayer(Context.Guild);
+            var queue = player.Queue.ToList();
+
+            if (indexToMove == 0)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Please specify a track to remove.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                return;
+            }
+            if (queue.Count == 0)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Nothing in queue to remove.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                return;
+            }
+            if (indexToMove > queue.Count)
+            {
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid track nuumber.");
+                await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                return;
+            }
+
+            --indexToMove;
+
+            LavaTrack trackToRemove = queue.ElementAt(indexToMove) as LavaTrack;
+            queue.RemoveAt(indexToMove);
+            player.Queue.Clear();
+
+            foreach (var p in queue)
+            {
+                player.Queue.Enqueue(p);
+            }
+
+            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
+
+            var msg2 = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToRemove.Title}** has been removed.");
+            await (await Context.Channel.SendMessageAsync(embed: msg2)).RemoveAfterTimeout();
+        }
+        #endregion
+
         #region equalizer
         [Command("equalizer", RunMode = RunMode.Async)]
         [Alias("eq")]
-        public async Task Equalizer([Remainder]string eq = null)
+        public async Task Equalizer([Remainder] string eq = null)
         {
             if (!node.HasPlayer(Context.Guild))
             {
@@ -451,7 +516,7 @@ namespace MusicBot.Commands
                     await (await Context.Channel.SendMessageAsync(embed: await embedHelper.BuildMessageEmbed(Color.Orange, "Valid EQ modes: `earrape`, `bass`, `pop`, `off`"))).RemoveAfterTimeout(6000);
                     return;
             };
-            
+
             EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
             await player.EqualizerAsync(bands);
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, (EQHelper.CurrentEQ == "Off") ? "EQ turned off" : $"`{EQHelper.CurrentEQ}`: working my magic!");
@@ -466,7 +531,7 @@ namespace MusicBot.Commands
             Regex r = new Regex(@"https?:\/\/(?:open\.spotify\.com)\/(?<type>\w+)\/(?<id>[\w-]{22})(?:\?si=(?:[\w-]{22}))?");
             if (!r.Match(url).Success)
             {
-                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid Spotify link");
+                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid Spotify link.");
                 var send = await Context.Channel.SendMessageAsync(embed: msg);
                 await send.RemoveAfterTimeout(5000);
                 return;
@@ -502,7 +567,7 @@ namespace MusicBot.Commands
                     break;
 
                 default:
-                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Must be a `track`, `playlist`, or `album`");
+                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Must be a `track`, `playlist`, or `album`.");
                     var send = await Context.Channel.SendMessageAsync(embed: msg);
                     await send.RemoveAfterTimeout(6000);
                     return;
