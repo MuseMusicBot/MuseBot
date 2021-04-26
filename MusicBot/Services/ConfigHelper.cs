@@ -7,7 +7,14 @@ namespace MusicBot.Services
 {
     public class ConfigHelper
     {
+        /// <summary>
+        /// Default volume
+        /// </summary>
         public static ushort DefaultVolume { get; } = 10;
+
+        /// <summary>
+        /// Struct for Bot Config
+        /// </summary>
         public struct Config
         {
             public ulong GuildId { get; set; }
@@ -28,8 +35,15 @@ namespace MusicBot.Services
             public ushort Volume { get; set; }
         }
 
+        /// <summary>
+        /// Name of config file
+        /// </summary>
         public const string ConfigName = "appConfig.json";
 
+        /// <summary>
+        /// Loads config file
+        /// </summary>
+        /// <returns>Config struct with file values</returns>
         public static Config LoadConfigFile()
         {
             string json = File.ReadAllText(ConfigName);
@@ -38,6 +52,9 @@ namespace MusicBot.Services
             return config;   
         }
 
+        /// <summary>
+        /// Creates config file
+        /// </summary>
         public static void CreateConfigFile()
         {
             // TODO: Get Spotify and Lavalink details
@@ -63,6 +80,10 @@ namespace MusicBot.Services
             File.WriteAllText(ConfigName, JsonConvert.SerializeObject(config, Formatting.Indented));
         }
 
+        /// <summary>
+        /// Updates config file
+        /// </summary>
+        /// <param name="config">Config struct to be used to update</param>
         public static void UpdateConfigFile(Config config)
         {
             File.WriteAllText(ConfigName, JsonConvert.SerializeObject(config, Formatting.Indented));

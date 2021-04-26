@@ -56,6 +56,10 @@ namespace MusicBot
                 await discord.SetGameAsync("music", type: ActivityType.Listening);
             };
 
+            // Voice state updated handler
+            // user -> SocketUser
+            // before -> VoiceState before
+            // after -> VoiceState after
             discord.UserVoiceStateUpdated += async (user, before, after) =>
             {
                 if (user.Id == discord.CurrentUser.Id && before.VoiceChannel == null)
@@ -118,8 +122,15 @@ namespace MusicBot
             await Task.Delay(-1);
         }
 
+        /// <summary>
+        /// On Guild Available event handler
+        /// </summary>
+        /// <param name="guild">Guild that has become available</param>
+        /// <returns>void</returns>
         private async Task OnGuildAvaiable(SocketGuild guild)
         {
+            // Check if BotConfig has been loaded yet
+            // Will not fire if setup has not been performed
             if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
             {
                 var config = BotConfig;
@@ -128,6 +139,10 @@ namespace MusicBot
             }
         }
 
+        /// <summary>
+        /// Creates the Dependency Injection for this bot
+        /// </summary>
+        /// <returns>DI for bot</returns>
         private IServiceProvider ConfigureServices()
         {
             return new ServiceCollection()

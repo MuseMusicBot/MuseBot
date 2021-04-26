@@ -35,6 +35,13 @@ namespace MusicBot.Helpers
             discord.ReactionAdded += OnReactionAdded;
         }
 
+        /// <summary>
+        /// On Reaction handler 
+        /// </summary>
+        /// <param name="message">Cacheable struct from Discord</param>
+        /// <param name="channel">SocketChannel reaction occurred in</param>
+        /// <param name="reaction">Reaction added</param>
+        /// <returns></returns>
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
             var msg = await message.GetOrDownloadAsync();

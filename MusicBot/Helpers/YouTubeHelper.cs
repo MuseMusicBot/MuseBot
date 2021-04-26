@@ -5,6 +5,11 @@ namespace MusicBot.Helpers
 {
     class YouTubeHelper
     {
+        /// <summary>
+        /// Grabs YouTube thumbnail
+        /// </summary>
+        /// <param name="url">YouTube url to get thumbnail from</param>
+        /// <returns>Link to thumbnail</returns>
         public static string GetYtThumbnail(string url)
         {
             const string baseUrl = "https://img.youtube.com/vi/";
