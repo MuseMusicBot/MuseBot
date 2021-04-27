@@ -532,7 +532,7 @@ namespace MusicBot.Commands
 
         #region spotify
         [Command("spotify", RunMode = RunMode.Async)]
-        public async Task Test([Remainder] string url)
+        public async Task Spotify([Remainder] string url)
         {
             if (!node.HasPlayer(Context.Guild))
             {
@@ -547,41 +547,5 @@ namespace MusicBot.Commands
             }
         }
         #endregion
-
-        // [Command("ping", RunMode = RunMode.Async)]
-        // public async Task Ping()
-        // {
-        //     IUserMessage message;
-        //     Stopwatch stopwatch;
-        //     var latency = Context.Client.Latency;
-
-        //     var tcs = new TaskCompletionSource<long>();
-        //     var timeout = Task.Delay(TimeSpan.FromSeconds(30));
-
-        //     Task TestMessageAsync(SocketMessage arg)
-        //     {
-        //         tcs.SetResult(stopwatch.ElapsedMilliseconds);
-        //         return Task.CompletedTask;
-        //     }
-
-        //     stopwatch = Stopwatch.StartNew();
-        //     message = await ReplyAsync($"{latency}ms");
-        //     var init = stopwatch.ElapsedMilliseconds;
-
-        //     Context.Client.MessageReceived += TestMessageAsync;
-        //     var task = await Task.WhenAny(tcs.Task, timeout);
-        //     Context.Client.MessageReceived -= TestMessageAsync;
-        //     stopwatch.Stop();
-
-        //     if (task == timeout)
-        //     {
-        //         await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: timed out");
-        //     }
-        //     else
-        //     {
-        //         var rtt = await tcs.Task;
-        //         await message.ModifyAsync(x => x.Content = $"{latency}ms, init: {init}ms, rtt: {rtt}ms");
-        //     }
-        // }
     }
 }

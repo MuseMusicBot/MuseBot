@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading;
 using Victoria;
 using Victoria.Enums;
 using Discord.Commands;
-using System.Text.RegularExpressions;
 
 namespace MusicBot.Helpers
 {
