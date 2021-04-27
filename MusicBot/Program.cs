@@ -58,9 +58,6 @@ namespace MusicBot
                     {
                         return;
                     }
-
-                    await player.UpdateVolumeAsync(BotConfig.Volume);
-
                 });
                 //Sets Listening activity
                 await discord.SetGameAsync("music", type: ActivityType.Listening);

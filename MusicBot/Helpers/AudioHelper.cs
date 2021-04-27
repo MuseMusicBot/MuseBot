@@ -46,6 +46,12 @@ namespace MusicBot.Helpers
                 var queue = await UpdateEmbedQueue(player);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
+                //If for some reason Volume is set to 0 (100%) it will set to default volume
+                if (player.Volume == 0)
+                {
+                    await player.UpdateVolumeAsync(Program.BotConfig.Volume);
+                }
+
                 var content = queue switch
                 {
                     "" => NoSongsInQueue,
