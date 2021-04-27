@@ -366,7 +366,13 @@ namespace MusicBot.Commands
 
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
-                if (player.Queue.Count >= 1)
+                if (player.Queue.Count == 0)
+                {
+                    var embed = await embedHelper.BuildDefaultEmbed();
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+                    await player.StopAsync();
+                }
+                else
                 {
                     await player.SkipAsync();
                 }

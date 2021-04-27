@@ -27,7 +27,7 @@ namespace MusicBot.Helpers
 
         public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh)
         {
-			//Uiharu was here. :)
+            //Uiharu was here. :)
             discord = client;
             node = lavaNode;
             audioHelper = ah;
@@ -97,7 +97,16 @@ namespace MusicBot.Helpers
                         if (player.PlayerState == PlayerState.Playing ||
                             player.PlayerState == PlayerState.Paused)
                         {
-                            await player.SkipAsync();
+                            if (player.Queue.Count == 0)
+                            {
+                                var embed = await embedHelper.BuildDefaultEmbed();
+                                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+                                await player.StopAsync();
+                            }
+                            else
+                            {
+                                await player.SkipAsync();
+                            }
                         }
                         break;
                     case EmojiStates.Loop:
