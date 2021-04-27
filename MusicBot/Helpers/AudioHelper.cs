@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using SpotifyAPI.Web;
 using System;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using Victoria;
 using Victoria.Enums;
-using Discord.Commands;
 
 namespace MusicBot.Helpers
 {

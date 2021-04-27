@@ -2,12 +2,9 @@
 using Discord.Commands;
 using MusicBot.Helpers;
 using MusicBot.Services;
-using SpotifyAPI.Web;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
