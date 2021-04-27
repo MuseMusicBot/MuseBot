@@ -53,11 +53,6 @@ namespace MusicBot
                     {
                         await node.ConnectAsync();
                     }
-
-                    if (!node.TryGetPlayer(discord.GetGuild(BotConfig.GuildId), out var player))
-                    {
-                        return;
-                    }
                 });
                 //Sets Listening activity
                 await discord.SetGameAsync("music", type: ActivityType.Listening);
@@ -160,7 +155,7 @@ namespace MusicBot
                     x.Authorization = BotConfig.LavalinkPassword;
                     x.Hostname = BotConfig.LavalinkHost;
                     x.Port = (ushort)BotConfig.LavalinkPort;
-                    x.LogSeverity = LogSeverity.Info;
+                    x.LogSeverity = LogSeverity.Debug;
                 })
                 .AddSingleton<EmbedHelper>()
                 .AddSingleton<AudioHelper>()

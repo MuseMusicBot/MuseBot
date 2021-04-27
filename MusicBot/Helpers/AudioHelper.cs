@@ -385,6 +385,8 @@ namespace MusicBot.Helpers
                         return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
                     });
 
+                    SpinWait.SpinUntil(() => lavaTracks.Count() == spotifyTracks.Count - startIdx);
+
                     foreach (var track in lavaTracks)
                     {
                         player.Queue.Enqueue(track);

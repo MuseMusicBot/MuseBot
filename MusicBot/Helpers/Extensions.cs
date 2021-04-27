@@ -72,7 +72,7 @@ namespace MusicBot.Helpers
             var unorderedResult = new ConcurrentBag<(long, T1)>();
             Parallel.ForEach(list, async (o, state, i) =>
             {
-                unorderedResult.Add((i, await action.Invoke(o)));
+                unorderedResult.Add((i, await action.Invoke(o).ConfigureAwait(false)));
             });
             var ordered = unorderedResult.OrderBy(o => o.Item1);
             return ordered.Select(o => o.Item2);
