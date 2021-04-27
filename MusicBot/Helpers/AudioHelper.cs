@@ -170,8 +170,7 @@ namespace MusicBot.Helpers
                 return;
             }
 
-
-            if (uri.Host.ToLower() == "spotify")
+            if (uri.Host.ToLower() == "open.spotify.com")
             {
                 var tracks = await SearchSpotify(context.Channel, query);
 
@@ -360,6 +359,8 @@ namespace MusicBot.Helpers
                 string newQueue;
                 int startIdx = 0;
 
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
+
                 if (player.PlayerState == PlayerState.Connected || player.PlayerState == PlayerState.Stopped)
                 {
                     var node = await Node.SearchYouTubeAsync(spotifyTracks[0]);
@@ -367,7 +368,6 @@ namespace MusicBot.Helpers
                         await player.PlayAsync(node.Tracks[0]);
                     startIdx = 1;
                 }
-                Console.WriteLine(spotifyTracks.Count);
 
                 if (spotifyTracks.Count - startIdx > 0)
                 {
@@ -384,8 +384,6 @@ namespace MusicBot.Helpers
 
                         return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
                     });
-
-                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
 
                     foreach (var track in lavaTracks)
                     {
