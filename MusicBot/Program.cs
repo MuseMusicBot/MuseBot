@@ -162,6 +162,7 @@ namespace MusicBot
                 .AddSingleton<CommandHandlerService>()
                 .AddSingleton<ReactionsHelper>()
                 .AddSingleton<Commands.MuseCommands>()
+                .AddSingleton<Commands.HelpCommands>()
                 .AddLogging()
                 .AddSingleton<LoggingService>()
                 .BuildServiceProvider();
