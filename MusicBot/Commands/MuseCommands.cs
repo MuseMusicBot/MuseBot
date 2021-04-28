@@ -355,7 +355,7 @@ namespace MusicBot.Commands
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
 
             var volmsg = await embedHelper.BuildMessageEmbed($"Volume is now set to `{Program.BotConfig.Volume}%`.");
-            await (await Context.Channel.SendMessageAsync(embed: volmsg)).RemoveAfterTimeout();
+            await Context.Channel.SendAndRemove(embed: volmsg, timeout:10000);
         }
         #endregion
 
@@ -508,7 +508,7 @@ namespace MusicBot.Commands
             if (eq == null)
             {
                 var eqmsg = await embedHelper.BuildMessageEmbed((EQHelper.CurrentEQ == "Off") ? "No EQ applied." : $"Current EQ is: `{EQHelper.CurrentEQ}`");
-                await (await Context.Channel.SendMessageAsync(embed: eqmsg)).RemoveAfterTimeout();
+                await Context.Channel.SendAndRemove(embed: eqmsg, timeout:10000);
                 return;
             }
 

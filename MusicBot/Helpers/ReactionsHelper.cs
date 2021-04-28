@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Linq;
@@ -8,7 +9,7 @@ using Victoria.Enums;
 
 namespace MusicBot.Helpers
 {
-    public class ReactionsHelper
+    public class ReactionsHelper : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient discord;
         private readonly LavaNode node;
@@ -138,7 +139,7 @@ namespace MusicBot.Helpers
                             string newQueue = await audioHelper.GetNewEmbedQueueString(player);
                             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
                             var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
-                            await (await channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
+                            await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
                         }
                         break;
                     case EmojiStates.Eject:

@@ -15,7 +15,7 @@ using Victoria.Enums;
 
 namespace MusicBot.Helpers
 {
-    public class AudioHelper
+    public class AudioHelper : ModuleBase<SocketCommandContext>
     {
         private LavaNode Node { get; set; }
         private readonly EmbedHelper embedHelper;
@@ -112,7 +112,7 @@ namespace MusicBot.Helpers
             {
                 var player = args.Player;
                 var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\nVideo might still be processing, try again later.");
-                await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
+                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
                 //Works but might require some better debugging
                 //Having whats below above the messageasync doesn't trigger it for some reason?
                 if (player.Queue.Count == 0)
@@ -148,7 +148,7 @@ namespace MusicBot.Helpers
 
             await Node.LeaveAsync(player.VoiceChannel);
             var msg = await embedHelper.BuildMessageEmbed("Muse has disconnected due to inactivity.");
-            await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
+            await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
         }
 
         public async Task SearchForTrack(SocketCommandContext context, string query)
