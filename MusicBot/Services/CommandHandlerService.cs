@@ -56,7 +56,7 @@ namespace MusicBot.Services
                     _ = Task.Run(async () =>
                     {
                         await message.DeleteAsync();
-                        var msg = await embedHelper.BuildMessageEmbed(Color.Orange, $"This command is restrcited to <#{Program.BotConfig.ChannelId}>.");
+                        var msg = await embedHelper.BuildMessageEmbed($"This command is restrcited to <#{Program.BotConfig.ChannelId}>.");
                         await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(15000);
                     });
                 }
@@ -68,7 +68,7 @@ namespace MusicBot.Services
                 _ = Task.Run(async () =>
                 {
                     await message.DeleteAsync();
-                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "You have to be in a voice channel.");
+                    var msg = await embedHelper.BuildMessageEmbed("You have to be in a voice channel.");
                     await (await context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                 });
                 return;

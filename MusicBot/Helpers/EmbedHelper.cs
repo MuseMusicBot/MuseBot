@@ -51,10 +51,10 @@ namespace MusicBot.Helpers
             return new ValueTask<Embed>(embed);
         }
 
-        public ValueTask<Embed> BuildMessageEmbed(Color color, string text)
+        public ValueTask<Embed> BuildMessageEmbed(string text)
             => new ValueTask<Embed>(new EmbedBuilder
             {
-                Color = color,
+                Color = Color.Orange,
                 Description = text
             }.Build());
 

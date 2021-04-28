@@ -147,7 +147,7 @@ namespace MusicBot.Helpers
             }
 
             await Node.LeaveAsync(player.VoiceChannel);
-            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Muse has disconnected due to inactivity.");
+            var msg = await embedHelper.BuildMessageEmbed("Muse has disconnected due to inactivity.");
             await (await player.TextChannel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(10000);
         }
 
@@ -222,7 +222,7 @@ namespace MusicBot.Helpers
             Regex r = new Regex(@"https?:\/\/(?:open\.spotify\.com)\/(?<type>\w+)\/(?<id>[\w-]{22})(?:\?si=(?:[\w-]{22}))?");
             if (!r.Match(url).Success)
             {
-                var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Invalid Spotify link.");
+                var msg = await embedHelper.BuildMessageEmbed("Invalid Spotify link.");
                 var send = await channel.SendMessageAsync(embed: msg);
                 await send.RemoveAfterTimeout(5000);
                 return null;
@@ -258,7 +258,7 @@ namespace MusicBot.Helpers
                     break;
 
                 default:
-                    var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Must be a `track`, `playlist`, or `album`.");
+                    var msg = await embedHelper.BuildMessageEmbed("Must be a `track`, `playlist`, or `album`.");
                     var send = await channel.SendMessageAsync(embed: msg);
                     await send.RemoveAfterTimeout(6000);
                     return null;

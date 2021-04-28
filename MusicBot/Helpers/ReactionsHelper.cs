@@ -120,7 +120,7 @@ namespace MusicBot.Helpers
                                 false => null
                             };
 
-                            var embed = await embedHelper.BuildMessageEmbed(Color.Orange, $"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
+                            var embed = await embedHelper.BuildMessageEmbed($"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
                             var send = await channel.SendMessageAsync(embed: embed);
                             await send.RemoveAfterTimeout(5000);
                         }
@@ -137,7 +137,7 @@ namespace MusicBot.Helpers
                             player.Queue.Shuffle();
                             string newQueue = await audioHelper.GetNewEmbedQueueString(player);
                             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
-                            var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
+                            var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
                             await (await channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
                         }
                         break;
