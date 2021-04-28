@@ -69,7 +69,7 @@ namespace MusicBot.Services
                 {
                     await message.DeleteAsync();
                     var msg = await embedHelper.BuildMessageEmbed("You have to be in a voice channel.");
-                    await context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                    await context.Channel.SendAndRemove(embed: msg);
                 });
                 return;
             }

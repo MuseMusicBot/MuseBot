@@ -231,7 +231,7 @@ namespace MusicBot.Commands
             var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             var msg = await embedHelper.BuildMessageEmbed("Queue cleared");
-            await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+            await Context.Channel.SendAndRemove(embed: msg);
         }
         #endregion
 
@@ -258,13 +258,13 @@ namespace MusicBot.Commands
             if (queue.Count == 0)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Nothing in queue to remove.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
             if (indexToMove > queue.Count)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Invalid track nuumber.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
 
@@ -285,7 +285,7 @@ namespace MusicBot.Commands
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
 
             var msg2 = await embedHelper.BuildMessageEmbed($"**{trackToMove.Title}** moved to position 1.");
-            await Context.Channel.SendAndRemove(embed: msg2, timeout:10000);
+            await Context.Channel.SendAndRemove(embed: msg2);
         }
         #endregion
 
@@ -301,13 +301,13 @@ namespace MusicBot.Commands
                 if (vol == null)
                 {
                     var msg = await embedHelper.BuildMessageEmbed($"Volume is at `{Program.BotConfig.Volume}%`.");
-                    await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                    await Context.Channel.SendAndRemove(embed: msg);
                     return;
                 }
                 else
                 {
                     var msg = await embedHelper.BuildMessageEmbed("The bot must be in a voice channel to change volume.");
-                    await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                    await Context.Channel.SendAndRemove(embed: msg);
                     return;
                 }
             }
@@ -318,21 +318,21 @@ namespace MusicBot.Commands
             if (vol == null)
             {
                 var msg = await embedHelper.BuildMessageEmbed($"Current volume is at `{player.Volume}%`.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
             //If user sets the volume to the same level as it currently is
             if (vol == Program.BotConfig.Volume)
             {
                 var msg = await embedHelper.BuildMessageEmbed($"Volume is already set to `{player.Volume}%`.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
             //If user sets the volume below 1 or above 150
             if (vol > 150 || vol < 1)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Volume can only be set between 0 - 150 inclusively");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
             //If user sets the volume when music is stopped (not paused)
@@ -342,7 +342,7 @@ namespace MusicBot.Commands
                 config2.Volume = vol.Value;
                 Program.BotConfig = config2;
                 var msg = await embedHelper.BuildMessageEmbed($"Volume is now set to `{Program.BotConfig.Volume}%`.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
 
@@ -355,7 +355,7 @@ namespace MusicBot.Commands
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
 
             var volmsg = await embedHelper.BuildMessageEmbed($"Volume is now set to `{Program.BotConfig.Volume}%`.");
-            await Context.Channel.SendAndRemove(embed: volmsg, timeout:10000);
+            await Context.Channel.SendAndRemove(embed: volmsg);
         }
         #endregion
 
@@ -418,7 +418,7 @@ namespace MusicBot.Commands
             }
             await player.SeekAsync(TimeSpan.Zero);
             var msg = await embedHelper.BuildMessageEmbed("Let's run it one more time!");
-            await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+            await Context.Channel.SendAndRemove(embed: msg);
         }
         #endregion
 
@@ -457,19 +457,19 @@ namespace MusicBot.Commands
             if (indexToMove == 0)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Please specify a track to remove.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
             if (queue.Count == 0)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Nothing in queue to remove.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
             if (indexToMove > queue.Count)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Invalid track nuumber.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
 
@@ -488,7 +488,7 @@ namespace MusicBot.Commands
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
 
             var msg2 = await embedHelper.BuildMessageEmbed($"**{trackToRemove.Title}** has been removed.");
-            await Context.Channel.SendAndRemove(embed: msg2, timeout:10000);
+            await Context.Channel.SendAndRemove(embed: msg2);
         }
         #endregion
 
@@ -508,7 +508,7 @@ namespace MusicBot.Commands
             if (eq == null)
             {
                 var eqmsg = await embedHelper.BuildMessageEmbed((EQHelper.CurrentEQ == "Off") ? "No EQ applied." : $"Current EQ is: `{EQHelper.CurrentEQ}`");
-                await Context.Channel.SendAndRemove(embed: eqmsg, timeout:10000);
+                await Context.Channel.SendAndRemove(embed: eqmsg);
                 return;
             }
 
@@ -532,7 +532,7 @@ namespace MusicBot.Commands
                     bands = EQHelper.BuildEQ(null);
                     break;
                 default:
-                    await (await Context.Channel.SendMessageAsync(embed: await embedHelper.BuildMessageEmbed("Valid EQ modes: `earrape`, `bass`, `pop`, `off`"))).RemoveAfterTimeout(6000);
+                    await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Valid EQ modes: `earrape`, `bass`, `pop`, `off`"), timeout:6000);
                     return;
             };
 
