@@ -29,7 +29,7 @@ namespace MusicBot.Commands
             // TODO: Get command by name
             var cmds = commands.Commands.OrderBy(x => x.Name);
 
-            var s = string.Join("\n", cmds.Select(x => $"`{x.Name}` - [**{string.Join(", ", x.Aliases)}**]: {x.Summary}"));
+            var s = string.Join("\n", cmds.Select(x => $"`{x.Name}`{(x.Aliases.Count - 1 == 0 ? "" : " - [**" + string.Join(", ", x.Aliases.Skip(1)) + "**]")}: {x.Summary}"));
             var embed = await embedHelper.BuildMessageEmbed(s);
             await Context.Channel.SendAndRemove(embed: embed, timeout: 30000);
         }
