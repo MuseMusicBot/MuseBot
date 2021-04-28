@@ -43,7 +43,7 @@ namespace MusicBot.Helpers
             Node.OnTrackStarted += async (args) =>
             {
                 var player = args.Player;
-                var queue = await UpdateEmbedQueue(player);
+                var queue = await GetNewEmbedQueueString(player);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
                 //If for some reason Volume is set to 0 (100%) it will set to default volume
@@ -267,7 +267,7 @@ namespace MusicBot.Helpers
             return tracks;
         }
 
-        public ValueTask<string> UpdateEmbedQueue(LavaPlayer player)
+        public ValueTask<string> GetNewEmbedQueueString(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();
             var q = player.Queue.ToList();
@@ -318,10 +318,10 @@ namespace MusicBot.Helpers
                 {
                     foreach (var track in lavaTracks)
                     {
-                        player.Queue.Enqueue(track);
+                        player.Queue.Enqueue(track.CreateMuseTrack(requester));
                     }
                     //Pause flag needed!
-                    newQueue = await UpdateEmbedQueue(player);
+                    newQueue = await GetNewEmbedQueueString(player);
                     var emebed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
                     await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                     {
@@ -333,7 +333,7 @@ namespace MusicBot.Helpers
                 {
                     foreach (var track in lavaTracks)
                     {
-                        player.Queue.Enqueue(track);
+                        player.Queue.Enqueue(track.CreateMuseTrack(requester));
                     }
 
                     _ = player.Queue.TryDequeue(out var newTrack);
@@ -352,7 +352,7 @@ namespace MusicBot.Helpers
             await Task.CompletedTask;
         }
 
-        public async Task QueueSpotifyToPlayer(LavaPlayer player, List<string> spotifyTracks)
+        public async Task QueueSpotifyToPlayer(LavaPlayer player, List<string> spotifyTracks, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
             {
@@ -393,7 +393,7 @@ namespace MusicBot.Helpers
                     }
                 }
 
-                newQueue = await UpdateEmbedQueue(player).ConfigureAwait(false);
+                newQueue = await GetNewEmbedQueueString(player).ConfigureAwait(false);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen).ConfigureAwait(false);
                 var content = newQueue switch
                 {

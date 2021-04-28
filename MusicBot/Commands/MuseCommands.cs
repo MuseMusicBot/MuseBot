@@ -207,7 +207,7 @@ namespace MusicBot.Commands
         {
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Shuffle();
-            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
             await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();
@@ -273,7 +273,7 @@ namespace MusicBot.Commands
                 player.Queue.Enqueue(p);
             }
 
-            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
 
             var msg2 = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToMove.Title}** moved to position 1.");
@@ -469,7 +469,7 @@ namespace MusicBot.Commands
                 player.Queue.Enqueue(p);
             }
 
-            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
 
             var msg2 = await embedHelper.BuildMessageEmbed(Color.Orange, $"**{trackToRemove.Title}** has been removed.");
@@ -542,6 +542,22 @@ namespace MusicBot.Commands
             {
                 await audioHelper.QueueSpotifyToPlayer(player, tracks);
             }
+        }
+        #endregion
+
+        #region requester
+        [Command("requester", RunMode = RunMode.Async)]
+        [Alias("req")]
+        public async Task Requester()
+        {
+            if (!node.TryGetPlayer(Context.Guild, out var player))
+            {
+                return;
+            }
+
+            MuseTrack track = player.Track as MuseTrack;
+            var embed = await embedHelper.BuildMessageEmbed(Color.Orange, $"Requested by: `{track.Requester.Nickname ?? track.Requester.Username + "#" + track.Requester.Discriminator}`");
+            await Context.Channel.SendAndRemove(embed: embed);
         }
         #endregion
     }

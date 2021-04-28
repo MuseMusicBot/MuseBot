@@ -135,7 +135,7 @@ namespace MusicBot.Helpers
                             }
 
                             player.Queue.Shuffle();
-                            string newQueue = await audioHelper.UpdateEmbedQueue(player);
+                            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
                             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
                             var msg = await embedHelper.BuildMessageEmbed(Color.Orange, "Queue shuffled");
                             await (await channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout();

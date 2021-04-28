@@ -45,6 +45,7 @@ namespace MusicBot.Helpers
             await msg.RemoveAfterTimeout(timeout);
             await Task.CompletedTask;
         }
+
         public static MuseTrack CreateMuseTrack(this LavaTrack track, IGuildUser requester)
         {
             return new MuseTrack(track, requester);
