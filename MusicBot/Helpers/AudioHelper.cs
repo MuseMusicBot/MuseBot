@@ -176,7 +176,7 @@ namespace MusicBot.Helpers
 
                 if (tracks != null)
                 {
-                    await QueueSpotifyToPlayer(player, tracks);
+                    await QueueSpotifyToPlayer(player, tracks, context.User as IGuildUser);
                 }
                 return;
             }
@@ -365,7 +365,7 @@ namespace MusicBot.Helpers
                 {
                     var node = await Node.SearchYouTubeAsync(spotifyTracks[0]);
                     if (node.LoadStatus != LoadStatus.NoMatches || node.LoadStatus != LoadStatus.LoadFailed)
-                        await player.PlayAsync(node.Tracks[0]);
+                        await player.PlayAsync(node.Tracks[0].CreateMuseTrack(requester));
                     startIdx = 1;
                 }
 
@@ -382,7 +382,7 @@ namespace MusicBot.Helpers
                             i++;
                         } while ((node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) && i <= maxRetries);
 
-                        return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault();
+                        return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault()?.CreateMuseTrack(requester);
                     });
 
                     SpinWait.SpinUntil(() => lavaTracks.Count() == spotifyTracks.Count - startIdx);
