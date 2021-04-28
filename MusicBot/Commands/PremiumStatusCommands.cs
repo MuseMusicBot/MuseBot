@@ -9,6 +9,7 @@ namespace MusicBot.Commands
     {
         [Command("premiumstatus", RunMode = RunMode.Async)]
         [Alias("premium")]
+        [Summary("Shows the server premium status.")]
         public async Task HelpAsync([Remainder] string commandOrModule = null)
         {
             var embed = new EmbedBuilder
@@ -19,7 +20,7 @@ namespace MusicBot.Commands
                 ImageUrl = "https://i.imgur.com/aq7yRAn.gif"
             }.Build();
 
-            await (await Context.Channel.SendMessageAsync(embed: embed)).RemoveAfterTimeout(15000);
+            await Context.Channel.SendAndRemove(embed: embed, timeout:15000);
         }
         
     }

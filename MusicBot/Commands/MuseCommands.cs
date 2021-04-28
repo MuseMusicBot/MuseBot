@@ -29,6 +29,7 @@ namespace MusicBot.Commands
 
         #region setup
         [Command("setup", RunMode = RunMode.Async)]
+        [Summary("Setups the song request channel.")]
         public async Task Setup()
         {
             if (Context.Guild.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
@@ -62,6 +63,7 @@ namespace MusicBot.Commands
 
         #region play
         [Command("play", RunMode = RunMode.Async)]
+        [Summary("Plays a song.")]
         public async Task Play([Remainder] string query)
         {
             if (!node.HasPlayer(Context.Guild))
@@ -97,6 +99,7 @@ namespace MusicBot.Commands
         #region pause
         [Command("pause")]
         [Alias("p")]
+        [Summary("Pauses the current playing song.")]
         public async Task Pause()
         {
             if (!node.HasPlayer(Context.Guild))
@@ -123,6 +126,7 @@ namespace MusicBot.Commands
         #region resume
         [Command("resume")]
         [Alias("r")]
+        [Summary("Resumes the current playing song.")]
         public async Task Resume()
         {
             if (!node.HasPlayer(Context.Guild))
@@ -150,6 +154,7 @@ namespace MusicBot.Commands
         #region seek
         [Command("seek", RunMode = RunMode.Async)]
         [Alias("s")]
+        [Summary("Seeks to a specific part of the current song.")]
         public async Task Seek(string seekTime = null)
         {
             if (!node.HasPlayer(Context.Guild))
@@ -203,6 +208,7 @@ namespace MusicBot.Commands
 
         #region shuffle
         [Command("shuffle", RunMode = RunMode.Async)]
+        [Summary("Shuffles the entire queue.")]
         public async Task Shuffle()
         {
             var player = node.GetPlayer(Context.Guild);
@@ -217,6 +223,7 @@ namespace MusicBot.Commands
         #region clear
         [Command("clear", RunMode = RunMode.Async)]
         [Alias("clearqueue")]
+        [Summary("Clears the entire queue.")]
         public async Task Clear()
         {
             var player = node.GetPlayer(Context.Guild);
@@ -231,6 +238,7 @@ namespace MusicBot.Commands
         #region move
         [Command("move", RunMode = RunMode.Async)]
         [Alias("mv")]
+        [Summary("Moves a specified song to the top queue.")]
         public async Task MoveQueue(int indexToMove = 0)
         {
             if (!node.HasPlayer(Context.Guild))
@@ -284,6 +292,7 @@ namespace MusicBot.Commands
         #region volume
         [Command("volume", RunMode = RunMode.Async)]
         [Alias("vol")]
+        [Summary("Changes the output of the bot's volume.")]
         public async Task SetVolume(ushort? vol = null)
         {
             //If user sets volume when Bot is not in a voice channel
@@ -352,6 +361,7 @@ namespace MusicBot.Commands
 
         #region skip
         [Command("skip", RunMode = RunMode.Async)]
+        [Summary("Skips the current playing song.")]
         public async Task Skip()
         {
             if (!node.HasPlayer(Context.Guild))
@@ -379,6 +389,7 @@ namespace MusicBot.Commands
 
         #region stop
         [Command("stop", RunMode = RunMode.Async)]
+        [Summary("Stops playing and clears the queue.")]
         public async Task Stop()
         {
             if (!node.HasPlayer(Context.Guild))
@@ -394,8 +405,10 @@ namespace MusicBot.Commands
         }
         #endregion
 
-        #region restart
-        [Command("restart", RunMode = RunMode.Async)]
+        #region replay
+        [Command("replay", RunMode = RunMode.Async)]
+        [Alias("restart")]
+        [Summary("Restarts the current playing song.")]
         public async Task RestartTrack()
         {
             var player = node.GetPlayer(Context.Guild);
@@ -412,6 +425,7 @@ namespace MusicBot.Commands
         #region disconnect
         [Command("disconnect", RunMode = RunMode.Async)]
         [Alias("d", "dc", "leave")]
+        [Summary("Disconnects the bot from the voice channel.")]
         public async Task Disconnect()
         {
             if (!node.HasPlayer(Context.Guild))
@@ -429,6 +443,7 @@ namespace MusicBot.Commands
 
         #region remove
         [Command("remove", RunMode = RunMode.Async)]
+        [Summary("Removes a specific song from the queue.")]
         public async Task Remove(int indexToMove = 0)
         {
             if (!node.HasPlayer(Context.Guild))
@@ -480,6 +495,7 @@ namespace MusicBot.Commands
         #region equalizer
         [Command("equalizer", RunMode = RunMode.Async)]
         [Alias("eq")]
+        [Summary("Applies EQ to the bot.")]
         public async Task Equalizer([Remainder] string eq = null)
         {
             if (!node.HasPlayer(Context.Guild))
@@ -523,12 +539,13 @@ namespace MusicBot.Commands
             EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
             await player.EqualizerAsync(bands);
             var msg = await embedHelper.BuildMessageEmbed((EQHelper.CurrentEQ == "Off") ? "EQ turned off" : $"`{EQHelper.CurrentEQ}`: working my magic!");
-            await (await Context.Channel.SendMessageAsync(embed: msg)).RemoveAfterTimeout(5000);
+            await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
         }
         #endregion
 
         #region spotify
         [Command("spotify", RunMode = RunMode.Async)]
+        [Summary("Plays a song from Spotify.")]
         public async Task Spotify([Remainder] string url)
         {
             if (!node.HasPlayer(Context.Guild))
@@ -548,6 +565,7 @@ namespace MusicBot.Commands
         #region requester
         [Command("requester", RunMode = RunMode.Async)]
         [Alias("req")]
+        [Summary("Shows the user that requested the current song.")]
         public async Task Requester()
         {
             if (!node.TryGetPlayer(Context.Guild, out var player))
