@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 .vscode/launch.json
 .vscode/tasks.json
+.vscode/extensions.json
+MusicBot/appConfig.json
