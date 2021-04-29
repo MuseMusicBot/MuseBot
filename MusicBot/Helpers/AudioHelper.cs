@@ -111,10 +111,30 @@ namespace MusicBot.Helpers
             Node.OnTrackException += async (args) =>
             {
                 var player = args.Player;
-                var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\nVideo might still be processing, try again later.");
+                var errorMessage = args.ErrorMessage switch
+                {
+                    "This video cannot be viewed anonymously." => "This video most likely hasn't premiered yet.",
+                    "Received unexpected response from YouTube." => "YouTube is most likely down.",
+                    _ => "Video might still be processing, try again later."
+                };
+                var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\n{errorMessage}");
                 await player.TextChannel.SendAndRemove(embed: msg);
-                //Works but might require some better debugging
-                //Having whats below above the messageasync doesn't trigger it for some reason?
+                if (player.Queue.Count == 0)
+                {
+                    //If no songs in queue it will stop playback to reset the embed
+                    await player.StopAsync();
+                    return;
+                }
+                //If queue has any songs it will skip to the next track
+                await player.SkipAsync();
+                return;
+            };
+
+            Node.OnTrackStuck += async (args) =>
+            {
+                var player = args.Player;
+                var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\nTrack got stuck, moving on...");
+                await player.TextChannel.SendAndRemove(embed: msg);
                 if (player.Queue.Count == 0)
                 {
                     //If no songs in queue it will stop playback to reset the embed
