@@ -3,19 +3,19 @@ using Discord.Commands;
 using Discord.WebSocket;
 using SpotifyAPI.Web;
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 
 namespace MusicBot.Helpers
 {
-    public class AudioHelper : ModuleBase<SocketCommandContext>
+    public class AudioHelper
     {
         private LavaNode Node { get; set; }
         private readonly EmbedHelper embedHelper;
@@ -112,7 +112,7 @@ namespace MusicBot.Helpers
             {
                 var player = args.Player;
                 var msg = await embedHelper.BuildTrackErrorEmbed($"[{player.Track.Title}]({player.Track.Url})\nVideo might still be processing, try again later.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+                await player.TextChannel.SendAndRemove(embed: msg);
                 //Works but might require some better debugging
                 //Having whats below above the messageasync doesn't trigger it for some reason?
                 if (player.Queue.Count == 0)
@@ -148,7 +148,7 @@ namespace MusicBot.Helpers
 
             await Node.LeaveAsync(player.VoiceChannel);
             var msg = await embedHelper.BuildMessageEmbed("Muse has disconnected due to inactivity.");
-            await Context.Channel.SendAndRemove(embed: msg, timeout:10000);
+            await player.TextChannel.SendAndRemove(embed: msg);
         }
 
         public async Task SearchForTrack(SocketCommandContext context, string query)
@@ -223,8 +223,7 @@ namespace MusicBot.Helpers
             if (!r.Match(url).Success)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Invalid Spotify link.");
-                var send = await channel.SendMessageAsync(embed: msg);
-                await send.RemoveAfterTimeout(5000);
+                await channel.SendAndRemove(embed: msg, timeout: 5000);
                 return null;
             }
 
@@ -259,8 +258,7 @@ namespace MusicBot.Helpers
 
                 default:
                     var msg = await embedHelper.BuildMessageEmbed("Must be a `track`, `playlist`, or `album`.");
-                    var send = await channel.SendMessageAsync(embed: msg);
-                    await send.RemoveAfterTimeout(6000);
+                    await channel.SendAndRemove(embed: msg, timeout: 6000);
                     return null;
             }
 

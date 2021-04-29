@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
-using System.Threading.Tasks;
 using MusicBot.Helpers;
+using System.Threading.Tasks;
 
 namespace MusicBot.Commands
 {
@@ -20,8 +20,8 @@ namespace MusicBot.Commands
                 ImageUrl = "https://i.imgur.com/aq7yRAn.gif"
             }.Build();
 
-            await Context.Channel.SendAndRemove(embed: embed, timeout:15000);
+            await Context.Channel.SendAndRemove(embed: embed, timeout: 15000);
         }
-        
+
     }
 }

@@ -175,7 +175,7 @@ namespace MusicBot.Commands
             if (seekTime == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
             {
                 var msg = await embedHelper.BuildMessageEmbed($"Current Position: {pos.ToTimecode()}/{len.ToTimecode()}");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
+                await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace MusicBot.Commands
             if (len.TotalMilliseconds - seek.TotalMilliseconds < 0)
             {
                 var msg = await embedHelper.BuildMessageEmbed($"You can only seek up to {len.ToTimecode()}");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
+                await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
                 return;
             }
 
@@ -200,7 +200,7 @@ namespace MusicBot.Commands
             {
                 await player.SeekAsync(seek);
                 var msg = await embedHelper.BuildMessageEmbed($"Seeked to `{seek.ToTimecode()}`.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
+                await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
                 return;
             }
         }
@@ -216,7 +216,7 @@ namespace MusicBot.Commands
             string newQueue = await audioHelper.GetNewEmbedQueueString(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
             var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
-            await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
+            await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
         }
         #endregion
 
@@ -252,7 +252,7 @@ namespace MusicBot.Commands
             if (indexToMove == 0)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Please specify a track to move.");
-                await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
+                await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
                 return;
             }
             if (queue.Count == 0)
@@ -263,7 +263,7 @@ namespace MusicBot.Commands
             }
             if (indexToMove > queue.Count)
             {
-                var msg = await embedHelper.BuildMessageEmbed("Invalid track nuumber.");
+                var msg = await embedHelper.BuildMessageEmbed("Invalid track number.");
                 await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
@@ -532,14 +532,14 @@ namespace MusicBot.Commands
                     bands = EQHelper.BuildEQ(null);
                     break;
                 default:
-                    await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Valid EQ modes: `earrape`, `bass`, `pop`, `off`"), timeout:6000);
+                    await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Valid EQ modes: `earrape`, `bass`, `pop`, `off`"), timeout: 6000);
                     return;
             };
 
             EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
             await player.EqualizerAsync(bands);
             var msg = await embedHelper.BuildMessageEmbed((EQHelper.CurrentEQ == "Off") ? "EQ turned off" : $"`{EQHelper.CurrentEQ}`: working my magic!");
-            await Context.Channel.SendAndRemove(embed: msg, timeout:5000);
+            await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
         }
         #endregion
 

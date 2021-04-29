@@ -49,7 +49,7 @@ namespace MusicBot.Services
             string json = File.ReadAllText(ConfigName);
             var config = JsonConvert.DeserializeObject<Config>(json);
             config.Volume = DefaultVolume;
-            return config;   
+            return config;
         }
 
         /// <summary>

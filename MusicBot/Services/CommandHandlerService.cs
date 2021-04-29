@@ -3,13 +3,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using MusicBot.Helpers;
 using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Victoria;
-using Victoria.Enums;
 
 namespace MusicBot.Services
 {
@@ -19,16 +14,14 @@ namespace MusicBot.Services
         private readonly CommandService commands;
         private IServiceProvider provider;
         private readonly AudioHelper ah;
-        private readonly LavaNode node;
         public EmbedHelper embedHelper;
 
-        public CommandHandlerService(DiscordSocketClient discord, CommandService commands, IServiceProvider provider, AudioHelper audioHelper, LavaNode lavanode, EmbedHelper eh)
+        public CommandHandlerService(DiscordSocketClient discord, CommandService commands, IServiceProvider provider, AudioHelper audioHelper, EmbedHelper eh)
         {
             this.discord = discord;
             this.commands = commands;
             this.provider = provider;
             ah = audioHelper;
-            node = lavanode;
             embedHelper = eh;
 
             this.discord.MessageReceived += MessageReceived;
@@ -57,7 +50,7 @@ namespace MusicBot.Services
                     {
                         await message.DeleteAsync();
                         var msg = await embedHelper.BuildMessageEmbed($"This command is restrcited to <#{Program.BotConfig.ChannelId}>.");
-                        await context.Channel.SendAndRemove(embed: msg, timeout:15000);
+                        await context.Channel.SendAndRemove(embed: msg, timeout: 15000);
                     });
                 }
                 return;

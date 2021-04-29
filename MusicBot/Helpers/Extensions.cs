@@ -39,7 +39,7 @@ namespace MusicBot.Helpers
             return res;
         }
 
-        public static async Task SendAndRemove(this ISocketMessageChannel channel, string content = null, Embed embed = null, int timeout = 10000)
+        public static async Task SendAndRemove<T>(this T channel, string content = null, Embed embed = null, int timeout = 10000) where T: IMessageChannel
         {
             var msg = await channel.SendMessageAsync(text: content, embed: embed);
             await msg.RemoveAfterTimeout(timeout);
