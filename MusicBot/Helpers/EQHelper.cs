@@ -3,6 +3,9 @@ using Victoria.Payloads;
 
 namespace MusicBot.Helpers
 {
+    /// <summary>
+    /// Class to handle creating EQ filters
+    /// </summary>
     class EQHelper
     {
         /// <summary>

@@ -15,6 +15,9 @@ using Victoria.Enums;
 
 namespace MusicBot.Helpers
 {
+    /// <summary>
+    /// Class to handle most audio related functions
+    /// </summary>
     public class AudioHelper
     {
         private LavaNode Node { get; set; }
@@ -40,6 +43,9 @@ namespace MusicBot.Helpers
             Spotify = spotify;
             _disconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
+
+            // Handler for when a LavaTrack is started
+            // args: TrackStartEventArgs
             Node.OnTrackStarted += async (args) =>
             {
                 var player = args.Player;
@@ -75,6 +81,8 @@ namespace MusicBot.Helpers
                 value.Cancel(true);
             };
 
+            // Handler for when a LavaTrack is ended, stopped, or skipped
+            // args: TrackEndedEventArgs
             Node.OnTrackEnded += async (args) =>
             {
                 var player = args.Player;
@@ -108,6 +116,8 @@ namespace MusicBot.Helpers
                 await args.Player.PlayAsync(track);
             };
 
+            // Handler for when a LavaTrack throws an exception
+            // args: TrackExceptionEventArgs
             Node.OnTrackException += async (args) =>
             {
                 var player = args.Player;
@@ -130,6 +140,8 @@ namespace MusicBot.Helpers
                 return;
             };
 
+            // Handler for when a LavaTrack gets stuck
+            // args: TrackStuckEventArgs
             Node.OnTrackStuck += async (args) =>
             {
                 var player = args.Player;
@@ -147,6 +159,12 @@ namespace MusicBot.Helpers
             };
         }
 
+        /// <summary>
+        /// Initiates a disconnect from the voice channel
+        /// </summary>
+        /// <param name="player">Instance of LavaPlayer for the guild</param>
+        /// <param name="timeSpan">TimeSpan for length before disconnecting</param>
+        /// <returns></returns>
         private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeSpan)
         {
             if (!_disconnectTokens.TryGetValue(player.VoiceChannel.Id, out var value))
@@ -171,6 +189,12 @@ namespace MusicBot.Helpers
             await player.TextChannel.SendAndRemove(embed: msg);
         }
 
+        /// <summary>
+        /// Searches for a track from YouTube, Soundcloud, or Spotify
+        /// </summary>
+        /// <param name="context">context for message</param>
+        /// <param name="query">Query for YouTube, Soundcloud, or Spotify</param>
+        /// <returns></returns>
         public async Task SearchForTrack(SocketCommandContext context, string query)
         {
             Victoria.Responses.Rest.SearchResponse search;
@@ -237,6 +261,12 @@ namespace MusicBot.Helpers
             await QueueTracksToPlayer(player, search, timeSpan, context.User as IGuildUser);
         }
 
+        /// <summary>
+        /// Searches Spotify for tracks
+        /// </summary>
+        /// <param name="channel">Channel in which to send to</param>
+        /// <param name="url">Spotify URL</param>
+        /// <returns><see cref="List{T}"/> of tracks (track name + artists' name) or null if not found</returns>
         public async Task<List<string>> SearchSpotify(ISocketMessageChannel channel, string url)
         {
             Regex r = new Regex(@"https?:\/\/(?:open\.spotify\.com)\/(?<type>\w+)\/(?<id>[\w-]{22})(?:\?si=(?:[\w-]{22}))?");
@@ -285,6 +315,11 @@ namespace MusicBot.Helpers
             return tracks;
         }
 
+        /// <summary>
+        /// Gets new content string for queue above embed
+        /// </summary>
+        /// <param name="player">Instance of <see cref="LavaPlayer" /> for the guild</param>
+        /// <returns>String with songs queued</returns>
         public ValueTask<string> GetNewEmbedQueueString(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();
@@ -315,6 +350,14 @@ namespace MusicBot.Helpers
 
         }
 
+        /// <summary>
+        /// Queues serached (YouTube/Soundcloud) songs to the player queue
+        /// </summary>
+        /// <param name="player">Instance of <see cref="LavaPlayer" /> for the guild</param>
+        /// <param name="search"><see cref="Victoria.Responses.Rest.SearchResponse"/></param>
+        /// <param name="startTime">Start time of the track</param>
+        /// <param name="requester">Requester of the track</param>
+        /// <returns></returns>
         public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search, TimeSpan? startTime = null, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
@@ -370,6 +413,13 @@ namespace MusicBot.Helpers
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Queues serached spotify songs to the player queue
+        /// </summary>
+        /// <param name="player">Instance of <see cref="LavaPlayer" /> for the guild</param>
+        /// <param name="spotifyTracks"><see cref="List{T}"/> of spotifyTracks</param>
+        /// <param name="requester">Requester of the song</param>
+        /// <returns></returns>
         public async Task QueueSpotifyToPlayer(LavaPlayer player, List<string> spotifyTracks, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
@@ -389,7 +439,7 @@ namespace MusicBot.Helpers
 
                 if (spotifyTracks.Count - startIdx > 0)
                 {
-                    var lavaTracks = spotifyTracks.Skip(startIdx).OrderedParallel(async e =>
+                    var lavaTracks = spotifyTracks.Skip(startIdx).OrderedParallelAsync(async e =>
                     {
                         int i = 0;
                         int maxRetries = 3;

@@ -5,6 +5,9 @@ using Victoria;
 
 namespace MusicBot.Helpers
 {
+    /// <summary>
+    /// Class to create commonly used embeds
+    /// </summary>
     public class EmbedHelper
     {
         private readonly DiscordSocketClient discord;
@@ -14,6 +17,13 @@ namespace MusicBot.Helpers
             discord = _discord;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="color"></param>
+        /// <param name="paused"></param>
+        /// <returns></returns>
         public ValueTask<Embed> BuildMusicEmbed(LavaPlayer player, Color color, bool paused = false)
         {
             string footerText = string.Format(AudioHelper.FooterText,
