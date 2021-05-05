@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Linq;
@@ -15,7 +14,7 @@ namespace MusicBot.Helpers
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
-        private readonly IEmote[] Emojis = { new Emoji("⏮"), new Emoji("⏯️"), new Emoji("⏭️"), new Emoji("🔂"), new Emoji("🔀"), new Emoji("⏏️") };
+        public static readonly IEmote[] Emojis = { new Emoji("⏮"), new Emoji("⏯️"), new Emoji("⏭️"), new Emoji("🔂"), new Emoji("🔀"), new Emoji("⏏️") };
         private enum EmojiStates
         {
             Previous,

@@ -55,7 +55,7 @@ namespace MusicBot.Helpers
                 Title = "Nothing currently playing",
                 Description = "This ain't Hydra. Please stop asking.",
                 ImageUrl = "https://i.imgur.com/K4dWciL.jpg",
-                Footer = new EmbedFooterBuilder { Text = "Prefix for this server is: m?" }
+                Footer = new EmbedFooterBuilder { Text = $"Prefix for this server is: {Program.BotConfig.Prefix}" }
             }.Build();
 
             return new ValueTask<Embed>(embed);

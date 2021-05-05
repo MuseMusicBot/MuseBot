@@ -57,7 +57,6 @@ namespace MusicBot.Services
         /// </summary>
         public static void CreateConfigFile()
         {
-            // TODO: Get Spotify and Lavalink details
             string token;
             do
             {
@@ -69,12 +68,27 @@ namespace MusicBot.Services
 
             Console.Write("Enter prefix (default is \"m?\"): ");
             string prefix = Console.ReadLine().Trim();
+            Console.Write("Enter SpotifyClientID: ");
+            string spotifyClientId = Console.ReadLine().Trim();
+            Console.Write("Enter SpotifySecret: ");
+            string spotifySecret = Console.ReadLine().Trim();
+            Console.Write("Enter LavaLink Host: ");
+            string lavaLinkHost = Console.ReadLine().Trim();
+            Console.Write("Enter LavaLink Port (default = 2333): ");
+            string lavaLinkPort = Console.ReadLine().Trim();
+            Console.Write("Enter LavaLink Password: ");
+            string lavaLinkPassword = Console.ReadLine().Trim();
 
 
             Config config = new Config
             {
                 Prefix = string.IsNullOrWhiteSpace(prefix) ? "m?" : prefix,
-                Token = token
+                Token = token,
+                SpotifyClientId = spotifyClientId,
+                SpotifySecret = spotifySecret,
+                LavalinkHost = lavaLinkHost,
+                LavalinkPassword = lavaLinkPassword,
+                LavalinkPort = string.IsNullOrWhiteSpace(lavaLinkPort) ? 2333 : int.Parse(lavaLinkPort)
             };
 
             File.WriteAllText(ConfigName, JsonConvert.SerializeObject(config, Formatting.Indented));

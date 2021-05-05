@@ -42,9 +42,9 @@ namespace MusicBot.Services
 
             int argPos = 0;
 
-            if (message.Content != "m?setup" && message.Channel.Id != Program.BotConfig.ChannelId)
+            if (message.Content != $"{Program.BotConfig.Prefix}setup" && message.Channel.Id != Program.BotConfig.ChannelId)
             {
-                if (message.HasStringPrefix("m?", ref argPos))
+                if (message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos))
                 {
                     _ = Task.Run(async () =>
                     {
@@ -56,7 +56,7 @@ namespace MusicBot.Services
                 return;
             }
 
-            if (message.Content != "m?premium" && (message.Author as IGuildUser)?.VoiceChannel == null)
+            if (message.Content != $"{Program.BotConfig.Prefix}premium" && (message.Author as IGuildUser)?.VoiceChannel == null)
             {
                 _ = Task.Run(async () =>
                 {
@@ -67,7 +67,7 @@ namespace MusicBot.Services
                 return;
             }
 
-            if (!message.HasStringPrefix("m?", ref argPos))
+            if (!message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos))
             {
                 _ = Task.Run(async () =>
                 {

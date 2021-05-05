@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using MusicBot.Services;
 using System;

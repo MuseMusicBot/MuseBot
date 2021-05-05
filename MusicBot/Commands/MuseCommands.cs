@@ -48,8 +48,7 @@ namespace MusicBot.Commands
 
             var embed = await embedHelper.BuildDefaultEmbed();
             var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
-            IEmote[] emojis = { new Emoji("⏮"), new Emoji("⏯️"), new Emoji("⏭️"), new Emoji("🔂"), new Emoji("🔀"), new Emoji("⏏️") };
-            await msg.AddReactionsAsync(emojis);
+            await msg.AddReactionsAsync(ReactionsHelper.Emojis, new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
 
             var config = Program.BotConfig;
             config.GuildId = Context.Guild.Id;
@@ -576,6 +575,21 @@ namespace MusicBot.Commands
             MuseTrack track = player.Track as MuseTrack;
             var embed = await embedHelper.BuildMessageEmbed($"Requested by: `{track.Requester.Nickname ?? track.Requester.Username + "#" + track.Requester.Discriminator}`");
             await Context.Channel.SendAndRemove(embed: embed);
+        }
+        #endregion
+
+        #region regen
+        [Command("regenreactions", RunMode = RunMode.Async)]
+        [Alias("regen", "rr")]
+        [Summary("Regenerates the reaction buttons")]
+        [RequireUserPermission(ChannelPermission.ManageChannels)]
+        public async Task RegenerateReactions()
+        {
+            var msg = Program.BotConfig.BotEmbedMessage;
+            await msg.RemoveAllReactionsAsync(new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
+            await msg.AddReactionsAsync(ReactionsHelper.Emojis, new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
+
+            await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Regenerated reactions."));
         }
         #endregion
     }
