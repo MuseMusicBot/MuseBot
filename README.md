@@ -161,7 +161,7 @@ Some issues we are aware of:
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/issues/DrDevinRX/MusicBot?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/DrDevinRX/MusicBot?style=for-the-badge
 [contributors-url]: https://github.com/DrDevinRX/MusicBot/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/DrDevinRX/MusicBot?style=for-the-badge
 [forks-url]: https://github.com/DrDevinRX/MusicBot/network/members
