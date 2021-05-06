@@ -109,13 +109,11 @@ namespace MusicBot
                     try
                     {
                         node.LeaveAsync(player.VoiceChannel);
-                        Program.message.ModifyAsync(async (x) =>
+                        Program.BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
                         {
                             x.Content = AudioHelper.NoSongsInQueue;
                             x.Embed = await embedHelper.BuildDefaultEmbed();
                         });
-                        //Fix this too
-                        Console.WriteLine("No :p");
                     }
                     catch { }
 
