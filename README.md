@@ -1,26 +1,27 @@
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-
-
-
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/DrDevinRX/MusicBot">
+  <a href="https://github.com/MuseMusicBot/MuseBot">
     <img src="https://i.imgur.com/mnmuuvZ.png" alt="Logo" width="160" height="160">
   </a>
 
   <h3 align="center">:headphones: Muse Bot</h3>
 
   <p align="center">
-    A self hosted alternative for Hydra written in C#!
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/DrDevinRX/MusicBot/network/members">Fork Me</a>
-  </p>
+  A self hosted alternative of Hydra written in C#!
+	<br>
+	<a href="https://github.com/MuseMusicBot/MuseBot/releases">
+		<img src="https://img.shields.io/github/downloads/MuseMusicBot/MuseBot/total?style=for-the-badge" />
+	</a>
+	<a href="https://github.com/MuseMusicBot/MuseBot/issues">
+		<img src="https://img.shields.io/github/issues/MuseMusicBot/MuseBot?style=for-the-badge" />
+	</a>
+	<a href="https://github.com/MuseMusicBot/MuseBot/network/members">
+		<img src="https://img.shields.io/github/forks/MuseMusicBot/MuseBot?style=for-the-badge" />
+	</a>
+	<a href="https://github.com/MuseMusicBot/MuseBot/stargazers">
+	    <img src="https://img.shields.io/github/stars/MuseMusicBot/MuseBot?style=for-the-badge" />
+	</a>
 </p>
 
 
@@ -40,6 +41,7 @@
       <ul>
         <li><a href="#lavalink-prerequisites">Lavalink Prerequisites</a></li>
         <li><a href="#spotify-api-prerequisites">Spotify API Prerequisites</a></li>
+        <li><a href="#discord-token-prerequisites">Discord Token Prerequisites</a></li>
         <li><a href="#bot-installation">Bot Installation</a></li>
       </ul>
     </li>
@@ -54,12 +56,12 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+<img src="https://i.imgur.com/CGhAndo.png" alt="Lavalink" height="900">
 
 We have created a self hosted alternative for Hydra music bot.
 
 Features:
-* Supports YouTube, Spotify, SoundCloud, Twitch, and Vimeo links
+* Supports YouTube, Spotify, SoundCloud, Bandcamp, Twitch, and Vimeo links
 * Music requester channel
 * Volume command
 * Equalizer
@@ -109,19 +111,28 @@ As mentioned [Lavalink](https://github.com/freyacodes/Lavalink) is required to r
 
 At the current state, the bot requires a Spotify API key to function.
 This is required for requesting the Spotify links.
-* Head to Spotify's [dashboard](https://developer.spotify.com/dashboard/) and create a new application
+* Head to Spotify's [dashboard](https://developer.spotify.com/dashboard/) and create a new application.
 * Name it whatever you want and add a description.
 * Now grab the Client ID and Client Secret. **Do not share this with anyone.**
+* Keep this safe for when you first run the bot as it will ask you for it!
+
+
+### Discord Token Prerequisites
+
+We need a Discord bot token to run the bot.
+* Head to Discord's [portal](https://discord.com/developers/applications) and create a new application.
+* Name it whatever you want.
+* Now grab the token from the Bot section on the left side. **Do not share this with anyone.**
 * Keep this safe for when you first run the bot as it will ask you for it!
 
 
 ### Bot Installation
 
 For the easiest way possible, do the following:
-1. Download the bot from the [Releases](https://github.com/DrDevinRX/MusicBot/releases) page.
+1. Download the bot from the [Releases](https://github.com/MuseMusicBot/MuseBot/releases) page.
 2. Run the executable file and follow the prompt.
 
-If you want to run the bot from master, do the following
+If you want to run the bot from master, do the following:
 1. Download the project zip.
 2. Download and install .NET Runtime from [here](https://dotnet.microsoft.com/download).
 3. Extract and navigate to the bot's folder. In the File Explorer's address bar, type "CMD".
@@ -134,19 +145,34 @@ If you want to run the bot from master, do the following
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-Soon™
+Commands exist, but we do recommend just using the reaction the bot has to make things easier. Here are some of the commands:
+| Command | Outcome |
+| ------ | ------ |
+| setup | creates the requester channel |
+| help | shows all the commands |
+| play | followed with a link to play a video |
+| leave | leaves the voice channel |
+| pause | pauses the music |
+| resume | resumes the music |
+| stop | clears the queue and stops the music |
+| skip | skips the music |
+| clear | clears the queue |
+| volume | changes the volume |
+| remove | remove a track from the queue |
+| seek | seeks to a position in the song |
 
 
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-If you want to improve this bot, feel free to make a pull request or fork this project. At this state, the bot is considered mostly finishes and will not see much commits from us.
+If you want to improve this bot, feel free to make a pull request or fork this project. At this state, the bot is considered mostly finished and will not see much commits from us. If you do decide to use this bot as a template for your own, we will appreciate if you could credit us somewhere.
 The bot is not perfect and we are aware there are some issues with it, but since they function we are considering this to be good enough.
 
 Some issues we are aware of:
 * Spotify playlist is quite slow
 * Thumbnail doesn't show in rare instances
+* You need to run the setup command to start requesting any music
 
 
 <!-- ACKNOWLEDGEMENTS -->
@@ -154,19 +180,3 @@ Some issues we are aware of:
 * [Hydra](https://hydra.bot/)
 * [Musii](https://github.com/encodeous/musii)
 * [Discord API Channel](https://discord.gg/discord-api)
-
-
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/DrDevinRX/MusicBot?style=for-the-badge
-[contributors-url]: https://github.com/DrDevinRX/MusicBot/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/DrDevinRX/MusicBot?style=for-the-badge
-[forks-url]: https://github.com/DrDevinRX/MusicBot/network/members
-[stars-shield]: https://img.shields.io/github/stars/DrDevinRX/MusicBot?style=for-the-badge
-[stars-url]: https://github.com/DrDevinRX/MusicBot/stargazers
-[issues-shield]: https://img.shields.io/github/issues/DrDevinRX/MusicBot?style=for-the-badge
-[issues-url]: https://github.com/DrDevinRX/MusicBot/issues
-[product-screenshot]: images/screenshot.png
