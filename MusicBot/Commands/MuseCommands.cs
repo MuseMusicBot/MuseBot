@@ -32,8 +32,10 @@ namespace MusicBot.Commands
         [Summary("Setups the song request channel.")]
         public async Task Setup()
         {
-            if (Context.Guild.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
             {
+                var error = await embedHelper.BuildErrorEmbed("Could not create channel", $"<#{Program.BotConfig.ChannelId}> already exists.");
+                await Context.Channel.SendAndRemove(embed: error, timeout: 15000);
                 return;
             }
 
@@ -350,8 +352,11 @@ namespace MusicBot.Commands
             Program.BotConfig = config;
             await player.UpdateVolumeAsync(vol.Value);
 
-            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+            }
 
             var volmsg = await embedHelper.BuildMessageEmbed($"Volume is now set to `{Program.BotConfig.Volume}%`.");
             await Context.Channel.SendAndRemove(embed: volmsg);
@@ -398,8 +403,11 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var embed = await embedHelper.BuildDefaultEmbed();
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildDefaultEmbed();
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            }
             await player.StopAsync();
         }
         #endregion

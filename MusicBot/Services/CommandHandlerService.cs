@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using MusicBot.Helpers;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -42,7 +43,7 @@ namespace MusicBot.Services
 
             int argPos = 0;
 
-            if (message.Content != $"{Program.BotConfig.Prefix}setup" && message.Channel.Id != Program.BotConfig.ChannelId)
+            if (context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any() && message.Channel.Id != Program.BotConfig.ChannelId)
             {
                 if (message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos))
                 {
