@@ -589,7 +589,7 @@ namespace MusicBot.Commands
         #region regen
         [Command("regenreactions", RunMode = RunMode.Async)]
         [Alias("regen", "rr")]
-        [Summary("Regenerates the reaction buttons")]
+        [Summary("Regenerates the reaction buttons.")]
         [RequireUserPermission(ChannelPermission.ManageChannels)]
         public async Task RegenerateReactions()
         {
@@ -604,7 +604,7 @@ namespace MusicBot.Commands
         #region 24/7
         [Command("24/7", RunMode = RunMode.Async)]
         [Alias("247")]
-        [Summary("Toggle bot to stay in channel 24/7")]
+        [Summary("Toggle bot to stay in channel 24/7.")]
         public async Task StayConnected()
         {
             audioHelper.StayFlag = !audioHelper.StayFlag;
