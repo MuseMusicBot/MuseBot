@@ -68,7 +68,7 @@ namespace MusicBot.Services
                 return;
             }
 
-            if (!message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos))
+            if (!message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos) && context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
             {
                 _ = Task.Run(async () =>
                 {
