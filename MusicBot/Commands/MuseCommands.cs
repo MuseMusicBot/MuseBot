@@ -600,5 +600,17 @@ namespace MusicBot.Commands
             await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Regenerated reactions."));
         }
         #endregion
+
+        #region 24/7
+        [Command("24/7", RunMode = RunMode.Async)]
+        [Alias("247")]
+        [Summary("Toggle bot to stay in channel 24/7")]
+        public async Task StayConnected()
+        {
+            audioHelper.StayFlag = !audioHelper.StayFlag;
+            var embed = await embedHelper.BuildMessageEmbed($"24/7 is now `{(audioHelper.StayFlag ? "enabled" : "disabled")}`");
+            await Context.Channel.SendAndRemove(embed: embed);
+        }
+        #endregion
     }
 }
