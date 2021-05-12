@@ -636,5 +636,48 @@ namespace MusicBot.Commands
             await Context.Channel.SendAndRemove(embed: embed);
         }
         #endregion
+
+        #region Loop
+        [Command("loop", RunMode = RunMode.Async)]
+        [Summary("Loops the currently playing song.")]
+        public async Task Loop()
+        {
+            var player = node.GetPlayer(Context.Guild);
+            audioHelper.RepeatFlag = !audioHelper.RepeatFlag;
+            audioHelper.RepeatTrack = audioHelper.RepeatFlag switch
+            {
+                true => player.Track,
+                false => null
+            };
+
+            var embed = await embedHelper.BuildMessageEmbed($"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
+            await Context.Channel.SendAndRemove(embed: embed, timeout: 5000);
+        }
+        #endregion
+
+        #region Prefix
+        [Command("prefix", RunMode = RunMode.Async)]
+        [Summary("Changes the bot's prefix")]
+        public async Task Prefix([Remainder] string prefix = null)
+        {
+            if (prefix == null)
+            {
+                var current = await embedHelper.BuildMessageEmbed($"Current prefix is: **{Program.BotConfig.Prefix}**");
+                await Context.Channel.SendAndRemove(embed: current);
+                return;
+            }
+            if (prefix == "default")
+            {
+                prefix = "m?";
+            }
+            var config = Program.BotConfig;
+            config.Prefix = prefix;
+            ConfigHelper.UpdateConfigFile(config);
+            Program.BotConfig = config;
+
+            var msg = await embedHelper.BuildMessageEmbed($"Prefix has been changed to: **{Program.BotConfig.Prefix}**");
+            await Context.Channel.SendAndRemove(embed: msg);
+        }
+        #endregion
     }
 }
