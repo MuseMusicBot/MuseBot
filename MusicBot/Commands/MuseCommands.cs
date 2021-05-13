@@ -675,6 +675,12 @@ namespace MusicBot.Commands
             ConfigHelper.UpdateConfigFile(config);
             Program.BotConfig = config;
 
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildDefaultEmbed();
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Embed = embed; });
+            }
+
             var msg = await embedHelper.BuildMessageEmbed($"Prefix has been changed to: **{Program.BotConfig.Prefix}**");
             await Context.Channel.SendAndRemove(embed: msg);
         }
