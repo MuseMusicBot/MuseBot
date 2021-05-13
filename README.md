@@ -160,6 +160,9 @@ Commands exist, but we do recommend just using the reaction the bot has to make 
 | volume | changes the volume |
 | remove | remove a track from the queue |
 | seek | seeks to a position in the song |
+| loop | loops the current song |
+| 24/7 | prevents bot from auto disconnecting from the voice channel |
+| prefix | changes the prefix for the bot |
 
 
 
@@ -172,7 +175,7 @@ The bot is not perfect and we are aware there are some issues with it, but since
 Some issues we are aware of:
 * Spotify playlist is quite slow
 * Thumbnail doesn't show in rare instances
-* You need to run the setup command to start requesting any music
+* ~~You need to run the setup command to start requesting any music~~ This is partially fixed in version 1.1
 
 
 <!-- ACKNOWLEDGEMENTS -->
