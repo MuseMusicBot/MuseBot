@@ -32,15 +32,17 @@ namespace MusicBot.Commands
         [Summary("Setups the song request channel.")]
         public async Task Setup()
         {
-            if (Context.Guild.TextChannels.Where(x => x.Name == "muse-song-requests").Any())
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
             {
+                var error = await embedHelper.BuildErrorEmbed("Could not create channel", $"<#{Program.BotConfig.ChannelId}> already exists.");
+                await Context.Channel.SendAndRemove(embed: error, timeout: 15000);
                 return;
             }
 
             var channel = await Context.Guild.CreateTextChannelAsync("muse-song-requests", x =>
             {
                 var c = Context.Guild.CategoryChannels;
-                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
+                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.Id;
                 x.Topic = "Music Bot";
             });
 
@@ -116,8 +118,11 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Playing)
             {
                 await player.PauseAsync();
-                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
-                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+                if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+                {
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+                }
             }
         }
         #endregion
@@ -143,8 +148,11 @@ namespace MusicBot.Commands
             if (player.PlayerState == PlayerState.Paused)
             {
                 await player.ResumeAsync();
-                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+                if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+                {
+                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+                }
             }
 
         }
@@ -212,8 +220,11 @@ namespace MusicBot.Commands
         {
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Shuffle();
-            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
+            }
             var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
             await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
         }
@@ -227,8 +238,11 @@ namespace MusicBot.Commands
         {
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            }
             var msg = await embedHelper.BuildMessageEmbed("Queue cleared");
             await Context.Channel.SendAndRemove(embed: msg);
         }
@@ -280,8 +294,11 @@ namespace MusicBot.Commands
                 player.Queue.Enqueue(p);
             }
 
-            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
+            }
 
             var msg2 = await embedHelper.BuildMessageEmbed($"**{trackToMove.Title}** moved to position 1.");
             await Context.Channel.SendAndRemove(embed: msg2);
@@ -350,8 +367,11 @@ namespace MusicBot.Commands
             Program.BotConfig = config;
             await player.UpdateVolumeAsync(vol.Value);
 
-            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+            }
 
             var volmsg = await embedHelper.BuildMessageEmbed($"Volume is now set to `{Program.BotConfig.Volume}%`.");
             await Context.Channel.SendAndRemove(embed: volmsg);
@@ -374,8 +394,11 @@ namespace MusicBot.Commands
             {
                 if (player.Queue.Count == 0)
                 {
-                    var embed = await embedHelper.BuildDefaultEmbed();
-                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+                    if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+                    {
+                        var embed = await embedHelper.BuildDefaultEmbed();
+                        await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+                    }
                     await player.StopAsync();
                 }
                 else
@@ -398,8 +421,11 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var embed = await embedHelper.BuildDefaultEmbed();
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildDefaultEmbed();
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            }
             await player.StopAsync();
         }
         #endregion
@@ -434,8 +460,11 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            var embed = await embedHelper.BuildDefaultEmbed();
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                var embed = await embedHelper.BuildDefaultEmbed();
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            }
             await node.LeaveAsync(player.VoiceChannel);
         }
         #endregion
@@ -483,8 +512,11 @@ namespace MusicBot.Commands
                 player.Queue.Enqueue(p);
             }
 
-            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
+            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
+            }
 
             var msg2 = await embedHelper.BuildMessageEmbed($"**{trackToRemove.Title}** has been removed.");
             await Context.Channel.SendAndRemove(embed: msg2);
@@ -581,7 +613,7 @@ namespace MusicBot.Commands
         #region regen
         [Command("regenreactions", RunMode = RunMode.Async)]
         [Alias("regen", "rr")]
-        [Summary("Regenerates the reaction buttons")]
+        [Summary("Regenerates the reaction buttons.")]
         [RequireUserPermission(ChannelPermission.ManageChannels)]
         public async Task RegenerateReactions()
         {
@@ -590,6 +622,61 @@ namespace MusicBot.Commands
             await msg.AddReactionsAsync(ReactionsHelper.Emojis, new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
 
             await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Regenerated reactions."));
+        }
+        #endregion
+
+        #region 24/7
+        [Command("24/7", RunMode = RunMode.Async)]
+        [Alias("247")]
+        [Summary("Toggle bot to stay in channel 24/7.")]
+        public async Task StayConnected()
+        {
+            audioHelper.StayFlag = !audioHelper.StayFlag;
+            var embed = await embedHelper.BuildMessageEmbed($"24/7 is now `{(audioHelper.StayFlag ? "enabled" : "disabled")}`");
+            await Context.Channel.SendAndRemove(embed: embed);
+        }
+        #endregion
+
+        #region Loop
+        [Command("loop", RunMode = RunMode.Async)]
+        [Summary("Loops the currently playing song.")]
+        public async Task Loop()
+        {
+            var player = node.GetPlayer(Context.Guild);
+            audioHelper.RepeatFlag = !audioHelper.RepeatFlag;
+            audioHelper.RepeatTrack = audioHelper.RepeatFlag switch
+            {
+                true => player.Track,
+                false => null
+            };
+
+            var embed = await embedHelper.BuildMessageEmbed($"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
+            await Context.Channel.SendAndRemove(embed: embed, timeout: 5000);
+        }
+        #endregion
+
+        #region Prefix
+        [Command("prefix", RunMode = RunMode.Async)]
+        [Summary("Changes the bot's prefix")]
+        public async Task Prefix([Remainder] string prefix = null)
+        {
+            if (prefix == null)
+            {
+                var current = await embedHelper.BuildMessageEmbed($"Current prefix is: **{Program.BotConfig.Prefix}**");
+                await Context.Channel.SendAndRemove(embed: current);
+                return;
+            }
+            if (prefix == "default")
+            {
+                prefix = "m?";
+            }
+            var config = Program.BotConfig;
+            config.Prefix = prefix;
+            ConfigHelper.UpdateConfigFile(config);
+            Program.BotConfig = config;
+
+            var msg = await embedHelper.BuildMessageEmbed($"Prefix has been changed to: **{Program.BotConfig.Prefix}**");
+            await Context.Channel.SendAndRemove(embed: msg);
         }
         #endregion
     }

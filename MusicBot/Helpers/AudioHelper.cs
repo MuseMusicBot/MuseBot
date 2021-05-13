@@ -28,6 +28,7 @@ namespace MusicBot.Helpers
         public const string FooterText = "{0} song{1} in queue | Volume: {2}";
         public SpotifyClient Spotify { get; }
         public bool RepeatFlag { get; set; } = false;
+        public bool StayFlag { get; set; } = false;
         public LavaTrack RepeatTrack { get; set; }
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
@@ -109,7 +110,10 @@ namespace MusicBot.Helpers
                     x.Embed = embed;
                 });
 
-                    _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(15));
+                    if (!StayFlag)
+                    {
+                        _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromMinutes(15));
+                    }
                     return;
                 }
 
