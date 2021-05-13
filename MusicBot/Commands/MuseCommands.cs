@@ -42,7 +42,7 @@ namespace MusicBot.Commands
             var channel = await Context.Guild.CreateTextChannelAsync("muse-song-requests", x =>
             {
                 var c = Context.Guild.CategoryChannels;
-                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).First()?.Id;
+                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.Id;
                 x.Topic = "Music Bot";
             });
 
