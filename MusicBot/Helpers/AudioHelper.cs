@@ -209,6 +209,7 @@ namespace MusicBot.Helpers
             {
                 await Node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
                 player = Node.GetPlayer(context.Guild);
+                await player.UpdateVolumeAsync(Program.BotConfig.Volume);
             }
 
             if (!query.IsUri(out var uri))

@@ -67,6 +67,8 @@ namespace MusicBot.Commands
         [Summary("Plays a song.")]
         public async Task Play([Remainder] string query)
         {
+            var player = node.GetPlayer(Context.Guild);
+            
             if (!node.HasPlayer(Context.Guild))
             {
                 try
@@ -77,6 +79,7 @@ namespace MusicBot.Commands
                     }
 
                     await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+                    await player.UpdateVolumeAsync(Program.BotConfig.Volume);
                 }
                 catch (Exception e)
                 {
@@ -90,8 +93,6 @@ namespace MusicBot.Commands
                 await Context.Channel.SendMessageAsync($"{search.Exception}");
                 return;
             }
-
-            var player = node.GetPlayer(Context.Guild);
 
             await audioHelper.QueueTracksToPlayer(player, search);
         }
@@ -579,12 +580,14 @@ namespace MusicBot.Commands
         [Summary("Plays a song from Spotify.")]
         public async Task Spotify([Remainder] string url)
         {
+            var player = node.GetPlayer(Context.Guild);
+
             if (!node.HasPlayer(Context.Guild))
             {
                 await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+                await player.UpdateVolumeAsync(Program.BotConfig.Volume);
             }
 
-            var player = node.GetPlayer(Context.Guild);
             var tracks = await audioHelper.SearchSpotify(Context.Channel, url);
             if (tracks != null)
             {
