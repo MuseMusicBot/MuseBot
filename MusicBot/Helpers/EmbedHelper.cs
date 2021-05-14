@@ -54,7 +54,7 @@ namespace MusicBot.Helpers
             var embed = new EmbedBuilder
             {
                 Color = Color.DarkTeal,
-                Title = "Nothing currently playing",
+                Title = "Nothing is currently playing",
                 Description = "This ain't Hydra. Please stop asking.",
                 ImageUrl = "https://i.imgur.com/K4dWciL.jpg",
                 Footer = new EmbedFooterBuilder { Text = $"Prefix for this server is: {Program.BotConfig.Prefix}" }
