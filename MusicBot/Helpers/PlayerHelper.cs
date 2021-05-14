@@ -1,7 +1,6 @@
 ﻿using Victoria;
 using Victoria.Enums;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
@@ -9,12 +8,34 @@ using System.Threading.Tasks;
 namespace MusicBot.Helpers
 {
     //Uiharu did a thing! :D
-    public class PlayerHelper : ModuleBase<SocketCommandContext>
+    public class PlayerHelper
     {
         private readonly DiscordSocketClient discord;
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
+        private IGuild Guild
+        {
+            get
+            {
+                try
+                {
+                    return discord.GetGuild(Program.BotConfig.GuildId);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        private LavaPlayer Player
+        {
+            get
+            {
+                return node.GetPlayer(Guild);
+            }
+        }
 
         public PlayerHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh)
         {
@@ -23,18 +44,16 @@ namespace MusicBot.Helpers
             audioHelper = ah;
             embedHelper = eh;
         }
-        public async Task PauseResumeAsync(bool pause = true)
+        public async Task PauseResumeAsync(bool paused = true)
         {
-            var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
-            if (pause)
-            {
-                await player.PauseAsync();
-            }
-            else
+            var player = node.GetPlayer(Guild);
+
+            if (paused)
             {
                 await player.ResumeAsync();
+                return;
             }
-            await Task.CompletedTask;
+            await player.PauseAsync();
         }
 
         public async Task PreviousAsync()

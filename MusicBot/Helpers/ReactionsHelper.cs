@@ -73,6 +73,11 @@ namespace MusicBot.Helpers
 
                 var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
 
+                if (!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused) && currentState != EmojiStates.Eject)
+                {
+                    return;
+                }
+
                 switch (currentState)
                 {
                     case EmojiStates.Previous:
@@ -84,19 +89,12 @@ namespace MusicBot.Helpers
                         }
                         break;
                     case EmojiStates.PlayPause:
-                        if (player.PlayerState == PlayerState.Paused)
                         {
-                            await playerHelper.PauseResumeAsync(false);
-                            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
+                            await playerHelper.PauseResumeAsync(player.PlayerState == PlayerState.Paused);
+                            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
                             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+                            break;
                         }
-                        else if (player.PlayerState == PlayerState.Playing)
-                        {
-                            await playerHelper.PauseResumeAsync(true);
-                            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
-                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
-                        }
-                        break;
                     case EmojiStates.Next:
                         if (player.PlayerState == PlayerState.Playing ||
                             player.PlayerState == PlayerState.Paused)
