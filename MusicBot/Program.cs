@@ -38,6 +38,7 @@ namespace MusicBot
             var loggingService = services.GetRequiredService<LoggingService>();
             await services.GetRequiredService<CommandHandlerService>().InitializeAsync(services);
             services.GetRequiredService<ReactionsHelper>();
+            services.GetRequiredService<PlayerHelper>();
             await discord.LoginAsync(TokenType.Bot, BotConfig.Token);
             await discord.StartAsync();
 
@@ -163,6 +164,7 @@ namespace MusicBot
                     x.LogSeverity = LogSeverity.Debug;
                 })
                 .AddSingleton<EmbedHelper>()
+                .AddSingleton<PlayerHelper>()
                 .AddSingleton<AudioHelper>()
                 .AddSingleton<CommandHandlerService>()
                 .AddSingleton<ReactionsHelper>()
