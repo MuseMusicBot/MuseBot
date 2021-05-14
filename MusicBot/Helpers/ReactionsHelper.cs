@@ -10,7 +10,7 @@ using Victoria.Enums;
 
 namespace MusicBot.Helpers
 {
-    public class ReactionsHelper : ModuleBase<SocketCommandContext>
+    public class ReactionsHelper
     {
         private readonly DiscordSocketClient discord;
         private readonly LavaNode node;
