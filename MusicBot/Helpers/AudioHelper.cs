@@ -38,7 +38,7 @@ namespace MusicBot.Helpers
             embedHelper = eh;
 
             // TODO: Make SpotifyClient own class
-            if (Program.BotConfig.SpotifyClientId != "" || Program.BotConfig.SpotifySecret != "")
+            if (Program.BotConfig.SpotifyClientId != "" && Program.BotConfig.SpotifySecret != "")
             {
                 var config = SpotifyClientConfig.CreateDefault();
                 var request = new ClientCredentialsRequest(Program.BotConfig.SpotifyClientId, Program.BotConfig.SpotifySecret);
