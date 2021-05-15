@@ -67,8 +67,7 @@ namespace MusicBot.Commands
         [Summary("Plays a song.")]
         public async Task Play([Remainder] string query)
         {
-            var player = node.GetPlayer(Context.Guild);
-            
+            LavaPlayer player = null;
             if (!node.HasPlayer(Context.Guild))
             {
                 try
@@ -79,6 +78,7 @@ namespace MusicBot.Commands
                     }
 
                     await node.JoinAsync((Context.User as IGuildUser)?.VoiceChannel, Context.Channel as ITextChannel);
+                    player = node.GetPlayer(Context.Guild);
                     await player.UpdateVolumeAsync(Program.BotConfig.Volume);
                 }
                 catch (Exception e)
@@ -86,6 +86,8 @@ namespace MusicBot.Commands
                     Console.WriteLine(e);
                 }
             }
+
+            player = node.GetPlayer(Context.Guild);
 
             var search = await node.SearchAsync(query);
             if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
