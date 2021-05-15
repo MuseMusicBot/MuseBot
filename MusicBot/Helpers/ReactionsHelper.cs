@@ -16,7 +16,7 @@ namespace MusicBot.Helpers
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
-        private readonly PlayerHelper playerHelper; //access to universal commands. -Uiharu
+        //private readonly PlayerHelper playerHelper; //access to universal commands. -Uiharu
         public static readonly IEmote[] Emojis = { new Emoji("⏮"), new Emoji("⏯️"), new Emoji("⏭️"), new Emoji("🔂"), new Emoji("🔀"), new Emoji("⏏️") };
         private enum EmojiStates
         {
@@ -28,14 +28,14 @@ namespace MusicBot.Helpers
             Eject
         };
 
-        public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh, PlayerHelper ph)
+        public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh/*, PlayerHelper ph*/)
         {
             //Uiharu was here. :)
             discord = client;
             node = lavaNode;
             audioHelper = ah;
             embedHelper = eh;
-            playerHelper = ph;
+            //playerHelper = ph;
             discord.ReactionAdded += OnReactionAdded;
         }
 
@@ -48,7 +48,12 @@ namespace MusicBot.Helpers
         /// <returns></returns>
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
+            if (!(channel is IGuildChannel guildChannel))
+            {
+                return;
+            }
             var msg = await message.GetOrDownloadAsync();
+
             if (channel.Id != Program.BotConfig.ChannelId && msg.Id != Program.BotConfig.MessageId && !Emojis.Contains(reaction.Emote))
             {
                 await Task.CompletedTask;
@@ -69,7 +74,7 @@ namespace MusicBot.Helpers
 
                 try
                 {
-                    if (!node.HasPlayer(discord.GetGuild(Program.BotConfig.GuildId)))
+                    if (!node.HasPlayer(guildChannel.Guild))
                     {
                         return;
                     }
@@ -90,78 +95,35 @@ namespace MusicBot.Helpers
                 switch (currentState)
                 {
                     case EmojiStates.Previous:
-                        if (player.PlayerState == PlayerState.Playing ||
-                            player.PlayerState == PlayerState.Paused)
                         {
-                            //await player.SeekAsync(TimeSpan.FromSeconds(0));
-                            await playerHelper.PreviousAsync();
+                            await player.PreviousAsync();
+                            break;
                         }
-                        break;
                     case EmojiStates.PlayPause:
                         {
-                            await playerHelper.PauseResumeAsync(player.PlayerState == PlayerState.Paused);
-                            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
-                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
+                            await player.PauseResumeAsync(embedHelper, player.PlayerState == PlayerState.Paused);
                             break;
                         }
                     case EmojiStates.Next:
-                        if (player.PlayerState == PlayerState.Playing ||
-                            player.PlayerState == PlayerState.Paused)
                         {
-                            if (player.Queue.Count == 0)
-                            {
-                                var embed = await embedHelper.BuildDefaultEmbed();
-                                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-                                await playerHelper.NextTrackAsync(true);
-                            }
-                            else
-                            {
-                                await playerHelper.NextTrackAsync(false);
-                            }
+                            await player.NextTrackAsync(embedHelper);
+                            break;
                         }
-                        break;
                     case EmojiStates.Loop:
-                        if (player.PlayerState == PlayerState.Playing ||
-                            player.PlayerState == PlayerState.Paused)
                         {
-                            /*audioHelper.RepeatFlag = !audioHelper.RepeatFlag;
-                            audioHelper.RepeatTrack = audioHelper.RepeatFlag switch
-                            {
-                                true => player.Track,
-                                false => null
-                            };*/
-                            await playerHelper.LoopAsync();
-
-                            var embed = await embedHelper.BuildMessageEmbed($"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
-                            await channel.SendAndRemove(embed: embed, timeout: 5000);
+                            await player.LoopAsync(audioHelper, embedHelper, channel);
+                            break;
                         }
-                        break;
                     case EmojiStates.Shuffle:
-                        if (player.PlayerState == PlayerState.Playing ||
-                            player.PlayerState == PlayerState.Paused)
                         {
-                            if (player.Queue.Count < 2)
-                            {
-                                break;
-                            }
-
-                            await playerHelper.ShuffleAsync();
-                            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
-                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
-                            var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
-                            await channel.SendAndRemove(embed: msg);
+                            await player.ShuffleAsync(audioHelper, embedHelper, channel);
+                            break;
                         }
-                        break;
                     case EmojiStates.Eject:
                         {
-                            //player.Queue.Clear();
-                            var embed = await embedHelper.BuildDefaultEmbed();
-                            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-
                             try
                             {
-                                //await node.LeaveAsync(player.VoiceChannel);
-                                await playerHelper.EjectAsync();
+                                await node.EjectAsync(guildChannel.Guild, embedHelper);
                             }
                             catch { }
                             break;

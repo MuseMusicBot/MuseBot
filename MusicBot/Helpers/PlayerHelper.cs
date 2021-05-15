@@ -8,47 +8,15 @@ using System.Threading.Tasks;
 namespace MusicBot.Helpers
 {
     //Uiharu did a thing! :D
-    public class PlayerHelper
+    public static class PlayerHelper
     {
-        private readonly DiscordSocketClient discord;
-        private readonly LavaNode node;
-        private readonly AudioHelper audioHelper;
-        private readonly EmbedHelper embedHelper;
-        private IGuild Guild
+        // TODO: Take a bool
+        public static async Task PauseResumeAsync(this LavaPlayer player, EmbedHelper embedHelper, bool pause)
         {
-            get
-            {
-                try
-                {
-                    return discord.GetGuild(Program.BotConfig.GuildId);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
+            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, pause);
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
 
-        private LavaPlayer Player
-        {
-            get
-            {
-                return node.GetPlayer(Guild);
-            }
-        }
-
-        public PlayerHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh)
-        {
-            discord = client;
-            node = lavaNode;
-            audioHelper = ah;
-            embedHelper = eh;
-        }
-        public async Task PauseResumeAsync(bool paused = true)
-        {
-            var player = node.GetPlayer(Guild);
-
-            if (paused)
+            if (!pause)
             {
                 await player.ResumeAsync();
                 return;
@@ -56,52 +24,58 @@ namespace MusicBot.Helpers
             await player.PauseAsync();
         }
 
-        public async Task PreviousAsync()
+        public static async Task PreviousAsync(this LavaPlayer player)
         {
-            var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
-            await player.SeekAsync(TimeSpan.FromSeconds(0));
-            await Task.CompletedTask;
+            await player.SeekAsync(TimeSpan.Zero);
         }
 
-        public async Task NextTrackAsync(bool empty = true)
+        public static async Task NextTrackAsync(this LavaPlayer player, EmbedHelper embedHelper)
         {
-            var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
-            if (empty)
-            {
-                await player.StopAsync();
-            }
-            else
+            if (player.Queue.Count >= 2)
             {
                 await player.SkipAsync();
+                return;
             }
-            await Task.CompletedTask;
+
+            await player.StopAsync();
+            var embed = await embedHelper.BuildDefaultEmbed();
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
 
-        public async Task LoopAsync(bool loop = true)
+        public static async Task LoopAsync(this LavaPlayer player, AudioHelper audioHelper, EmbedHelper embedHelper, ISocketMessageChannel channel)
         {
-            var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
             audioHelper.RepeatFlag = !audioHelper.RepeatFlag;
             audioHelper.RepeatTrack = audioHelper.RepeatFlag switch
             {
                 true => player.Track,
                 false => null
             };
-            await Task.CompletedTask;
+
+            var embed = await embedHelper.BuildMessageEmbed($"Loop set to `{(audioHelper.RepeatFlag ? "enabled" : "disabled")}`");
+            await channel.SendAndRemove(embed: embed, timeout: 5000);
         }
 
-        public async Task ShuffleAsync()
+        public static async Task ShuffleAsync(this LavaPlayer player, AudioHelper audioHelper, EmbedHelper embedHelper, ISocketMessageChannel channel)
         {
-            var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
+            if (player.Queue.Count < 2)
+            {
+                return;
+            }
+
             player.Queue.Shuffle();
-            await Task.CompletedTask;
+            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
+            var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
+            await channel.SendAndRemove(embed: msg);
         }
 
-        public async Task EjectAsync()
+        public static async Task EjectAsync(this LavaNode node, IGuild guild, EmbedHelper embedHelper)
         {
-            var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
+            var embed = await embedHelper.BuildDefaultEmbed();
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
+            var player = node.GetPlayer(guild);
             player.Queue.Clear();
             await node.LeaveAsync(player.VoiceChannel);
-            await Task.CompletedTask;
         }
     }
 }
