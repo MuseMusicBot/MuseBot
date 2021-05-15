@@ -17,16 +17,13 @@ namespace MusicBot.Commands
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
-        //private readonly PlayerHelper playerHelper; //PlayerHelper to access universal logic -Uiharu
 
-        // TODO: Use PlayerHelper instead of baked methods
         #region ctor
-        public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh/*PlayerHelper ph*/)
+        public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh)
         {
             node = lavaNode;
             audioHelper = ah;
             embedHelper = eh;
-            //playerHelper = ph; //haha.
         }
         #endregion
 
@@ -121,13 +118,7 @@ namespace MusicBot.Commands
 
             if (player.PlayerState == PlayerState.Playing)
             {
-                await player.PauseAsync();
-                //await playerHelper.PauseResumeAsync(true);
-                if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
-                {
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, true);
-                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
-                }
+                await player.PauseResumeAsync(embedHelper, false, context: Context);
             }
         }
         #endregion
@@ -152,13 +143,7 @@ namespace MusicBot.Commands
 
             if (player.PlayerState == PlayerState.Paused)
             {
-                await player.ResumeAsync();
-                //await playerHelper.PauseResumeAsync(true);
-                if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
-                {
-                    var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
-                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
-                }
+                await player.PauseResumeAsync(embedHelper, true, context: Context);
             }
 
         }
@@ -224,25 +209,11 @@ namespace MusicBot.Commands
         [Summary("Shuffles the entire queue.")]
         public async Task Shuffle()
         {
-            var player = node.GetPlayer(Context.Guild);
-            if (player.PlayerState == PlayerState.Playing ||
+            if (node.TryGetPlayer(Context.Guild, out var player) &&
+                player.PlayerState == PlayerState.Playing ||
                 player.PlayerState == PlayerState.Paused)
             {
-                if (player.Queue.Count < 2)
-                {
-                    return;
-                }
-
-                player.Queue.Shuffle();
-
-                //await playerHelper.ShuffleAsync();
-                if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
-                {
-                    string newQueue = await audioHelper.GetNewEmbedQueueString(player);
-                    await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
-                }
-                var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
-                await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
+                await player.ShuffleAsync(audioHelper, embedHelper, context: Context);
             }
         }
         #endregion
@@ -253,6 +224,11 @@ namespace MusicBot.Commands
         [Summary("Clears the entire queue.")]
         public async Task Clear()
         {
+            if (!node.HasPlayer(Context.Guild))
+            {
+                return;
+            }
+
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
             if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
@@ -409,21 +385,7 @@ namespace MusicBot.Commands
 
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
-                if (player.Queue.Count == 0)
-                {
-                    if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
-                    {
-                        var embed = await embedHelper.BuildDefaultEmbed();
-                        await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-                    }
-                    await player.StopAsync();
-                    //await playerHelper.NextTrackAsync(true);
-                }
-                else
-                {
-                    await player.SkipAsync();
-                    //await playerHelper.NextTrackAsync(false);
-                }
+                await player.NextTrackAsync(embedHelper, context: Context);
             }
         }
         #endregion
@@ -460,8 +422,7 @@ namespace MusicBot.Commands
             {
                 return;
             }
-            await player.SeekAsync(TimeSpan.Zero);
-            //await playerHelper.PreviousAsync();
+            await player.PreviousAsync();
             var msg = await embedHelper.BuildMessageEmbed("Let's run it one more time!");
             await Context.Channel.SendAndRemove(embed: msg);
         }
@@ -473,19 +434,7 @@ namespace MusicBot.Commands
         [Summary("Disconnects the bot from the voice channel.")]
         public async Task Disconnect()
         {
-            if (!node.HasPlayer(Context.Guild))
-            {
-                return;
-            }
-
-            var player = node.GetPlayer(Context.Guild);
-
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
-            {
-                var embed = await embedHelper.BuildDefaultEmbed();
-                await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-            }
-            await node.LeaveAsync(player.VoiceChannel);
+            await node.EjectAsync(embedHelper, Context.Guild, Context);
         }
         #endregion
 

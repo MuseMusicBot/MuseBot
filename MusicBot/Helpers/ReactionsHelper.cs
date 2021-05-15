@@ -85,7 +85,7 @@ namespace MusicBot.Helpers
                     await channel.SendAndRemove(embed: error, timeout: 15000);
                 }
 
-                var player = node.GetPlayer(discord.GetGuild(Program.BotConfig.GuildId));
+                var player = node.GetPlayer(guildChannel.Guild);
 
                 if (!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused) && currentState != EmojiStates.Eject)
                 {
@@ -123,7 +123,7 @@ namespace MusicBot.Helpers
                         {
                             try
                             {
-                                await node.EjectAsync(guildChannel.Guild, embedHelper);
+                                await node.EjectAsync(embedHelper, guildChannel.Guild);
                             }
                             catch { }
                             break;
