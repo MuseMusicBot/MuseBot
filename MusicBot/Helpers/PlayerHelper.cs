@@ -1,27 +1,39 @@
 ﻿using Victoria;
 using Victoria.Enums;
+using Discord.Commands;
 using Discord;
 using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MusicBot.Helpers
 {
     //Uiharu did a thing! :D
     public static class PlayerHelper
     {
-        // TODO: Take a bool
-        public static async Task PauseResumeAsync(this LavaPlayer player, EmbedHelper embedHelper, bool pause)
+        public static async Task PauseResumeAsync(
+            this LavaPlayer player,
+            EmbedHelper embedHelper,
+            bool paused,
+            SocketCommandContext context = null)
         {
-            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, pause);
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
-
-            if (!pause)
+            if (paused)
             {
                 await player.ResumeAsync();
+            }
+            else
+            {
+                await player.PauseAsync();
+            }
+
+            if (context != null && !context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
                 return;
             }
-            await player.PauseAsync();
+
+            var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, !paused);
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
         }
 
         public static async Task PreviousAsync(this LavaPlayer player)
@@ -29,15 +41,24 @@ namespace MusicBot.Helpers
             await player.SeekAsync(TimeSpan.Zero);
         }
 
-        public static async Task NextTrackAsync(this LavaPlayer player, EmbedHelper embedHelper)
+        public static async Task NextTrackAsync(
+            this LavaPlayer player,
+            EmbedHelper embedHelper,
+            SocketCommandContext context = null)
         {
-            if (player.Queue.Count >= 2)
+            if (player.Queue.Count >= 1)
             {
                 await player.SkipAsync();
+            }
+            else
+            {
+                await player.StopAsync();
+            }
+            
+            if (context != null && !context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
                 return;
             }
-
-            await player.StopAsync();
             var embed = await embedHelper.BuildDefaultEmbed();
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
@@ -55,7 +76,12 @@ namespace MusicBot.Helpers
             await channel.SendAndRemove(embed: embed, timeout: 5000);
         }
 
-        public static async Task ShuffleAsync(this LavaPlayer player, AudioHelper audioHelper, EmbedHelper embedHelper, ISocketMessageChannel channel)
+        public static async Task ShuffleAsync(
+            this LavaPlayer player,
+            AudioHelper audioHelper,
+            EmbedHelper embedHelper,
+            ISocketMessageChannel channel = null,
+            SocketCommandContext context = null)
         {
             if (player.Queue.Count < 2)
             {
@@ -63,19 +89,43 @@ namespace MusicBot.Helpers
             }
 
             player.Queue.Shuffle();
+
+            if (context != null && !context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                return;
+            }
+
+            channel ??= context?.Channel;
             string newQueue = await audioHelper.GetNewEmbedQueueString(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
-            var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
-            await channel.SendAndRemove(embed: msg);
+
+            if (channel != null)
+            {
+                var msg = await embedHelper.BuildMessageEmbed("Queue shuffled");
+                await channel.SendAndRemove(embed: msg);
+            }
         }
 
-        public static async Task EjectAsync(this LavaNode node, IGuild guild, EmbedHelper embedHelper)
+        public static async Task EjectAsync(
+            this LavaNode node,
+            EmbedHelper embedHelper,
+            IGuild guild,
+            SocketCommandContext context = null)
         {
-            var embed = await embedHelper.BuildDefaultEmbed();
-            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
-            var player = node.GetPlayer(guild);
+            if (!node.TryGetPlayer(guild, out var player))
+            {
+                return;
+            }
+
             player.Queue.Clear();
             await node.LeaveAsync(player.VoiceChannel);
+
+            if (context != null && !context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            {
+                return;
+            }
+            var embed = await embedHelper.BuildDefaultEmbed();
+            await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
     }
 }
