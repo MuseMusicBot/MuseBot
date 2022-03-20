@@ -9,7 +9,7 @@
     <None Remove="Resources\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="2.3.1" />
+    <PackageReference Include="Discord.Net" Version="3.4.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.3.21201.4" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0-preview.3.21201.4" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0-preview.3.21201.4" />
@@ -22,4 +22,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+    <ItemGroup>
+    <AssetsSourceFiles Include="muse-banner.png" />
+  </ItemGroup>
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <Copy SourceFiles="@(AssetsSourceFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

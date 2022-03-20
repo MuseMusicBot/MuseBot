@@ -62,19 +62,19 @@ namespace MusicBot
             // user -> SocketUser
             // before -> VoiceState before
             // after -> VoiceState after
-            discord.UserVoiceStateUpdated += async (user, before, after) =>
-            {
-                if (user.Id == discord.CurrentUser.Id && before.VoiceChannel == null)
-                {
-                    try
-                    {
-                        var node = services.GetRequiredService<LavaNode>();
-                        var player = node.GetPlayer((user as IGuildUser).Guild);
-                        await player.UpdateVolumeAsync(BotConfig.Volume);
-                    }
-                    catch { }
-                }
-            };
+            // discord.UserVoiceStateUpdated += async (user, before, after) =>
+            // {
+            //     if (user.Id == discord.CurrentUser.Id && before.VoiceChannel == null)
+            //     {
+            //         try
+            //         {
+            //             var node = services.GetRequiredService<LavaNode>();
+            //             var player = node.GetPlayer((user as IGuildUser).Guild);
+            //             await player.UpdateVolumeAsync(BotConfig.Volume);
+            //         }
+            //         catch { }
+            //     }
+            // };
 
             // Trap Ctrl+C
             Console.CancelKeyPress += (s, e) =>

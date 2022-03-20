@@ -31,6 +31,8 @@ namespace MusicBot.Helpers
                                               player.Queue.Count switch { 1 => "", _ => "s" },
                                               $"{Program.BotConfig.Volume}%");
 
+            string iUrl = paused ? "https://i.imgur.com/F6ujxuo.gif" : YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result;
+
             Embed embed = new EmbedBuilder
             {
                 Color = color,
@@ -40,7 +42,7 @@ namespace MusicBot.Helpers
                     Name = $"[{player.Track.Duration.ToTimecode()}] - {player.Track.Title}",
                     Url = player.Track.Url
                 },
-                ImageUrl = paused ? "https://i.imgur.com/F6ujxuo.gif" : YouTubeHelper.GetYtThumbnail(player.Track.Url) ?? player.Track.FetchArtworkAsync().Result, // If not youtube, have Victoria fetch the artwork
+                ImageUrl = iUrl,
                 Footer = new EmbedFooterBuilder { Text = footerText }
             }.Build();
 
@@ -52,7 +54,7 @@ namespace MusicBot.Helpers
             var embed = new EmbedBuilder
             {
                 Color = Color.DarkTeal,
-                Title = "Nothing currently playing",
+                Title = "Nothing is currently playing",
                 Description = "This ain't Hydra. Please stop asking.",
                 ImageUrl = "https://i.imgur.com/K4dWciL.jpg",
                 Footer = new EmbedFooterBuilder { Text = $"Prefix for this server is: {Program.BotConfig.Prefix}" }

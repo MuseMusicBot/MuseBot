@@ -159,20 +159,24 @@ Commands exist, but we do recommend just using the reaction the bot has to make 
 | clear | clears the queue |
 | volume | changes the volume |
 | remove | remove a track from the queue |
+| requester | shows who requested the current song |
 | seek | seeks to a position in the song |
+| loop | loops the current song |
+| 24/7 | prevents bot from auto disconnecting from the voice channel |
+| prefix | changes the prefix for the bot |
 
 
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-If you want to improve this bot, feel free to make a pull request or fork this project. At this state, the bot is considered mostly finished and will not see much commits from us. If you do decide to use this bot as a template for your own, we will appreciate if you could credit us somewhere.
+If you want to improve this bot, feel free to make a pull request or fork this project. At this state, the bot is considered mostly finished and will not see much commits from us. If you do decide to use this bot as a template for your own, we would appreciate if you could credit us somewhere.
 The bot is not perfect and we are aware there are some issues with it, but since they function we are considering this to be good enough.
 
 Some issues we are aware of:
 * Spotify playlist is quite slow
 * Thumbnail doesn't show in rare instances
-* You need to run the setup command to start requesting any music
+* ~~You need to run the setup command to start requesting any music~~ This is partially fixed in version 1.1
 
 
 <!-- ACKNOWLEDGEMENTS -->

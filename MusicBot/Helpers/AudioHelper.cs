@@ -29,6 +29,7 @@ namespace MusicBot.Helpers
         public SpotifyClient Spotify { get; }
         public bool RepeatFlag { get; set; } = false;
         public bool StayFlag { get; set; } = false;
+        public bool SpotifyLogin { get; set; } = false;
         public LavaTrack RepeatTrack { get; set; }
 
         public AudioHelper(LavaNode lavanode, EmbedHelper eh)
@@ -37,12 +38,16 @@ namespace MusicBot.Helpers
             embedHelper = eh;
 
             // TODO: Make SpotifyClient own class
-            var config = SpotifyClientConfig.CreateDefault();
-            var request = new ClientCredentialsRequest(Program.BotConfig.SpotifyClientId, Program.BotConfig.SpotifySecret);
-            var response = new OAuthClient(config).RequestToken(request);
-            var spotify = new SpotifyClient(config.WithToken(response.Result.AccessToken));
-            Spotify = spotify;
-            _disconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
+            if (Program.BotConfig.SpotifyClientId != "" && Program.BotConfig.SpotifySecret != "")
+            {
+                var config = SpotifyClientConfig.CreateDefault();
+                var request = new ClientCredentialsRequest(Program.BotConfig.SpotifyClientId, Program.BotConfig.SpotifySecret);
+                var response = new OAuthClient(config).RequestToken(request);
+                var spotify = new SpotifyClient(config.WithToken(response.Result.AccessToken));
+                Spotify = spotify;
+                _disconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
+                SpotifyLogin = true;
+            }
 
 
             // Handler for when a LavaTrack is started
@@ -205,10 +210,16 @@ namespace MusicBot.Helpers
             Regex regex;
             Match match;
 
+            if (!SpotifyLogin)
+            {
+                return;
+            }
+
             if (!Node.TryGetPlayer(context.Guild, out var player))
             {
                 await Node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
                 player = Node.GetPlayer(context.Guild);
+                await player.UpdateVolumeAsync(Program.BotConfig.Volume);
             }
 
             if (!query.IsUri(out var uri))
