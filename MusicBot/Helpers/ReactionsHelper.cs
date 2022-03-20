@@ -16,7 +16,6 @@ namespace MusicBot.Helpers
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
-        //private readonly PlayerHelper playerHelper; //access to universal commands. -Uiharu
         public static readonly IEmote[] Emojis = { new Emoji("⏮"), new Emoji("⏯️"), new Emoji("⏭️"), new Emoji("🔂"), new Emoji("🔀"), new Emoji("⏏️") };
         private enum EmojiStates
         {
@@ -28,14 +27,13 @@ namespace MusicBot.Helpers
             Eject
         };
 
-        public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh/*, PlayerHelper ph*/)
+        public ReactionsHelper(DiscordSocketClient client, LavaNode lavaNode, AudioHelper ah, EmbedHelper eh)
         {
             //Uiharu was here. :)
             discord = client;
             node = lavaNode;
             audioHelper = ah;
             embedHelper = eh;
-            //playerHelper = ph;
             discord.ReactionAdded += OnReactionAdded;
         }
 
@@ -43,11 +41,13 @@ namespace MusicBot.Helpers
         /// On Reaction handler 
         /// </summary>
         /// <param name="message">Cacheable struct from Discord</param>
-        /// <param name="channel">SocketChannel reaction occurred in</param>
+        /// <param name="messageChannel">SocketChannel reaction occurred in</param>
         /// <param name="reaction">Reaction added</param>
         /// <returns></returns>
-        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> messageChannel, SocketReaction reaction)
         {
+            var channel = await messageChannel.GetOrDownloadAsync();
+
             if (!(channel is IGuildChannel guildChannel))
             {
                 return;

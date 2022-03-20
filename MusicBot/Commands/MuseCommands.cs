@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using MusicBot.Helpers;
 using MusicBot.Services;
 using System;
@@ -17,13 +18,15 @@ namespace MusicBot.Commands
         private readonly LavaNode node;
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
+        private readonly ILogger logger;
 
         #region ctor
-        public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh)
+        public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh, LoggingService loggingService)
         {
             node = lavaNode;
             audioHelper = ah;
             embedHelper = eh;
+            logger = loggingService.Loggers[LoggingService.LoggerEntries.Commands];
         }
         #endregion
 
@@ -67,7 +70,7 @@ namespace MusicBot.Commands
         [Summary("Plays a song.")]
         public async Task Play([Remainder] string query)
         {
-            LavaPlayer player = null;
+            LavaPlayer player;
             if (!node.HasPlayer(Context.Guild))
             {
                 try
@@ -83,7 +86,7 @@ namespace MusicBot.Commands
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    logger.LogError(e, "Failed to create player");
                 }
             }
 

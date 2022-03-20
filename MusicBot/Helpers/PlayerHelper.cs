@@ -63,7 +63,7 @@ namespace MusicBot.Helpers
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
 
-        public static async Task LoopAsync(this LavaPlayer player, AudioHelper audioHelper, EmbedHelper embedHelper, ISocketMessageChannel channel)
+        public static async Task LoopAsync(this LavaPlayer player, AudioHelper audioHelper, EmbedHelper embedHelper, IMessageChannel channel)
         {
             audioHelper.RepeatFlag = !audioHelper.RepeatFlag;
             audioHelper.RepeatTrack = audioHelper.RepeatFlag switch
@@ -80,7 +80,7 @@ namespace MusicBot.Helpers
             this LavaPlayer player,
             AudioHelper audioHelper,
             EmbedHelper embedHelper,
-            ISocketMessageChannel channel = null,
+            IMessageChannel channel = null,
             SocketCommandContext context = null)
         {
             if (player.Queue.Count < 2)

@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using MusicBot.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -14,9 +15,15 @@ namespace MusicBot.Services
         private readonly DiscordSocketClient discord;
         private readonly CommandService commandService;
         private readonly ILoggerFactory logger;
-        private readonly ILogger commandLogger;
-        private readonly ILogger discordLogger;
-        private readonly ILogger victoriaLogger;
+
+        public enum LoggerEntries
+        {
+            Discord,
+            Victoria,
+            Commands
+        }
+
+        public Dictionary<LoggerEntries, ILogger> Loggers { get; }
 
         /// <summary>
         /// ctor for Logging service
@@ -30,9 +37,12 @@ namespace MusicBot.Services
             discord = client;
             commandService = cmdService;
             logger = ConfigureLogging(loggerFactory);
-            discordLogger = logger.CreateLogger("Discord");
-            commandLogger = logger.CreateLogger("Commands");
-            victoriaLogger = logger.CreateLogger("Victoria");
+            Loggers = new Dictionary<LoggerEntries, ILogger>()
+            {
+                { LoggerEntries.Discord, logger.CreateLogger("Discord") },
+                { LoggerEntries.Commands, logger.CreateLogger("Commands") },
+                { LoggerEntries.Victoria, logger.CreateLogger("Victoria") }
+            };
 
             discord.Log += LogDiscord;
             commandService.Log += LogCommandService;
@@ -73,7 +83,7 @@ namespace MusicBot.Services
         /// <returns></returns>
         private Task LogDiscord(LogMessage message)
         {
-            discordLogger.LogMessage(message);
+            Loggers[LoggerEntries.Discord].LogMessage(message);
             return Task.CompletedTask;
         }
 
@@ -84,7 +94,7 @@ namespace MusicBot.Services
         /// <returns></returns>
         private Task LavaNodeOnLog(LogMessage message)
         {
-            victoriaLogger.LogMessage(message);
+            Loggers[LoggerEntries.Victoria].LogMessage(message);
             return Task.CompletedTask;
         }
 
@@ -101,7 +111,7 @@ namespace MusicBot.Services
                 var _ = cmd.Context.Channel.SendMessageAsync($"Error: {cmd.Message}");
             }
 
-            commandLogger.LogMessage(message);
+            Loggers[LoggerEntries.Commands].LogMessage(message);
             return Task.CompletedTask;
         }
 
