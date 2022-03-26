@@ -43,21 +43,25 @@ namespace MusicBot.Services
 
             int argPos = 0;
 
-            if (context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any() && message.Channel.Id != Program.BotConfig.ChannelId)
+            string prefix   = Program.BotConfig.Prefix;
+            ulong chId      = Program.BotConfig.ChannelId;
+
+            if (context.Guild.TextChannels.Where(x => x.Id == chId).Any() && message.Channel.Id != chId)
             {
-                if (message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos))
+                
+                if (message.HasStringPrefix(prefix, ref argPos))
                 {
                     _ = Task.Run(async () =>
                     {
                         await message.DeleteAsync();
-                        var msg = await embedHelper.BuildMessageEmbed($"This command is restrcited to <#{Program.BotConfig.ChannelId}>.");
+                        var msg = await embedHelper.BuildMessageEmbed($"This command is restrcited to <#{chId}>.");
                         await context.Channel.SendAndRemove(embed: msg, timeout: 15000);
                     });
                 }
                 return;
             }
 
-            if (message.Content != $"{Program.BotConfig.Prefix}premium" && (message.Author as IGuildUser)?.VoiceChannel == null)
+            if (message.Content != $"{prefix}premium" && (message.Author as IGuildUser)?.VoiceChannel == null)
             {
                 _ = Task.Run(async () =>
                 {
@@ -68,7 +72,7 @@ namespace MusicBot.Services
                 return;
             }
 
-            if (!message.HasStringPrefix(Program.BotConfig.Prefix, ref argPos) && context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (!message.HasStringPrefix(prefix, ref argPos) && context.Guild.TextChannels.Where(x => x.Id == chId).Any())
             {
                 _ = Task.Run(async () =>
                 {

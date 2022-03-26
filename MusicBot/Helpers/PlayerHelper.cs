@@ -1,8 +1,6 @@
 ﻿using Victoria;
-using Victoria.Enums;
 using Discord.Commands;
 using Discord;
-using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
