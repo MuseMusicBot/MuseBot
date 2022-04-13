@@ -51,8 +51,7 @@ namespace MusicBot.Commands
 
             await channel.SendFileAsync("muse-banner.png", "");
 
-            var embed = await embedHelper.BuildDefaultEmbed();
-            var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
+            var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: await EmbedHelper.BuildDefaultEmbed());
             await msg.AddReactionsAsync(ReactionsHelper.Emojis, new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
 
             var config = Program.BotConfig;
@@ -409,7 +408,7 @@ namespace MusicBot.Commands
             player.Queue.Clear();
             if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
             {
-                var embed = await embedHelper.BuildDefaultEmbed();
+                var embed = await EmbedHelper.BuildDefaultEmbed();
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             }
             await player.StopAsync();
@@ -648,7 +647,7 @@ namespace MusicBot.Commands
 
             if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
             {
-                var embed = await embedHelper.BuildDefaultEmbed();
+                var embed = await EmbedHelper.BuildDefaultEmbed();
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Embed = embed; });
             }
 

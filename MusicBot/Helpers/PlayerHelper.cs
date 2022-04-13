@@ -57,7 +57,7 @@ namespace MusicBot.Helpers
             {
                 return;
             }
-            var embed = await embedHelper.BuildDefaultEmbed();
+            var embed = await EmbedHelper.BuildDefaultEmbed();
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
 
@@ -110,6 +110,11 @@ namespace MusicBot.Helpers
             IGuild guild,
             SocketCommandContext context = null)
         {
+            if (context == null)
+            {
+                return;
+            }
+
             if (!node.TryGetPlayer(guild, out var player))
             {
                 return;
@@ -122,7 +127,7 @@ namespace MusicBot.Helpers
             {
                 return;
             }
-            var embed = await embedHelper.BuildDefaultEmbed();
+            var embed = await EmbedHelper.BuildDefaultEmbed();
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
     }

@@ -49,7 +49,7 @@ namespace MusicBot.Helpers
             return new ValueTask<Embed>(embed);
         }
 
-        public ValueTask<Embed> BuildDefaultEmbed()
+        public static ValueTask<Embed> BuildDefaultEmbed()
         {
             var embed = new EmbedBuilder
             {
@@ -64,14 +64,14 @@ namespace MusicBot.Helpers
         }
 
         public ValueTask<Embed> BuildMessageEmbed(string text)
-            => new ValueTask<Embed>(new EmbedBuilder
+            => new (new EmbedBuilder
             {
                 Color = Color.Orange,
                 Description = text
             }.Build());
 
         public ValueTask<Embed> BuildErrorEmbed(string title, string error)
-            => new ValueTask<Embed>(new EmbedBuilder
+            => new (new EmbedBuilder
             {
                 Color = Color.DarkRed,
                 Title = title,
@@ -79,7 +79,7 @@ namespace MusicBot.Helpers
             }.Build());
 
         public ValueTask<Embed> BuildTrackErrorEmbed(string error)
-            => new ValueTask<Embed>(new EmbedBuilder
+            => new(new EmbedBuilder
             {
                 Color = Color.DarkRed,
                 Title = "An error has occurred",

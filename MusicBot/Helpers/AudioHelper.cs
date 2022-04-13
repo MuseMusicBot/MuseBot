@@ -108,7 +108,7 @@ namespace MusicBot.Helpers
 
                 if (!player.Queue.TryDequeue(out var track) && player.Queue.Count == 0)
                 {
-                    var embed = await embedHelper.BuildDefaultEmbed();
+                    var embed = await EmbedHelper.BuildDefaultEmbed();
                     await Program.BotConfig.BotEmbedMessage.ModifyAsync(x =>
                 {
                     x.Content = NoSongsInQueue;

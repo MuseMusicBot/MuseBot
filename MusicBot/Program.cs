@@ -80,16 +80,10 @@ namespace MusicBot
             // };
 
             // Trap Ctrl+C
-            Console.CancelKeyPress += (s, e) =>
-            {
-                BotExit(services);
-            };
+            Console.CancelKeyPress += (s, e) => BotExit(services);
 
             // Trap process exit
-            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
-            {
-                BotExit(services);
-            };
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => BotExit(services);
 
             await Task.Delay(-1);
         }
@@ -110,7 +104,7 @@ namespace MusicBot
                     BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
                     {
                         x.Content = AudioHelper.NoSongsInQueue;
-                        x.Embed = await embedHelper.BuildDefaultEmbed();
+                        x.Embed = await EmbedHelper.BuildDefaultEmbed();
                     });
                 }
                 catch (Exception e)
@@ -124,7 +118,7 @@ namespace MusicBot
                 BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
                 {
                     x.Content = AudioHelper.NoSongsInQueue;
-                    x.Embed = await embedHelper.BuildDefaultEmbed();
+                    x.Embed = await EmbedHelper.BuildDefaultEmbed();
                 });
 
                 ConfigHelper.UpdateConfigFile(BotConfig);
@@ -143,7 +137,7 @@ namespace MusicBot
             if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
             {
                 var config = BotConfig;
-                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId).GetMessageAsync(config.MessageId) as IUserMessage;
+                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId)?.GetMessageAsync(config.MessageId) as IUserMessage;
                 BotConfig = config;
             }
         }

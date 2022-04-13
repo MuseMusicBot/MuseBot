@@ -48,7 +48,7 @@ namespace MusicBot.Helpers
         {
             var channel = await messageChannel.GetOrDownloadAsync();
 
-            if (!(channel is IGuildChannel guildChannel))
+            if (channel is not IGuildChannel guildChannel)
             {
                 return;
             }
