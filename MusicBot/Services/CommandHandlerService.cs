@@ -46,7 +46,7 @@ namespace MusicBot.Services
             string prefix   = Program.BotConfig.Prefix;
             ulong chId      = Program.BotConfig.ChannelId;
 
-            if (context.Guild.TextChannels.Where(x => x.Id == chId).Any() && message.Channel.Id != chId)
+            if (context.Guild.TextChannels.Any(x => x.Id == chId) && message.Channel.Id != chId)
             {
                 
                 if (message.HasStringPrefix(prefix, ref argPos))
@@ -54,7 +54,7 @@ namespace MusicBot.Services
                     _ = Task.Run(async () =>
                     {
                         await message.DeleteAsync();
-                        var msg = await embedHelper.BuildMessageEmbed($"This command is restrcited to <#{chId}>.");
+                        var msg = await embedHelper.BuildMessageEmbed($"This command is restricted to <#{chId}>.");
                         await context.Channel.SendAndRemove(embed: msg, timeout: 15000);
                     });
                 }
@@ -72,7 +72,7 @@ namespace MusicBot.Services
                 return;
             }
 
-            if (!message.HasStringPrefix(prefix, ref argPos) && context.Guild.TextChannels.Where(x => x.Id == chId).Any())
+            if (!message.HasStringPrefix(prefix, ref argPos) && context.Guild.TextChannels.Any(x => x.Id == chId))
             {
                 _ = Task.Run(async () =>
                 {
@@ -85,8 +85,7 @@ namespace MusicBot.Services
 
             var result = await commands.ExecuteAsync(context, argPos, provider);
 
-            if (result.Error.HasValue &&
-                result.Error.Value == CommandError.UnknownCommand)
+            if (result.Error is CommandError.UnknownCommand)
                 return;
             if (result.Error.HasValue &&
                 result.Error.Value != CommandError.UnknownCommand)

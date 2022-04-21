@@ -137,7 +137,7 @@ namespace MusicBot
             if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
             {
                 var config = BotConfig;
-                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId)?.GetMessageAsync(config.MessageId) as IUserMessage;
+                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId)?.GetMessageAsync(config.MessageId)! as IUserMessage;
                 BotConfig = config;
             }
         }

@@ -87,7 +87,7 @@ namespace MusicBot.Helpers
 
                 var player = node.GetPlayer(guildChannel.Guild);
 
-                if (!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused) && currentState != EmojiStates.Eject)
+                if (!(player.PlayerState is PlayerState.Playing or PlayerState.Paused) && currentState != EmojiStates.Eject)
                 {
                     return;
                 }
@@ -125,7 +125,11 @@ namespace MusicBot.Helpers
                             {
                                 await node.EjectAsync(embedHelper, guildChannel.Guild);
                             }
-                            catch { }
+                            catch
+                            {
+                                // ignored
+                            }
+
                             break;
                         }
 

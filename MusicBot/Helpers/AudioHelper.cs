@@ -217,7 +217,7 @@ namespace MusicBot.Helpers
 
             if (!Node.TryGetPlayer(context.Guild, out var player))
             {
-                await Node.JoinAsync((context.User as IGuildUser).VoiceChannel, context.Channel as ITextChannel);
+                await Node.JoinAsync((context.User as IGuildUser)?.VoiceChannel, context.Channel as ITextChannel);
                 player = Node.GetPlayer(context.Guild);
                 await player.UpdateVolumeAsync(Program.BotConfig.Volume);
             }
@@ -242,7 +242,7 @@ namespace MusicBot.Helpers
 
             search = await Node.SearchAsync(query);
 
-            if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+            if (search.LoadStatus is LoadStatus.LoadFailed or LoadStatus.NoMatches)
             {
                 var msg = await embedHelper.BuildErrorEmbed($"The link `{query}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
                 regex = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
@@ -335,7 +335,7 @@ namespace MusicBot.Helpers
         /// </summary>
         /// <param name="player">Instance of <see cref="LavaPlayer" /> for the guild</param>
         /// <returns>String with songs queued</returns>
-        public ValueTask<string> GetNewEmbedQueueString(LavaPlayer player)
+        public static ValueTask<string> GetNewEmbedQueueString(LavaPlayer player)
         {
             StringBuilder sb = new StringBuilder();
             var q = player.Queue.ToList();
@@ -439,12 +439,11 @@ namespace MusicBot.Helpers
         {
             _ = Task.Run(async () =>
             {
-                string newQueue;
                 int startIdx = 0;
 
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
 
-                if (player.PlayerState == PlayerState.Connected || player.PlayerState == PlayerState.Stopped)
+                if (player.PlayerState is PlayerState.Connected or PlayerState.Stopped)
                 {
                     var node = await Node.SearchYouTubeAsync(spotifyTracks[0]);
                     if (node.LoadStatus != LoadStatus.NoMatches || node.LoadStatus != LoadStatus.LoadFailed)
@@ -463,9 +462,16 @@ namespace MusicBot.Helpers
                         {
                             node = await Node.SearchYouTubeAsync(e);
                             i++;
-                        } while ((node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) && i <= maxRetries);
+                        } while (node.LoadStatus is LoadStatus.NoMatches or LoadStatus.LoadFailed && i <= maxRetries);
 
-                        return (node.LoadStatus == LoadStatus.NoMatches || node.LoadStatus == LoadStatus.LoadFailed) ? null : node.Tracks.FirstOrDefault()?.CreateMuseTrack(requester);
+                        LavaTrack first = null;
+                        foreach (var track in node.Tracks)
+                        {
+                            first = track;
+                            break;
+                        }
+
+                        return node.LoadStatus is LoadStatus.NoMatches or LoadStatus.LoadFailed ? null : first?.CreateMuseTrack(requester);
                     });
 
                     SpinWait.SpinUntil(() => lavaTracks.Count() == spotifyTracks.Count - startIdx);
@@ -476,7 +482,7 @@ namespace MusicBot.Helpers
                     }
                 }
 
-                newQueue = await GetNewEmbedQueueString(player).ConfigureAwait(false);
+                var newQueue = await GetNewEmbedQueueString(player).ConfigureAwait(false);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkGreen).ConfigureAwait(false);
                 var content = newQueue switch
                 {

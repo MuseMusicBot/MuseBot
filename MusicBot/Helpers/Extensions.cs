@@ -35,7 +35,7 @@ namespace MusicBot.Helpers
         /// <param name="message">Message to remove</param>
         /// <param name="timeout">Timeout to remove message</param>
         /// <returns></returns>
-        public static async Task RemoveAfterTimeout(this IMessage message, int timeout = 10000)
+        private static async Task RemoveAfterTimeout(this IDeletable message, int timeout = 10000)
         {
             await Task.Delay(timeout);
             await message.DeleteAsync(new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
@@ -49,12 +49,7 @@ namespace MusicBot.Helpers
         /// <returns><see cref="TimeSpan" /> of the timecode, default if bad parse</returns>
         public static TimeSpan ToTimeSpan(this string timecode)
         {
-            if (!TimeSpan.TryParse(timecode, out var res))
-            {
-                return default;
-            }
-
-            return res;
+            return !TimeSpan.TryParse(timecode, out var res) ? default : res;
         }
 
         /// <summary>
