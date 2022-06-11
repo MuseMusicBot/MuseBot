@@ -6,33 +6,53 @@
 trigger:
 - master
 
+pr:
+- master
+
+
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
+  solution: '**/MusicBot.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
+- checkout: self
 - task: NuGetToolInstaller@1
+  displayName: 'Download nuget packages'
 
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-
 - task: VSBuild@1
+  displayName: 'Build project'
   inputs:
-    solution: '$(solution)'
+    solution: '**/MusicBot/MusicBot.csproj'
+    vsVersion: 'latest'
+    msbuildArgs: '/t:Build /p:PublishSingleFile=true /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+    clean: true
 
-- task: VSTest@2
+- task: CopyFiles@2
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    SourceFolder: '**/MusicBot/'
+    Contents: 'muse-banner.png'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    ArtifactName: 'MuseBot'
+    publishLocation: 'Container'
