@@ -108,6 +108,7 @@ steps:
 
 - task: GitHubRelease@1
   inputs:
+    gitHubConnection: 'DrDevinRX'
     repositoryName: '$(Build.Repository.Name)'
     action: 'create'
     target: '$(Build.SourceVersion)'
