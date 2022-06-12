@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MusicBot.Helpers;
 using MusicBot.Services;
 using System;
@@ -9,6 +10,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Victoria;
 
+// TODO: Possibly add interactive services?
+// TODO: Update Victoria
 namespace MusicBot
 {
     class Program
@@ -77,56 +80,49 @@ namespace MusicBot
             // };
 
             // Trap Ctrl+C
-            Console.CancelKeyPress += (s, e) =>
+            Console.CancelKeyPress += (s, e) => BotExit(services);
+
+            // Trap process exit
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => BotExit(services);
+
+            await Task.Delay(-1);
+        }
+
+        /// <summary>
+        /// Bot exit function fired when application is closing or ctrl+c is pressed
+        /// </summary>
+        /// <param name="services"><see cref="IServiceProvider"> to get services from</param>
+        private void BotExit(IServiceProvider services)
+        {
+            var node = services.GetRequiredService<LavaNode>();
+            var embedHelper = services.GetRequiredService<EmbedHelper>();
+            foreach (var player in node.Players)
             {
-                var node = services.GetRequiredService<LavaNode>();
-                var embedHelper = services.GetRequiredService<EmbedHelper>();
-                foreach (var player in node.Players)
+                try
                 {
-                    try
+                    node.LeaveAsync(player.VoiceChannel);
+                    BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
                     {
-                        node.LeaveAsync(player.VoiceChannel);
-                    }
-                    catch { }
+                        x.Content = AudioHelper.NoSongsInQueue;
+                        x.Embed = await EmbedHelper.BuildDefaultEmbed();
+                    });
+                }
+                catch (Exception e)
+                {
+                    var logging = services.GetRequiredService<LoggingService>();
+                    var logger = logging.Loggers[LoggingService.LoggerEntries.Discord];
+
+                    logger.LogError(e, "");
                 }
 
                 BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
                 {
                     x.Content = AudioHelper.NoSongsInQueue;
-                    x.Embed = await embedHelper.BuildDefaultEmbed();
+                    x.Embed = await EmbedHelper.BuildDefaultEmbed();
                 });
 
                 ConfigHelper.UpdateConfigFile(BotConfig);
-            };
-
-            // Trap process exit
-            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
-            {
-                var node = services.GetRequiredService<LavaNode>();
-                var embedHelper = services.GetRequiredService<EmbedHelper>();
-                foreach (var player in node.Players)
-                {
-                    try
-                    {
-                        node.LeaveAsync(player.VoiceChannel);
-                        Program.BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
-                        {
-                            x.Content = AudioHelper.NoSongsInQueue;
-                            x.Embed = await embedHelper.BuildDefaultEmbed();
-                        });
-                    }
-                    catch { }
-
-                    BotConfig.BotEmbedMessage.ModifyAsync(async (x) =>
-                    {
-                        x.Content = AudioHelper.NoSongsInQueue;
-                        x.Embed = await embedHelper.BuildDefaultEmbed();
-                    });
-
-                    ConfigHelper.UpdateConfigFile(BotConfig);
-                }
-            };
-            await Task.Delay(-1);
+            }
         }
 
         /// <summary>
@@ -141,7 +137,7 @@ namespace MusicBot
             if (BotConfig.GuildId != 0 && BotConfig.ChannelId != 0 && BotConfig.MessageId != 0 && BotConfig.BotEmbedMessage == null)
             {
                 var config = BotConfig;
-                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId).GetMessageAsync(config.MessageId) as IUserMessage;
+                config.BotEmbedMessage = await guild.GetTextChannel(config.ChannelId)?.GetMessageAsync(config.MessageId)! as IUserMessage;
                 BotConfig = config;
             }
         }

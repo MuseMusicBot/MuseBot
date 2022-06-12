@@ -4,8 +4,10 @@ using Microsoft.Extensions.Logging;
 using MusicBot.Helpers;
 using MusicBot.Services;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
@@ -19,6 +21,14 @@ namespace MusicBot.Commands
         private readonly AudioHelper audioHelper;
         private readonly EmbedHelper embedHelper;
         private readonly ILogger logger;
+
+        private static Dictionary<string, double[]> EqBands = new()
+        {
+            { "earrape", new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 } },
+            { "bass", new[] { 0.10, 0.10, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.10, 0.10 }},
+            { "pop", new[] { -0.01, -0.01, 0, 0.01, 0.02, 0.05, 0.07, 0.10, 0.07, 0.05, 0.02, 0.01, 0, -0.01, -0.01 }},
+            { "off", null }
+        };
 
         #region ctor
         public MuseCommands(AudioHelper ah, LavaNode lavaNode, EmbedHelper eh, LoggingService loggingService)
@@ -35,7 +45,7 @@ namespace MusicBot.Commands
         [Summary("Setups the song request channel.")]
         public async Task Setup()
         {
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
                 var error = await embedHelper.BuildErrorEmbed("Could not create channel", $"<#{Program.BotConfig.ChannelId}> already exists.");
                 await Context.Channel.SendAndRemove(embed: error, timeout: 15000);
@@ -45,14 +55,13 @@ namespace MusicBot.Commands
             var channel = await Context.Guild.CreateTextChannelAsync("muse-song-requests", x =>
             {
                 var c = Context.Guild.CategoryChannels;
-                x.CategoryId = c.Where(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.Id;
+                x.CategoryId = c.FirstOrDefault(y => y.Name.Contains("general", StringComparison.OrdinalIgnoreCase))?.Id;
                 x.Topic = "Music Bot";
             });
 
             await channel.SendFileAsync("muse-banner.png", "");
 
-            var embed = await embedHelper.BuildDefaultEmbed();
-            var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: embed);
+            var msg = await channel.SendMessageAsync(AudioHelper.NoSongsInQueue, embed: await EmbedHelper.BuildDefaultEmbed());
             await msg.AddReactionsAsync(ReactionsHelper.Emojis, new RequestOptions { RetryMode = RetryMode.RetryRatelimit });
 
             var config = Program.BotConfig;
@@ -93,7 +102,7 @@ namespace MusicBot.Commands
             player = node.GetPlayer(Context.Guild);
 
             var search = await node.SearchAsync(query);
-            if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+            if (search.LoadStatus is LoadStatus.LoadFailed or LoadStatus.NoMatches)
             {
                 await Context.Channel.SendMessageAsync($"{search.Exception}");
                 return;
@@ -116,14 +125,13 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
-            if (player.PlayerState == PlayerState.Paused)
+            switch (player.PlayerState)
             {
-                return;
-            }
-
-            if (player.PlayerState == PlayerState.Playing)
-            {
-                await player.PauseResumeAsync(embedHelper, false, context: Context);
+                case PlayerState.Paused:
+                    return;
+                case PlayerState.Playing:
+                    await player.PauseResumeAsync(embedHelper, false, context: Context);
+                    break;
             }
         }
         #endregion
@@ -141,16 +149,14 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
-            if (player.PlayerState == PlayerState.Playing)
+            switch (player.PlayerState)
             {
-                return;
+                case PlayerState.Playing:
+                    return;
+                case PlayerState.Paused:
+                    await player.PauseResumeAsync(embedHelper, true, context: Context);
+                    break;
             }
-
-            if (player.PlayerState == PlayerState.Paused)
-            {
-                await player.PauseResumeAsync(embedHelper, true, context: Context);
-            }
-
         }
         #endregion
 
@@ -167,7 +173,7 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
-            if (!(player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            if (player.PlayerState is not (PlayerState.Playing or PlayerState.Paused))
             {
                 return;
             }
@@ -175,7 +181,7 @@ namespace MusicBot.Commands
             var pos = player.Track.Position;
             var len = player.Track.Duration;
 
-            if (seekTime == null && (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused))
+            if (seekTime == null && player.PlayerState is PlayerState.Playing or PlayerState.Paused)
             {
                 var msg = await embedHelper.BuildMessageEmbed($"Current Position: {pos.ToTimecode()}/{len.ToTimecode()}");
                 await Context.Channel.SendAndRemove(embed: msg, timeout: 5000);
@@ -215,8 +221,7 @@ namespace MusicBot.Commands
         public async Task Shuffle()
         {
             if (node.TryGetPlayer(Context.Guild, out var player) &&
-                player.PlayerState == PlayerState.Playing ||
-                player.PlayerState == PlayerState.Paused)
+                player.PlayerState is PlayerState.Playing or PlayerState.Paused)
             {
                 await player.ShuffleAsync(audioHelper, embedHelper, context: Context);
             }
@@ -236,7 +241,7 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
@@ -292,9 +297,9 @@ namespace MusicBot.Commands
                 player.Queue.Enqueue(p);
             }
 
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
-                string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+                string newQueue = await AudioHelper.GetNewEmbedQueueString(player);
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
             }
 
@@ -343,7 +348,7 @@ namespace MusicBot.Commands
                 return;
             }
             //If user sets the volume below 1 or above 150
-            if (vol > 150 || vol < 1)
+            if (vol is > 150 or < 1)
             {
                 var msg = await embedHelper.BuildMessageEmbed("Volume can only be set between 0 - 150 inclusively");
                 await Context.Channel.SendAndRemove(embed: msg);
@@ -365,7 +370,7 @@ namespace MusicBot.Commands
             Program.BotConfig = config;
             await player.UpdateVolumeAsync(vol.Value);
 
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal, player.PlayerState == PlayerState.Paused);
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Embed = embed);
@@ -388,7 +393,7 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
 
-            if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+            if (player.PlayerState is PlayerState.Playing or PlayerState.Paused)
             {
                 await player.NextTrackAsync(embedHelper, context: Context);
             }
@@ -407,9 +412,9 @@ namespace MusicBot.Commands
 
             var player = node.GetPlayer(Context.Guild);
             player.Queue.Clear();
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
-                var embed = await embedHelper.BuildDefaultEmbed();
+                var embed = await EmbedHelper.BuildDefaultEmbed();
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
             }
             await player.StopAsync();
@@ -470,7 +475,7 @@ namespace MusicBot.Commands
             }
             if (indexToMove > queue.Count)
             {
-                var msg = await embedHelper.BuildMessageEmbed("Invalid track nuumber.");
+                var msg = await embedHelper.BuildMessageEmbed("Invalid track number.");
                 await Context.Channel.SendAndRemove(embed: msg);
                 return;
             }
@@ -486,9 +491,9 @@ namespace MusicBot.Commands
                 player.Queue.Enqueue(p);
             }
 
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
-                string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+                string newQueue = await AudioHelper.GetNewEmbedQueueString(player);
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = newQueue);
             }
 
@@ -518,28 +523,24 @@ namespace MusicBot.Commands
             }
 
             var textInfo = CultureInfo.InvariantCulture.TextInfo;
-            EqualizerBand[] bands;
-            switch (eq)
+
+            if (!EqBands.ContainsKey(eq))
             {
-                case "earrape":
-                    bands = EQHelper.BuildEQ(new[] { 1, 1, 1, 1, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, 1, 1, 1, 1 });
-                    break;
+                var sb = new StringBuilder();
 
-                case "bass":
-                    bands = EQHelper.BuildEQ(new[] { 0.10, 0.10, 0.05, 0.05, 0.05, -0.05, -0.05, 0, -0.05, -0.05, 0, 0.05, 0.05, 0.10, 0.10 });
-                    break;
+                var keys = EqBands.Keys.ToList();
 
-                case "pop":
-                    bands = EQHelper.BuildEQ(new[] { -0.01, -0.01, 0, 0.01, 0.02, 0.05, 0.07, 0.10, 0.07, 0.05, 0.02, 0.01, 0, -0.01, -0.01 });
-                    break;
+                for (var i = 0; i < keys.Count; i++)
+                {
+                    keys[i] = $"`{keys[i]}`";
+                }
 
-                case "off":
-                    bands = EQHelper.BuildEQ(null);
-                    break;
-                default:
-                    await Context.Channel.SendAndRemove(embed: await embedHelper.BuildMessageEmbed("Valid EQ modes: `earrape`, `bass`, `pop`, `off`"), timeout: 6000);
-                    return;
-            };
+                await Context.Channel.SendAndRemove(
+                    embed: await embedHelper.BuildMessageEmbed($"Valid EQ modes: {string.Join(", ", keys)}"),
+                    timeout: 6000);
+            }
+
+            var bands = EQHelper.BuildEQ(EqBands[eq]);
 
             EQHelper.CurrentEQ = textInfo.ToTitleCase(eq);
             await player.EqualizerAsync(bands);
@@ -580,7 +581,11 @@ namespace MusicBot.Commands
                 return;
             }
 
-            MuseTrack track = player.Track as MuseTrack;
+            if (player.Track is not MuseTrack track)
+            {
+                return;
+            }
+            
             var embed = await embedHelper.BuildMessageEmbed($"Requested by: `{track.Requester.Nickname ?? track.Requester.Username + "#" + track.Requester.Discriminator}`");
             await Context.Channel.SendAndRemove(embed: embed);
         }
@@ -631,24 +636,27 @@ namespace MusicBot.Commands
         [Summary("Changes the bot's prefix")]
         public async Task Prefix([Remainder] string prefix = null)
         {
-            if (prefix == null)
+            switch (prefix)
             {
-                var current = await embedHelper.BuildMessageEmbed($"Current prefix is: **{Program.BotConfig.Prefix}**");
-                await Context.Channel.SendAndRemove(embed: current);
-                return;
+                case null:
+                {
+                    var current = await embedHelper.BuildMessageEmbed($"Current prefix is: **{Program.BotConfig.Prefix}**");
+                    await Context.Channel.SendAndRemove(embed: current);
+                    return;
+                }
+                case "default":
+                    prefix = "m?";
+                    break;
             }
-            if (prefix == "default")
-            {
-                prefix = "m?";
-            }
+
             var config = Program.BotConfig;
             config.Prefix = prefix;
             ConfigHelper.UpdateConfigFile(config);
             Program.BotConfig = config;
 
-            if (Context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (Context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId))
             {
-                var embed = await embedHelper.BuildDefaultEmbed();
+                var embed = await EmbedHelper.BuildDefaultEmbed();
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Embed = embed; });
             }
 

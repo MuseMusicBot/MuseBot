@@ -10,7 +10,7 @@ namespace MusicBot.Services
         /// <summary>
         /// Default volume
         /// </summary>
-        public static ushort DefaultVolume { get; } = 10;
+        private const ushort DefaultVolume = 10;
 
         /// <summary>
         /// Struct for Bot Config
@@ -20,13 +20,13 @@ namespace MusicBot.Services
             public ulong GuildId { get; set; }
             public ulong ChannelId { get; set; }
             public ulong MessageId { get; set; }
-            public string Token { get; set; }
+            public string Token { get; init; }
             public string Prefix { get; set; }
-            public string LavalinkHost { get; set; }
-            public int LavalinkPort { get; set; }
-            public string LavalinkPassword { get; set; }
-            public string SpotifyClientId { get; set; }
-            public string SpotifySecret { get; set; }
+            public string LavalinkHost { get; init; }
+            public int LavalinkPort { get; init; }
+            public string LavalinkPassword { get; init; }
+            public string SpotifyClientId { get; init; }
+            public string SpotifySecret { get; init; }
 
             [JsonIgnore]
             public IUserMessage BotEmbedMessage { get; set; }
@@ -61,7 +61,8 @@ namespace MusicBot.Services
             do
             {
                 Console.Write("Enter bot token: ");
-                token = Console.ReadLine().Trim();
+                token = Console.ReadLine()?.Trim();
+
                 Console.WriteLine();
             }
             while (string.IsNullOrWhiteSpace(token));

@@ -1,0 +1,107 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- master
+
+pr:
+- master
+
+workspace:
+  clean: all
+
+pool:
+  name: 'Default'
+
+variables:
+  solution: '**/MusicBot.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- checkout: self
+- task: NuGetToolInstaller@1
+  displayName: 'Download nuget packages'
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: CmdLine@2
+  displayName: 'Make windows dir'
+  inputs:
+    script: 'mkdir $(Build.ArtifactStagingDirectory)\windows'
+
+- task: CmdLine@2
+  displayName: 'Make linux dir'
+  inputs:
+    script: 'mkdir $(Build.ArtifactStagingDirectory)\linux'
+
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '6.x'
+
+- task: VSBuild@1
+  displayName: 'Build project (Windows)'
+  inputs:
+    solution: '**/MusicBot/MusicBot.csproj'
+    vsVersion: 'latest'
+    msbuildArgs: '/r /t:Publish /p:PublishSingleFile=true /p:RuntimeIdentifier=win-x64 /p:DebugType=None /p:DebugSymbols=false /p:PublishDir=$(Build.ArtifactStagingDirectory)\windows'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    clean: true
+
+- task: VSBuild@1
+  displayName: 'Build project (Linux)'
+  inputs:
+    solution: '**/MusicBot/MusicBot.csproj'
+    vsVersion: 'latest'
+    msbuildArgs: '/r /t:Publish /p:PublishSingleFile=true /p:RuntimeIdentifier=linux-x64 /p:DebugType=None /p:DebugSymbols=false /p:PublishDir=$(Build.ArtifactStagingDirectory)\linux'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    clean: true
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'MusicBot/'
+    Contents: 'muse-banner.png'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\windows'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'MusicBot/'
+    Contents: 'muse-banner.png'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\linux'
+
+- task: ArchiveFiles@2
+  displayName: "Archive Windows build"
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\windows'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)\MuseBot-Windows-$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  displayName: "Archive Linux build"
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\linux'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux-$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Windows-$(Build.BuildId).zip'
+    ArtifactName: 'MuseBot'
+    publishLocation: 'Container'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux-$(Build.BuildId).zip'
+    ArtifactName: 'MuseBot'
+    publishLocation: 'Container'

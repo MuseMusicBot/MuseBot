@@ -1,8 +1,6 @@
-﻿using Victoria;
-using Victoria.Enums;
+using Victoria;
 using Discord.Commands;
 using Discord;
-using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
@@ -18,16 +16,10 @@ namespace MusicBot.Helpers
             bool paused,
             SocketCommandContext context = null)
         {
-            if (paused)
-            {
-                await player.ResumeAsync();
-            }
-            else
-            {
-                await player.PauseAsync();
-            }
 
-            if (context != null && !context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            await ((paused) ? player.ResumeAsync() : player.PauseAsync());
+
+            if (context != null && context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId) == false)
             {
                 return;
             }
@@ -55,11 +47,11 @@ namespace MusicBot.Helpers
                 await player.StopAsync();
             }
             
-            if (context != null && !context.Guild.TextChannels.Where(x => x.Id == Program.BotConfig.ChannelId).Any())
+            if (context != null && context.Guild.TextChannels.Any(x => x.Id == Program.BotConfig.ChannelId) == false)
             {
                 return;
             }
-            var embed = await embedHelper.BuildDefaultEmbed();
+            var embed = await EmbedHelper.BuildDefaultEmbed();
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
 
@@ -96,7 +88,7 @@ namespace MusicBot.Helpers
             }
 
             channel ??= context?.Channel;
-            string newQueue = await audioHelper.GetNewEmbedQueueString(player);
+            string newQueue = await AudioHelper.GetNewEmbedQueueString(player);
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => x.Content = string.Format(AudioHelper.QueueMayHaveSongs, newQueue));
 
             if (channel != null)
@@ -112,6 +104,11 @@ namespace MusicBot.Helpers
             IGuild guild,
             SocketCommandContext context = null)
         {
+            if (context == null)
+            {
+                return;
+            }
+
             if (!node.TryGetPlayer(guild, out var player))
             {
                 return;
@@ -124,7 +121,7 @@ namespace MusicBot.Helpers
             {
                 return;
             }
-            var embed = await embedHelper.BuildDefaultEmbed();
+            var embed = await EmbedHelper.BuildDefaultEmbed();
             await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = AudioHelper.NoSongsInQueue; x.Embed = embed; });
         }
     }
