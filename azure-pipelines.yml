@@ -94,6 +94,12 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-*-$(Build.BuildId).zip'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Windows-$(Build.BuildId).zip'
+    ArtifactName: 'MuseBot'
+    publishLocation: 'Container'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux-$(Build.BuildId).zip'
     ArtifactName: 'MuseBot'
     publishLocation: 'Container'
