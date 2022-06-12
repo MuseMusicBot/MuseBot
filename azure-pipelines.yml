@@ -9,11 +9,11 @@ trigger:
 pr:
 - master
 
-parameters:
-  - name: releaseVersion
-    displayName: Release Version
-    type: string
-    default: ' '
+# parameters:
+#   - name: releaseVersion
+#     displayName: Release Version
+#     type: string
+#     default: ' '
 
 workspace:
   clean: all
@@ -141,9 +141,9 @@ steps:
     action: 'create'
     target: '$(Build.SourceVersion)'
     tagSource: 'userSpecifiedTag'
-    tag: 'v$(release)'
-    title: 'MuseBot v$(release)'
+    tag: 'v$(releaseVersion)'
+    title: 'MuseBot v$(releaseVersion)'
     assets: '$(Build.ArtifactStagingDirectory)/MuseBot*.zip'
-    isDraft: true
+    isDraft: false
     changeLogCompareToRelease: 'lastNonDraftRelease'
     changeLogType: 'commitBased'
