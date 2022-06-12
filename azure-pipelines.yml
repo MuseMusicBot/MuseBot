@@ -9,12 +9,6 @@ trigger:
 pr:
 - master
 
-# parameters:
-#   - name: releaseVersion
-#     displayName: Release Version
-#     type: string
-#     default: ' '
-
 workspace:
   clean: all
 
@@ -23,7 +17,7 @@ pool:
 
 variables:
 - name: doRelease
-  value: $[eq(variables['Build.SourceBranch'], 'refs/heads/azure-pipelines2')]
+  value: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
 - name: solution
   value: '**/MusicBot.sln'
 - name: 'buildPlatform'
@@ -153,6 +147,6 @@ steps:
     tag: 'v$(releaseVersion)'
     title: 'MuseBot v$(releaseVersion)'
     assets: '$(Build.ArtifactStagingDirectory)/MuseBot*.zip'
-    isDraft: true
+    isDraft: false
     changeLogCompareToRelease: 'lastNonDraftRelease'
     changeLogType: 'commitBased'
