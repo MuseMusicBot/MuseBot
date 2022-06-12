@@ -1,4 +1,4 @@
-﻿using Victoria;
+using Victoria;
 using Discord.Commands;
 using Discord;
 using System;
