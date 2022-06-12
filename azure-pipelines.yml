@@ -115,6 +115,7 @@ steps:
     target: '$(Build.SourceVersion)'
     tagSource: 'userSpecifiedTag'
     tag: 'v$(release)'
+    title: 'v$(release)'
     assets: '$(Build.ArtifactStagingDirectory)/MuseBot*.zip'
     isDraft: true
     changeLogCompareToRelease: 'lastNonDraftRelease'
