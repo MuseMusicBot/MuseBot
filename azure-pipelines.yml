@@ -32,14 +32,14 @@ steps:
   inputs:
     solution: '**/MusicBot/MusicBot.csproj'
     vsVersion: 'latest'
-    msbuildArgs: '/t:Build /p:PublishSingleFile=true /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)'
+    msbuildArgs: '/t:Build /p:PublishSingleFile=false /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     clean: true
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '**/MusicBot/'
+    SourceFolder: 'MusicBot/'
     Contents: 'muse-banner.png'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
