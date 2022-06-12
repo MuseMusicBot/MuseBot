@@ -121,7 +121,7 @@ steps:
       
       $ver3 = $ver3.Trim()
 
-      Write-Host "##vso[task.setvariable variable=releaseVersion;]$ver3'
+      Write-Host "##vso[task.setvariable variable=releaseVersion;]$ver3"
     workingDirectory: '$(Build.SourcesDirectory)'
 
 - task: CmdLine@2
