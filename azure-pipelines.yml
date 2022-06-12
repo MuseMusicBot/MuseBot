@@ -119,13 +119,14 @@ steps:
           $ver3 = $ver2[0] + '.' + [string]$([int]$ver2[1] + 1)
       }
       
-      echo "New version: $ver3"
-      Write-Host "##vso[task.setvariable variable=releaseVersion;]"$($ver3)""
+      $ver3 = $ver3.Trim()
+
+      Write-Host "##vso[task.setvariable variable=releaseVersion;]$ver3"
     workingDirectory: '$(Build.SourcesDirectory)'
 
 - task: CmdLine@2
   inputs:
-    script: 'echo $(releaseVersion)'
+    script: 'echo v$(releaseVersion)'
 
 - task: PublishBuildArtifacts@1
   condition: eq(variables['doRelease'], false)
