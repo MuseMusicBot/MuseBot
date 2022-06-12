@@ -13,7 +13,7 @@ parameters:
   - name: releaseVersion
     displayName: Release Version
     type: string
-    default: ''
+    default: ' '
 
 workspace:
   clean: all
