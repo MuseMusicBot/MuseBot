@@ -9,6 +9,12 @@ trigger:
 pr:
 - master
 
+parameters:
+  - name: releaseVersion
+    displayName: Release Version
+    type: string
+    default: ''
+
 workspace:
   clean: all
 
@@ -16,9 +22,14 @@ pool:
   name: 'Default'
 
 variables:
-  solution: '**/MusicBot.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+- name: doRelease
+  value: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+- name: solution
+  value: '**/MusicBot.sln'
+- name: 'buildPlatform'
+  value: 'Any CPU'
+- name : 'buildConfiguration'
+  value: 'Release'
 
 steps:
 - checkout: self
@@ -94,22 +105,24 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux.zip'
     replaceExistingArchive: true
 
+
+
 - task: PublishBuildArtifacts@1
-  condition: eq(variables['doRelease'], 'false')
+  condition: eq(variables['doRelease'], false)
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Windows.zip'
     ArtifactName: 'MuseBot'
     publishLocation: 'Container'
 
 - task: PublishBuildArtifacts@1
-  condition: eq(variables['doRelease'], 'false')
+  condition: eq(variables['doRelease'], false)
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux.zip'
     ArtifactName: 'MuseBot'
     publishLocation: 'Container'
 
 - task: GitHubRelease@1
-  condition: eq(variables['doRelease'], 'true')
+  condition: eq(variables['doRelease'], true)
   inputs:
     gitHubConnection: 'DrDevinRX'
     repositoryName: '$(Build.Repository.Name)'
