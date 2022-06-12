@@ -9,6 +9,8 @@ trigger:
 pr:
 - master
 
+workspace:
+  clean: outputs
 
 pool:
   name: 'Default'
