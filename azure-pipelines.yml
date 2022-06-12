@@ -47,7 +47,7 @@ steps:
   inputs:
     solution: '**/MusicBot/MusicBot.csproj'
     vsVersion: 'latest'
-    msbuildArgs: '/r /t:Build /p:PublishSingleFile=true /p:RuntimeIdentifier=win-x64 /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)\windows'
+    msbuildArgs: '/r /t:Publish /p:PublishSingleFile=true /p:RuntimeIdentifier=win-x64 /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)\windows'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     clean: true
@@ -57,7 +57,7 @@ steps:
   inputs:
     solution: '**/MusicBot/MusicBot.csproj'
     vsVersion: 'latest'
-    msbuildArgs: '/r /t:Build /p:PublishSingleFile=true /p:RuntimeIdentifier=linux-x64 /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)\linux'
+    msbuildArgs: '/r /t:Publish /p:PublishSingleFile=true /p:RuntimeIdentifier=linux-x64 /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)\linux'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     clean: true
