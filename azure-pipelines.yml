@@ -10,7 +10,7 @@ pr:
 - master
 
 workspace:
-  clean: outputs
+  clean: all
 
 pool:
   name: 'Default'
