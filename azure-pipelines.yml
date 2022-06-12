@@ -68,18 +68,18 @@ steps:
   inputs:
     SourceFolder: 'MusicBot/'
     Contents: 'muse-banner.png'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)\windows'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\windowspublish'
 
 - task: CopyFiles@2
   inputs:
     SourceFolder: 'MusicBot/'
     Contents: 'muse-banner.png'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)\linux'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\linuxpublish'
 
 - task: ArchiveFiles@2
   displayName: "Archive Windows build"
   inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\windows'
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\windowspublish'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)\MuseBot-Windows-$(Build.BuildId).zip'
@@ -88,7 +88,7 @@ steps:
 - task: ArchiveFiles@2
   displayName: "Archive Linux build"
   inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\linux'
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\linuxpublish'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux-$(Build.BuildId).zip'
