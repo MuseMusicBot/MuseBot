@@ -27,12 +27,32 @@ steps:
   inputs:
     restoreSolution: '$(solution)'
 
+- task: CmdLine@2
+  displayName: 'Make windows dir'
+  inputs:
+    script: 'mkdir $(Build.ArtifactStagingDirectory)/windows'
+
+- task: CmdLine@2
+  displayName: 'Make linux dir'
+  inputs:
+    script: 'mkdir $(Build.ArtifactStagingDirectory)/linux'
+
 - task: VSBuild@1
-  displayName: 'Build project'
+  displayName: 'Build project (Windows)'
   inputs:
     solution: '**/MusicBot/MusicBot.csproj'
     vsVersion: 'latest'
-    msbuildArgs: '/t:Build /p:PublishSingleFile=false /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)'
+    msbuildArgs: '/t:Build /p:PublishSingleFile=true /p:RuntimeIdentifier=win-x64 /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)/windows'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    clean: true
+
+- task: VSBuild@1
+  displayName: 'Build project (Linux)'
+  inputs:
+    solution: '**/MusicBot/MusicBot.csproj'
+    vsVersion: 'latest'
+    msbuildArgs: '/t:Build /p:PublishSingleFile=true /p:RuntimeIdentifier=linux-x64 /p:DebugType=None /p:DebugSymbols=false /p:OutputPath=$(Build.ArtifactStagingDirectory)/linux'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     clean: true
@@ -41,18 +61,34 @@ steps:
   inputs:
     SourceFolder: 'MusicBot/'
     Contents: 'muse-banner.png'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/windows'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'MusicBot/'
+    Contents: 'muse-banner.png'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/linux'
 
 - task: ArchiveFiles@2
+  displayName: "Archive Windows build"
   inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
-    includeRootFolder: true
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/windows'
+    includeRootFolder: false
     archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/MuseBot-Windows-$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  displayName: "Archive Linux build"
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/linux'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/MuseBot-Linux-$(Build.BuildId).zip'
     replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/MuseBot-*-$(Build.BuildId).zip'
     ArtifactName: 'MuseBot'
     publishLocation: 'Container'
