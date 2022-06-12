@@ -105,3 +105,16 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)\MuseBot-Linux-$(Build.BuildId).zip'
     ArtifactName: 'MuseBot'
     publishLocation: 'Container'
+
+- task: GitHubRelease@1
+  inputs:
+    gitHubConnection: 'DrDevinRX'
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'gitTag'
+    tagPattern: 'v1.*'
+    assets: '$(Build.ArtifactStagingDirectory)/MuseBot-*.zip'
+    isDraft: true
+    changeLogCompareToRelease: 'lastNonDraftRelease'
+    changeLogType: 'commitBased'
