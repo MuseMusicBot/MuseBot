@@ -30,8 +30,8 @@ namespace MusicBot.Services
 
         private async Task MessageReceived(SocketMessage socketMessage)
         {
-            if (!(socketMessage is SocketUserMessage message))
-                return;
+            if (socketMessage is not SocketUserMessage message)
+                return;;
 
             if (message.Source != MessageSource.User)
                 return;

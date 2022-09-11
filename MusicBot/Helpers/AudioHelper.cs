@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
+using Victoria.Responses.Search;
 
 namespace MusicBot.Helpers
 {
@@ -101,7 +102,7 @@ namespace MusicBot.Helpers
 
                 RepeatFlag = false;
 
-                if (!args.Reason.ShouldPlayNext())
+                if (args.Reason != TrackEndReason.Replaced)
                 {
                     return;
                 }
@@ -130,7 +131,7 @@ namespace MusicBot.Helpers
             Node.OnTrackException += async (args) =>
             {
                 var player = args.Player;
-                var errorMessage = args.ErrorMessage switch
+                var errorMessage = args.Exception.Message switch
                 {
                     "This video cannot be viewed anonymously." => "This video most likely hasn't premiered yet.",
                     "Received unexpected response from YouTube." => "YouTube is most likely down.",
@@ -206,9 +207,10 @@ namespace MusicBot.Helpers
         /// <returns></returns>
         public async Task SearchForTrack(SocketCommandContext context, string query)
         {
-            Victoria.Responses.Rest.SearchResponse search;
+            Victoria.Responses.Search.SearchResponse search;
             Regex regex;
             Match match;
+
 
             if (!SpotifyLogin)
             {
@@ -225,6 +227,9 @@ namespace MusicBot.Helpers
             if (!query.IsUri(out var uri))
             {
                 search = await Node.SearchYouTubeAsync(query.Trim());
+
+                Console.WriteLine(search.Status);
+
                 await QueueTracksToPlayer(player, search, requester: context.User as IGuildUser);
                 return;
             }
@@ -240,9 +245,9 @@ namespace MusicBot.Helpers
                 return;
             }
 
-            search = await Node.SearchAsync(query);
+            search = await Node.SearchAsync(SearchType.YouTube, query); //await Node.SearchAsync(query);
 
-            if (search.LoadStatus is LoadStatus.LoadFailed or LoadStatus.NoMatches)
+            if (search.Status is SearchStatus.LoadFailed or SearchStatus.NoMatches)
             {
                 var msg = await embedHelper.BuildErrorEmbed($"The link `{query}` failed to load.", "Is this a private video or playlist? Double check if the resource is available for public viewing or not region locked.");
                 regex = new Regex(@"(?<vid>(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=[\w-]{11})(?:&list=.+)?");
@@ -257,7 +262,7 @@ namespace MusicBot.Helpers
                 string type = match.Groups["vid"].Value;
                 search = await Node.SearchYouTubeAsync(type);
 
-                if (search.LoadStatus == LoadStatus.LoadFailed || search.LoadStatus == LoadStatus.NoMatches)
+                if (search.Status == SearchStatus.LoadFailed || search.Status == SearchStatus.NoMatches)
                 {
                     await context.Channel.SendAndRemove(embed: msg, timeout: 15000);
                     return;
@@ -373,13 +378,13 @@ namespace MusicBot.Helpers
         /// <param name="startTime">Start time of the track</param>
         /// <param name="requester">Requester of the track</param>
         /// <returns></returns>
-        public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Rest.SearchResponse search, TimeSpan? startTime = null, IGuildUser requester = null)
+        public async Task QueueTracksToPlayer(LavaPlayer player, Victoria.Responses.Search.SearchResponse search, TimeSpan? startTime = null, IGuildUser requester = null)
         {
             _ = Task.Run(async () =>
             {
                 List<LavaTrack> lavaTracks;
                 string newQueue;
-                if (search.LoadStatus == LoadStatus.PlaylistLoaded)
+                if (search.Status == SearchStatus.PlaylistLoaded)
                 {
                     lavaTracks = search.Tracks.ToList();
                 }
@@ -420,7 +425,12 @@ namespace MusicBot.Helpers
                     }
                     else
                     {
-                        await player.PlayAsync(newTrack, startTime.Value, newTrack.Duration);
+                        await player.PlayAsync((pa) =>
+                        {
+                            pa.Track = newTrack;
+                            pa.StartTime = startTime.Value;
+                            pa.EndTime = newTrack.Duration;
+                        });
                     }
                 }
             });
@@ -443,11 +453,11 @@ namespace MusicBot.Helpers
 
                 await Program.BotConfig.BotEmbedMessage.ModifyAsync(x => { x.Content = string.Format(QueueMayHaveSongs, "Loading..."); }).ConfigureAwait(false);
 
-                if (player.PlayerState is PlayerState.Connected or PlayerState.Stopped)
+                if (player.PlayerState is not PlayerState.None)
                 {
                     var node = await Node.SearchYouTubeAsync(spotifyTracks[0]);
-                    if (node.LoadStatus != LoadStatus.NoMatches || node.LoadStatus != LoadStatus.LoadFailed)
-                        await player.PlayAsync(node.Tracks[0].CreateMuseTrack(requester));
+                    if (node.Status != SearchStatus.NoMatches || node.Status != SearchStatus.LoadFailed)
+                        await player.PlayAsync(node.Tracks.ElementAt(0).CreateMuseTrack(requester));
                     startIdx = 1;
                 }
 
@@ -457,12 +467,12 @@ namespace MusicBot.Helpers
                     {
                         int i = 0;
                         int maxRetries = 3;
-                        Victoria.Responses.Rest.SearchResponse node;
+                        Victoria.Responses.Search.SearchResponse node;
                         do
                         {
                             node = await Node.SearchYouTubeAsync(e);
                             i++;
-                        } while (node.LoadStatus is LoadStatus.NoMatches or LoadStatus.LoadFailed && i <= maxRetries);
+                        } while (node.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed && i <= maxRetries);
 
                         LavaTrack first = null;
                         foreach (var track in node.Tracks)
@@ -471,7 +481,7 @@ namespace MusicBot.Helpers
                             break;
                         }
 
-                        return node.LoadStatus is LoadStatus.NoMatches or LoadStatus.LoadFailed ? null : first?.CreateMuseTrack(requester);
+                        return node.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed ? null : first?.CreateMuseTrack(requester);
                     });
 
                     SpinWait.SpinUntil(() => lavaTracks.Count() == spotifyTracks.Count - startIdx);

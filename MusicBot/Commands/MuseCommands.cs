@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.Payloads;
+using Victoria.Responses.Search;
 
 namespace MusicBot.Commands
 {
@@ -101,8 +102,8 @@ namespace MusicBot.Commands
 
             player = node.GetPlayer(Context.Guild);
 
-            var search = await node.SearchAsync(query);
-            if (search.LoadStatus is LoadStatus.LoadFailed or LoadStatus.NoMatches)
+            var search = await node.SearchAsync(Victoria.Responses.Search.SearchType.YouTube, query);
+            if (search.Status is SearchStatus.LoadFailed or SearchStatus.NoMatches)
             {
                 await Context.Channel.SendMessageAsync($"{search.Exception}");
                 return;
