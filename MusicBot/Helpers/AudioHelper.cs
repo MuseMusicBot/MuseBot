@@ -59,6 +59,10 @@ namespace MusicBot.Helpers
                 var queue = await GetNewEmbedQueueString(player);
                 var embed = await embedHelper.BuildMusicEmbed(player, Color.DarkTeal);
 
+                await player.UpdateVolumeAsync(Program.BotConfig.Volume);
+
+                Console.WriteLine("OnTrackStarted player volume: {0}", player.Volume);
+
                 //If for some reason Volume is set to 0 (100%) it will set to default volume
                 if (player.Volume == 0)
                 {
@@ -102,7 +106,10 @@ namespace MusicBot.Helpers
 
                 RepeatFlag = false;
 
-                if (args.Reason != TrackEndReason.Replaced)
+                Console.WriteLine(args.Reason);
+                Console.WriteLine("under reason volume: {0}", args.Player.Volume);
+
+                if (args.Reason != TrackEndReason.Finished)
                 {
                     return;
                 }
@@ -123,7 +130,13 @@ namespace MusicBot.Helpers
                     return;
                 }
 
-                await args.Player.PlayAsync(track);
+                await args.Player.PlayAsync(pa =>
+                {
+                    pa.Track = track;
+                    pa.Volume = Program.BotConfig.Volume;
+                });
+
+                Console.WriteLine("end volume: {0}", args.Player.Volume);
             };
 
             // Handler for when a LavaTrack throws an exception
@@ -486,10 +499,8 @@ namespace MusicBot.Helpers
 
                     SpinWait.SpinUntil(() => lavaTracks.Count() == spotifyTracks.Count - startIdx);
 
-                    foreach (var track in lavaTracks)
-                    {
-                        player.Queue.Enqueue(track);
-                    }
+
+                    player.Queue.Enqueue(lavaTracks);
                 }
 
                 var newQueue = await GetNewEmbedQueueString(player).ConfigureAwait(false);

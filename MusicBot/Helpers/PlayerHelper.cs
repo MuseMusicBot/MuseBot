@@ -38,12 +38,35 @@ namespace MusicBot.Helpers
             EmbedHelper embedHelper,
             SocketCommandContext context = null)
         {
+            Console.WriteLine(player.Queue.Count);
             if (player.Queue.Count >= 1)
             {
-                await player.SkipAsync();
+                ValueTuple<LavaTrack, LavaTrack> x = default;
+                Console.WriteLine("Start of deque");
+                try
+                {
+                    if (!player.Queue.TryDequeue(out var track))
+                    {
+                        return;
+                    }
+
+                    await player.SkipAsync();
+
+                    await player.PlayAsync((pa) =>
+                    {
+                        pa.Track = track;
+                        pa.Volume = Program.BotConfig.Volume;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
             }
             else
             {
+                Console.WriteLine("No tracks, attempting to stop");
                 await player.StopAsync();
             }
             
