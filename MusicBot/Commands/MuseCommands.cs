@@ -378,6 +378,7 @@ namespace MusicBot.Commands
             }
 
             var volmsg = await embedHelper.BuildMessageEmbed($"Volume is now set to `{Program.BotConfig.Volume}%`.");
+            Console.WriteLine(Program.BotConfig.Volume);
             await Context.Channel.SendAndRemove(embed: volmsg);
         }
         #endregion

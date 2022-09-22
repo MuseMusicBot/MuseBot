@@ -50,8 +50,6 @@ namespace MusicBot.Helpers
                         return;
                     }
 
-                    await player.SkipAsync();
-
                     await player.PlayAsync((pa) =>
                     {
                         pa.Track = track;

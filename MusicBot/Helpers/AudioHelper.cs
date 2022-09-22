@@ -106,10 +106,7 @@ namespace MusicBot.Helpers
 
                 RepeatFlag = false;
 
-                Console.WriteLine(args.Reason);
-                Console.WriteLine("under reason volume: {0}", args.Player.Volume);
-
-                if (args.Reason != TrackEndReason.Finished)
+                if (args.Reason is not (TrackEndReason.Finished or TrackEndReason.Replaced))
                 {
                     return;
                 }
